@@ -271,61 +271,80 @@ const OrdersPage = () => {
   };
 
   const generateInvoice = (order) => {
-    const doc = new jsPDF();
-    
-    // Header
-    doc.setFontSize(20);
-    doc.setTextColor(34, 84, 61);
-    doc.text('AgroYousfi', 105, 20, { align: 'center' });
-    
-    doc.setFontSize(12);
-    doc.setTextColor(100);
-    doc.text(text.invoice + ' #' + order.order_id.slice(-8).toUpperCase(), 105, 30, { align: 'center' });
-    
-    // Date
-    doc.setFontSize(10);
-    doc.text(format(new Date(order.created_at), 'dd/MM/yyyy HH:mm'), 105, 38, { align: 'center' });
-    
-    // Customer Info
-    doc.setFontSize(11);
-    doc.setTextColor(0);
-    doc.text(text.customerInfo, 15, 55);
-    doc.setFontSize(10);
-    doc.setTextColor(60);
-    doc.text(`${text.customer}: ${order.customer_name}`, 15, 65);
-    doc.text(`${text.phone}: ${order.phone}`, 15, 72);
-    doc.text(`${text.address}: ${order.address}`, 15, 79);
-    doc.text(`${text.wilaya}: ${order.wilaya}`, 15, 86);
-    
-    // Items Table
-    const tableData = order.items.map(item => [
-      item.name,
-      item.quantity,
-      formatPrice(item.price),
-      formatPrice(item.price * item.quantity)
-    ]);
-    
-    doc.autoTable({
-      startY: 100,
-      head: [[text.product, text.quantity, text.price, text.subtotal]],
-      body: tableData,
-      theme: 'striped',
-      headStyles: { fillColor: [34, 84, 61] },
-      foot: [[text.total, '', '', formatPrice(order.total)]],
-      footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' }
-    });
-    
-    // Payment Method
-    const finalY = doc.lastAutoTable.finalY + 15;
-    doc.setFontSize(10);
-    doc.text(`${text.paymentMethod}: ${text.cod}`, 15, finalY);
-    
-    // Footer
-    doc.setFontSize(8);
-    doc.setTextColor(150);
-    doc.text('AgroYousfi - agroyousfi.dz', 105, 280, { align: 'center' });
-    
-    doc.save(`invoice-${order.order_id.slice(-8)}.pdf`);
+    try {
+      const doc = new jsPDF();
+      
+      // Helper to format price as string
+      const priceStr = (price) => `${(price || 0).toLocaleString()} DZD`;
+      
+      // Header
+      doc.setFontSize(20);
+      doc.setTextColor(34, 84, 61);
+      doc.text('AgroYousfi', 105, 20, { align: 'center' });
+      
+      doc.setFontSize(12);
+      doc.setTextColor(100);
+      doc.text(`${text.invoice} #${(order.order_id || '').slice(-8).toUpperCase()}`, 105, 30, { align: 'center' });
+      
+      // Date
+      doc.setFontSize(10);
+      const orderDate = order.created_at ? format(new Date(order.created_at), 'dd/MM/yyyy HH:mm') : '-';
+      doc.text(orderDate, 105, 38, { align: 'center' });
+      
+      // Customer Info
+      doc.setFontSize(11);
+      doc.setTextColor(0);
+      doc.text('Customer Information', 15, 55);
+      doc.setFontSize(10);
+      doc.setTextColor(60);
+      doc.text(`Name: ${order.customer_name || '-'}`, 15, 65);
+      doc.text(`Phone: ${order.phone || '-'}`, 15, 72);
+      doc.text(`Address: ${order.address || '-'}`, 15, 79);
+      doc.text(`Wilaya: ${order.wilaya || '-'}`, 15, 86);
+      
+      // Items Table
+      const items = order.items || [];
+      const tableData = items.map(item => [
+        item.name || 'Product',
+        String(item.quantity || 1),
+        priceStr(item.price),
+        priceStr((item.price || 0) * (item.quantity || 1))
+      ]);
+      
+      // If no items, add a placeholder row
+      if (tableData.length === 0) {
+        tableData.push(['No items', '0', '0 DZD', '0 DZD']);
+      }
+      
+      doc.autoTable({
+        startY: 100,
+        head: [['Product', 'Qty', 'Price', 'Subtotal']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [34, 84, 61] },
+        foot: [['Total', '', '', priceStr(order.total)]],
+        footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' }
+      });
+      
+      // Payment Method
+      const finalY = (doc.lastAutoTable?.finalY || 150) + 15;
+      doc.setFontSize(10);
+      doc.text('Payment Method: Cash on Delivery', 15, finalY);
+      
+      // Order Status
+      doc.text(`Status: ${order.status || 'pending'}`, 15, finalY + 10);
+      
+      // Footer
+      doc.setFontSize(8);
+      doc.setTextColor(150);
+      doc.text('AgroYousfi - agroyousfi.dz', 105, 280, { align: 'center' });
+      
+      doc.save(`invoice-${(order.order_id || 'order').slice(-8)}.pdf`);
+      toast.success(language === 'ar' ? 'تم تحميل الفاتورة' : 'Invoice downloaded');
+    } catch (error) {
+      console.error('Error generating invoice:', error);
+      toast.error(language === 'ar' ? 'خطأ في إنشاء الفاتورة' : 'Error generating invoice');
+    }
   };
 
   const getStatusColor = (status) => {
