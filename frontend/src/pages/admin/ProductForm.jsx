@@ -430,17 +430,61 @@ const ProductForm = () => {
               </div>
 
               {/* Add Image */}
-              <div className="flex gap-2">
-                <Input
-                  placeholder={text.imageUrl}
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  className="flex-1"
-                />
-                <Button type="button" variant="outline" onClick={addImage}>
-                  <Plus className="h-4 w-4 me-2" />
-                  {text.addImage}
-                </Button>
+              <div className="space-y-3">
+                {/* Upload from Desktop */}
+                <div className="border-2 border-dashed rounded-lg p-4 text-center hover:border-primary/50 transition-colors">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    id="image-upload"
+                    disabled={uploading}
+                  />
+                  <label htmlFor="image-upload" className="cursor-pointer">
+                    {uploading ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <span className="text-sm text-muted-foreground">
+                          {language === 'ar' ? 'جاري الرفع...' : 'Uploading...'}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        <Upload className="h-8 w-8 text-muted-foreground" />
+                        <span className="text-sm font-medium">
+                          {language === 'ar' ? 'اضغط لرفع الصور من جهازك' : 'Click to upload images'}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          PNG, JPG, WebP (Max 5MB)
+                        </span>
+                      </div>
+                    )}
+                  </label>
+                </div>
+
+                {/* Or add by URL */}
+                <div className="flex items-center gap-4">
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-xs text-muted-foreground">
+                    {language === 'ar' ? 'أو أضف رابط' : 'or add URL'}
+                  </span>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
+
+                <div className="flex gap-2">
+                  <Input
+                    placeholder={text.imageUrl}
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button type="button" variant="outline" onClick={addImage}>
+                    <Plus className="h-4 w-4 me-2" />
+                    {text.addImage}
+                  </Button>
+                </div>
               </div>
 
               {/* Video URL */}
