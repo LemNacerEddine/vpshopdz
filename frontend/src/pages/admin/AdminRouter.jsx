@@ -27,17 +27,17 @@ const AdminRouter = () => {
   return (
     <AdminLayout>
       <Routes>
-        <Route path="/" element={<DashboardHome />} />
-        <Route path="/products" element={<ProductsPage />} />
-        <Route path="/products/new" element={<ProductForm />} />
-        <Route path="/products/:productId/edit" element={<ProductForm />} />
-        <Route path="/categories" element={<ProductsPage />} />
-        <Route path="/orders" element={<OrdersPage />} />
-        <Route path="/orders/:orderId" element={<OrdersPage />} />
-        <Route path="/customers" element={<CustomersPage />} />
-        <Route path="/analytics" element={<DashboardHome />} />
-        <Route path="/finance/*" element={<DashboardHome />} />
-        <Route path="/settings/*" element={<SettingsPage />} />
+        <Route index element={<DashboardHome />} />
+        <Route path="products" element={<ProductsPage />} />
+        <Route path="products/new" element={<ProductForm />} />
+        <Route path="products/:productId/edit" element={<ProductForm />} />
+        <Route path="categories" element={<ProductsPage />} />
+        <Route path="orders" element={<OrdersPage />} />
+        <Route path="orders/:orderId" element={<OrdersPage />} />
+        <Route path="customers" element={<CustomersPage />} />
+        <Route path="analytics" element={<DashboardHome />} />
+        <Route path="finance/*" element={<DashboardHome />} />
+        <Route path="settings/*" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
     </AdminLayout>
