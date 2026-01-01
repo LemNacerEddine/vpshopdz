@@ -57,7 +57,6 @@ export const ProductGallery = ({ images = [], video = null, productName = '', is
   };
 
   useEffect(() => {
-    // Pause video when switching away from it
     if (currentMedia.type !== 'video' && videoRef.current) {
       videoRef.current.pause();
       setIsVideoPlaying(false);
@@ -65,12 +64,49 @@ export const ProductGallery = ({ images = [], video = null, productName = '', is
   }, [selectedIndex]);
 
   return (
-    <div className="space-y-4">
-      {/* Main Image/Video Container */}
-      <div className="relative group">
+    <div className="flex gap-3">
+      {/* Vertical Thumbnails - Like Temu/AliExpress */}
+      {media.length > 1 && (
+        <div className="flex flex-col gap-2 w-16 shrink-0">
+          {media.map((item, index) => (
+            <button
+              key={index}
+              onMouseEnter={() => setSelectedIndex(index)}
+              onClick={() => setSelectedIndex(index)}
+              className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                selectedIndex === index 
+                  ? 'border-primary ring-1 ring-primary/30' 
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              {item.type === 'video' ? (
+                <div className="w-full h-full bg-muted relative">
+                  <video 
+                    src={item.src} 
+                    className="w-full h-full object-cover"
+                    muted
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                    <Play className="h-5 w-5 text-white" fill="white" />
+                  </div>
+                </div>
+              ) : (
+                <img 
+                  src={item.src} 
+                  alt={`${productName} ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Main Image/Video Container - Smaller size like Temu */}
+      <div className="relative group flex-1 max-w-md">
         <div 
           ref={mainImageRef}
-          className="aspect-square rounded-2xl overflow-hidden bg-muted relative cursor-zoom-in"
+          className="aspect-square rounded-xl overflow-hidden bg-muted relative cursor-zoom-in"
           onMouseEnter={() => currentMedia.type === 'image' && setIsZoomed(true)}
           onMouseLeave={() => setIsZoomed(false)}
           onMouseMove={handleMouseMove}
@@ -89,7 +125,6 @@ export const ProductGallery = ({ images = [], video = null, productName = '', is
                   toggleVideo();
                 }}
               />
-              {/* Video Play/Pause Overlay */}
               <div 
                 className={`absolute inset-0 flex items-center justify-center bg-black/20 transition-opacity ${
                   isVideoPlaying ? 'opacity-0 hover:opacity-100' : 'opacity-100'
@@ -99,16 +134,15 @@ export const ProductGallery = ({ images = [], video = null, productName = '', is
                   toggleVideo();
                 }}
               >
-                <div className="h-16 w-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform">
+                <div className="h-14 w-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform">
                   {isVideoPlaying ? (
-                    <Pause className="h-8 w-8 text-primary" />
+                    <Pause className="h-7 w-7 text-primary" />
                   ) : (
-                    <Play className="h-8 w-8 text-primary ms-1" />
+                    <Play className="h-7 w-7 text-primary ms-1" />
                   )}
                 </div>
               </div>
-              {/* Video Badge */}
-              <div className="absolute top-4 start-4 bg-black/70 text-white px-3 py-1 rounded-full text-xs flex items-center gap-1">
+              <div className="absolute top-3 start-3 bg-black/70 text-white px-2 py-0.5 rounded-full text-xs flex items-center gap-1">
                 <Play className="h-3 w-3" />
                 فيديو
               </div>
@@ -125,9 +159,8 @@ export const ProductGallery = ({ images = [], video = null, productName = '', is
                   transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`
                 } : {}}
               />
-              {/* Zoom Icon */}
-              <div className="absolute bottom-4 end-4 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                <ZoomIn className="h-5 w-5" />
+              <div className="absolute bottom-3 end-3 bg-black/50 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                <ZoomIn className="h-4 w-4" />
               </div>
             </>
           )}
@@ -139,24 +172,24 @@ export const ProductGallery = ({ images = [], video = null, productName = '', is
             <Button
               variant="secondary"
               size="icon"
-              className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? 'right-2' : 'left-2'} h-10 w-10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg`}
+              className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? 'right-1' : 'left-1'} h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md`}
               onClick={(e) => {
                 e.stopPropagation();
                 isRTL ? handleNext() : handlePrev();
               }}
             >
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-4 w-4" />
             </Button>
             <Button
               variant="secondary"
               size="icon"
-              className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? 'left-2' : 'right-2'} h-10 w-10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg`}
+              className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? 'left-1' : 'right-1'} h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md`}
               onClick={(e) => {
                 e.stopPropagation();
                 isRTL ? handlePrev() : handleNext();
               }}
             >
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </>
         )}
@@ -165,101 +198,60 @@ export const ProductGallery = ({ images = [], video = null, productName = '', is
         <Button
           variant="secondary"
           size="icon"
-          className="absolute top-4 end-4 h-10 w-10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+          className="absolute top-2 end-2 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
           onClick={(e) => {
             e.stopPropagation();
             openLightbox(selectedIndex);
           }}
         >
-          <Maximize2 className="h-5 w-5" />
+          <Maximize2 className="h-4 w-4" />
         </Button>
 
         {/* Image Counter */}
-        <div className="absolute bottom-4 start-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+        <div className="absolute bottom-2 start-2 bg-black/60 text-white px-2 py-0.5 rounded-full text-xs">
           {selectedIndex + 1} / {media.length}
         </div>
       </div>
 
-      {/* Thumbnails */}
-      {media.length > 1 && (
-        <div className="relative">
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            {media.map((item, index) => (
-              <button
-                key={index}
-                onClick={() => setSelectedIndex(index)}
-                className={`relative shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 transition-all ${
-                  selectedIndex === index 
-                    ? 'border-primary ring-2 ring-primary/30' 
-                    : 'border-transparent hover:border-muted-foreground/30'
-                }`}
-              >
-                {item.type === 'video' ? (
-                  <div className="w-full h-full bg-muted relative">
-                    <video 
-                      src={item.src} 
-                      className="w-full h-full object-cover"
-                      muted
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                      <Play className="h-6 w-6 text-white" fill="white" />
-                    </div>
-                  </div>
-                ) : (
-                  <img 
-                    src={item.src} 
-                    alt={`${productName} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Lightbox Modal */}
       <Dialog open={showLightbox} onOpenChange={setShowLightbox}>
-        <DialogContent className="max-w-5xl w-full h-[90vh] p-0 bg-black border-none">
+        <DialogContent className="max-w-4xl w-full h-[85vh] p-0 bg-black border-none">
           <div className="relative w-full h-full flex items-center justify-center">
-            {/* Close Button */}
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-4 end-4 z-50 text-white hover:bg-white/20 rounded-full"
+              className="absolute top-3 end-3 z-50 text-white hover:bg-white/20 rounded-full"
               onClick={() => setShowLightbox(false)}
             >
-              <X className="h-6 w-6" />
+              <X className="h-5 w-5" />
             </Button>
 
-            {/* Navigation */}
             {media.length > 1 && (
               <>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 h-12 w-12 rounded-full text-white hover:bg-white/20`}
+                  className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-10 w-10 rounded-full text-white hover:bg-white/20`}
                   onClick={() => setLightboxIndex(prev => prev === 0 ? media.length - 1 : prev - 1)}
                 >
-                  <ChevronLeft className="h-8 w-8" />
+                  <ChevronLeft className="h-6 w-6" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={`absolute ${isRTL ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2 h-12 w-12 rounded-full text-white hover:bg-white/20`}
+                  className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 h-10 w-10 rounded-full text-white hover:bg-white/20`}
                   onClick={() => setLightboxIndex(prev => prev === media.length - 1 ? 0 : prev + 1)}
                 >
-                  <ChevronRight className="h-8 w-8" />
+                  <ChevronRight className="h-6 w-6" />
                 </Button>
               </>
             )}
 
-            {/* Main Content */}
-            <div className="max-w-4xl max-h-[80vh] px-16">
+            <div className="max-w-3xl max-h-[75vh] px-14">
               {media[lightboxIndex]?.type === 'video' ? (
                 <video
                   src={media[lightboxIndex].src}
-                  className="max-w-full max-h-[80vh] object-contain"
+                  className="max-w-full max-h-[75vh] object-contain"
                   controls
                   autoPlay
                 />
@@ -267,29 +259,27 @@ export const ProductGallery = ({ images = [], video = null, productName = '', is
                 <img
                   src={media[lightboxIndex]?.src}
                   alt={productName}
-                  className="max-w-full max-h-[80vh] object-contain"
+                  className="max-w-full max-h-[75vh] object-contain"
                 />
               )}
             </div>
 
-            {/* Counter */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full">
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1.5 rounded-full text-sm">
               {lightboxIndex + 1} / {media.length}
             </div>
 
-            {/* Thumbnails in Lightbox */}
-            <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-2 max-w-lg overflow-x-auto p-2">
+            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-1.5 max-w-md overflow-x-auto p-1.5">
               {media.map((item, index) => (
                 <button
                   key={index}
                   onClick={() => setLightboxIndex(index)}
-                  className={`shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${
+                  className={`shrink-0 w-10 h-10 rounded-md overflow-hidden border-2 transition-all ${
                     lightboxIndex === index ? 'border-white' : 'border-transparent opacity-50 hover:opacity-100'
                   }`}
                 >
                   {item.type === 'video' ? (
                     <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-                      <Play className="h-4 w-4 text-white" />
+                      <Play className="h-3 w-3 text-white" />
                     </div>
                   ) : (
                     <img src={item.src} alt="" className="w-full h-full object-cover" />
