@@ -394,15 +394,9 @@ metadata:
   run_ui: true
 
 test_plan:
-  current_focus:
-    - "Phone Login UI"
-    - "Phone Registration Form"
-    - "Product Search via Navbar"
-    - "Wishlist Button on Product Detail"
-    - "Profile Page Features (Orders, Wishlist, Addresses)"
-    - "Google Login Flow"
+  current_focus: []
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
