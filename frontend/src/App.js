@@ -4,6 +4,7 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
 import { Layout } from '@/components/layout/Layout';
+import { Toaster } from 'sonner';
 
 // Pages
 import HomePage from '@/pages/HomePage';
@@ -15,7 +16,7 @@ import CheckoutPage from '@/pages/CheckoutPage';
 import LoginPage from '@/pages/LoginPage';
 import AuthCallback from '@/pages/AuthCallback';
 import ProfilePage from '@/pages/ProfilePage';
-import AdminDashboard from '@/pages/AdminDashboard';
+import AdminRouter from '@/pages/admin/AdminRouter';
 
 import '@/App.css';
 
@@ -26,6 +27,11 @@ const AppRouter = () => {
   // Check URL fragment for session_id (Google Auth callback)
   if (location.hash?.includes('session_id=')) {
     return <AuthCallback />;
+  }
+
+  // Admin routes - separate layout
+  if (location.pathname.startsWith('/admin')) {
+    return <AdminRouter />;
   }
 
   return (
@@ -41,7 +47,6 @@ const AppRouter = () => {
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/orders" element={<ProfilePage />} />
-        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </Layout>
   );
