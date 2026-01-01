@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
@@ -18,7 +18,8 @@ import {
   ChevronLeft,
   Truck,
   Shield,
-  RotateCcw
+  RotateCcw,
+  Heart
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -28,6 +29,7 @@ export const ProductDetailPage = () => {
   const { t, language, isRTL, formatPrice } = useLanguage();
   const { addToCart } = useCart();
   const { user } = useAuth();
+  const navigate = useNavigate();
   
   const [product, setProduct] = useState(null);
   const [reviews, setReviews] = useState([]);
@@ -37,11 +39,51 @@ export const ProductDetailPage = () => {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   useEffect(() => {
     fetchProduct();
     fetchReviews();
-  }, [productId]);
+    if (user) {
+      checkWishlistStatus();
+    }
+  }, [productId, user]);
+
+  const checkWishlistStatus = async () => {
+    try {
+      const response = await axios.get(`${API}/wishlist`, { withCredentials: true });
+      const inWishlist = response.data.some(item => item.product_id === productId);
+      setIsInWishlist(inWishlist);
+    } catch (error) {
+      console.error('Error checking wishlist:', error);
+    }
+  };
+
+  const handleToggleWishlist = async () => {
+    if (!user) {
+      toast.error(language === 'ar' ? 'يجب تسجيل الدخول أولاً' : 'Please login first');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      setWishlistLoading(true);
+      if (isInWishlist) {
+        await axios.delete(`${API}/wishlist/${productId}`, { withCredentials: true });
+        setIsInWishlist(false);
+        toast.success(language === 'ar' ? 'تمت الإزالة من المفضلة' : 'Removed from wishlist');
+      } else {
+        await axios.post(`${API}/wishlist/${productId}`, {}, { withCredentials: true });
+        setIsInWishlist(true);
+        toast.success(language === 'ar' ? 'تمت الإضافة للمفضلة' : 'Added to wishlist');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || t('common.error'));
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
 
   const fetchProduct = async () => {
     try {
@@ -271,6 +313,18 @@ export const ProductDetailPage = () => {
               >
                 <ShoppingCart className="h-5 w-5 me-2" />
                 {t('products.addToCart')}
+              </Button>
+
+              {/* Wishlist Button */}
+              <Button
+                size="lg"
+                variant={isInWishlist ? "secondary" : "outline"}
+                onClick={handleToggleWishlist}
+                disabled={wishlistLoading}
+                className="rounded-full"
+                data-testid="wishlist-btn"
+              >
+                <Heart className={`h-5 w-5 ${isInWishlist ? 'fill-current' : ''}`} />
               </Button>
             </div>
 
