@@ -632,49 +632,70 @@ export const ProfilePage = () => {
                       const StatusIcon = statusConfig.icon;
                       
                       return (
-                        <div key={order.order_id} className="bg-card rounded-2xl border shadow-sm p-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-3">
-                              <Badge variant="outline" className="font-mono text-xs">
-                                #{order.order_id?.slice(-8)}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {new Date(order.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}
-                              </span>
+                        <div key={order.order_id} className="bg-card rounded-2xl border shadow-sm overflow-hidden">
+                          {/* Order Header */}
+                          <div className="bg-muted/30 px-4 py-3 border-b flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-0.5">{text.orderNumber}</p>
+                                <p className="font-bold text-lg font-mono">{order.order_id?.slice(-8).toUpperCase()}</p>
+                              </div>
+                              <div className="h-8 w-px bg-border" />
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-0.5">{text.orderDate}</p>
+                                <p className="font-medium">
+                                  {new Date(order.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                  })}
+                                </p>
+                              </div>
                             </div>
-                            <div className={`flex items-center gap-1.5 text-sm ${statusConfig.color}`}>
+                            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
+                              order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                              order.status === 'shipped' ? 'bg-purple-100 text-purple-700' :
+                              order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                              'bg-yellow-100 text-yellow-700'
+                            }`}>
                               <StatusIcon className="h-4 w-4" />
                               <span>{statusConfig.label}</span>
                             </div>
                           </div>
 
-                          {/* Order Items Preview */}
-                          <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
-                            {order.items?.map((item, idx) => (
-                              <div key={idx} className="w-16 h-16 rounded-lg overflow-hidden bg-muted shrink-0 border">
-                                <img 
-                                  src={item.product?.images?.[0] || `https://via.placeholder.com/64?text=${encodeURIComponent(item.name?.charAt(0) || 'P')}`} 
-                                  alt={item.name}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    e.target.src = `https://via.placeholder.com/64/22c55e/ffffff?text=${encodeURIComponent(item.name?.charAt(0) || 'P')}`;
-                                  }}
-                                />
-                              </div>
-                            ))}
-                          </div>
-
-                          {/* Order Summary */}
-                          <div className="flex items-center justify-between pt-2 border-t">
-                            <div className="text-sm text-muted-foreground">
-                              {order.items?.length} {language === 'ar' ? 'منتج' : 'product(s)'}
+                          {/* Order Items */}
+                          <div className="p-4">
+                            <div className="flex gap-3 mb-4 overflow-x-auto pb-1">
+                              {order.items?.map((item, idx) => (
+                                <div key={idx} className="shrink-0">
+                                  <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted border">
+                                    <img 
+                                      src={item.product?.images?.[0] || `https://via.placeholder.com/80/22c55e/ffffff?text=${encodeURIComponent(item.name?.charAt(0) || 'P')}`} 
+                                      alt={item.name}
+                                      className="w-full h-full object-cover"
+                                      onError={(e) => {
+                                        e.target.src = `https://via.placeholder.com/80/22c55e/ffffff?text=${encodeURIComponent(item.name?.charAt(0) || 'P')}`;
+                                      }}
+                                    />
+                                  </div>
+                                  <p className="text-xs text-center mt-1 text-muted-foreground">x{item.quantity}</p>
+                                </div>
+                              ))}
                             </div>
-                            <div className="flex items-center gap-4">
-                              <span className="font-bold text-lg text-primary">
-                                {formatPrice(order.total || 0)}
-                              </span>
+
+                            {/* Order Footer */}
+                            <div className="flex items-center justify-between pt-3 border-t">
+                              <div>
+                                <span className="text-sm text-muted-foreground">
+                                  {order.items?.length} {language === 'ar' ? 'منتج' : language === 'fr' ? 'produit(s)' : 'product(s)'}
+                                </span>
+                                <span className="mx-2 text-muted-foreground">•</span>
+                                <span className="font-bold text-xl text-primary">
+                                  {formatPrice(order.total || 0)}
+                                </span>
+                              </div>
                               <Button 
-                                variant="outline" 
+                                variant="default" 
                                 size="sm" 
                                 className="rounded-full"
                                 onClick={() => {
@@ -682,7 +703,7 @@ export const ProfilePage = () => {
                                   setShowOrderDetail(true);
                                 }}
                               >
-                                <Eye className="h-4 w-4 me-1" />
+                                <Eye className="h-4 w-4 me-2" />
                                 {text.viewOrder}
                               </Button>
                             </div>
