@@ -1008,7 +1008,7 @@ export const ProfilePage = () => {
               <div className="border-t pt-3">
                 <div className="flex justify-between text-lg font-bold">
                   <span>{text.orderTotal}</span>
-                  <span className="text-primary">{formatPrice(selectedOrder.total_amount)}</span>
+                  <span className="text-primary">{formatPrice(selectedOrder.total || 0)}</span>
                 </div>
               </div>
             </div>
