@@ -263,40 +263,27 @@ export const Navbar = () => {
 
             {/* User Menu */}
             {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-9 w-9" data-testid="user-menu">
-                    {user.picture ? (
-                      <img src={user.picture} alt={user.name} className="h-8 w-8 rounded-full" />
-                    ) : (
-                      <User className="h-5 w-5" />
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align={isRTL ? 'start' : 'end'} className="w-48">
-                  <div className="px-2 py-1.5 text-sm font-medium border-b">
-                    {user.name}
-                  </div>
-                  <DropdownMenuItem onClick={() => navigate('/profile')} data-testid="profile-link">
-                    <User className={`${isRTL ? 'ml-2' : 'mr-2'} h-4 w-4`} />
-                    {t('nav.profile')}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/orders')} data-testid="orders-link">
-                    <Package className={`${isRTL ? 'ml-2' : 'mr-2'} h-4 w-4`} />
-                    {t('nav.myOrders')}
-                  </DropdownMenuItem>
-                  {isAdmin && (
-                    <DropdownMenuItem onClick={() => navigate('/admin')} data-testid="admin-link">
-                      <LayoutDashboard className={`${isRTL ? 'ml-2' : 'mr-2'} h-4 w-4`} />
-                      {t('nav.admin')}
-                    </DropdownMenuItem>
+              <div className="relative" ref={userMenuRef}>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-9 w-9" 
+                  data-testid="user-menu"
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  onMouseEnter={() => setShowUserMenu(true)}
+                >
+                  {user.picture ? (
+                    <img src={user.picture} alt={user.name} className="h-8 w-8 rounded-full object-cover" />
+                  ) : (
+                    <User className="h-5 w-5" />
                   )}
-                  <DropdownMenuItem onClick={logout} className="text-destructive" data-testid="logout-btn">
-                    <LogOut className={`${isRTL ? 'ml-2' : 'mr-2'} h-4 w-4`} />
-                    {t('nav.logout')}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                </Button>
+                
+                {/* Temu-style User Menu */}
+                {showUserMenu && (
+                  <UserMenu onClose={() => setShowUserMenu(false)} />
+                )}
+              </div>
             ) : (
               <Link to="/login" data-testid="login-link">
                 <Button variant="default" size="sm" className="rounded-full h-9 px-4">
