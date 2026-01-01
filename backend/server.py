@@ -1125,6 +1125,103 @@ async def remove_from_wishlist(product_id: str, user: User = Depends(require_aut
         raise HTTPException(status_code=404, detail="Item not in wishlist")
     return {"message": "Removed from wishlist"}
 
+# ============ BROWSING HISTORY ENDPOINTS ============
+
+@api_router.get("/browsing-history")
+async def get_browsing_history(request: Request, limit: int = 10):
+    """Get user's browsing history"""
+    # Try to get session from cookie
+    session_token = request.cookies.get("session_token")
+    user_id = None
+    
+    if session_token:
+        session = await db.user_sessions.find_one({"session_token": session_token}, {"_id": 0})
+        if session:
+            user_id = session["user_id"]
+    
+    # Also use browser fingerprint from header
+    browser_id = request.headers.get("X-Browser-ID", "")
+    
+    query = {}
+    if user_id:
+        query["$or"] = [{"user_id": user_id}, {"browser_id": browser_id}]
+    elif browser_id:
+        query["browser_id"] = browser_id
+    else:
+        return []
+    
+    history = await db.browsing_history.find(query, {"_id": 0}).sort("viewed_at", -1).limit(limit).to_list(limit)
+    
+    # Get product details
+    for item in history:
+        product = await db.products.find_one({"product_id": item["product_id"]}, {"_id": 0})
+        if product:
+            if isinstance(product.get("created_at"), str):
+                product["created_at"] = datetime.fromisoformat(product["created_at"])
+            item["product"] = product
+    
+    return history
+
+@api_router.post("/browsing-history/{product_id}")
+async def add_to_browsing_history(product_id: str, request: Request):
+    """Add product to browsing history"""
+    # Get session/browser info
+    session_token = request.cookies.get("session_token")
+    browser_id = request.headers.get("X-Browser-ID", "")
+    user_id = None
+    
+    if session_token:
+        session = await db.user_sessions.find_one({"session_token": session_token}, {"_id": 0})
+        if session:
+            user_id = session["user_id"]
+    
+    if not user_id and not browser_id:
+        return {"message": "No identifier"}
+    
+    # Check if product exists
+    product = await db.products.find_one({"product_id": product_id})
+    if not product:
+        return {"message": "Product not found"}
+    
+    # Update or insert history entry
+    query = {"product_id": product_id}
+    if user_id:
+        query["user_id"] = user_id
+    else:
+        query["browser_id"] = browser_id
+    
+    await db.browsing_history.update_one(
+        query,
+        {"$set": {
+            "product_id": product_id,
+            "user_id": user_id,
+            "browser_id": browser_id,
+            "viewed_at": datetime.now(timezone.utc).isoformat()
+        }},
+        upsert=True
+    )
+    
+    return {"message": "Added to history"}
+
+@api_router.delete("/browsing-history")
+async def clear_browsing_history(request: Request):
+    """Clear user's browsing history"""
+    session_token = request.cookies.get("session_token")
+    browser_id = request.headers.get("X-Browser-ID", "")
+    user_id = None
+    
+    if session_token:
+        session = await db.user_sessions.find_one({"session_token": session_token}, {"_id": 0})
+        if session:
+            user_id = session["user_id"]
+    
+    if user_id:
+        await db.browsing_history.delete_many({"$or": [{"user_id": user_id}, {"browser_id": browser_id}]})
+    elif browser_id:
+        await db.browsing_history.delete_many({"browser_id": browser_id})
+    
+    return {"message": "History cleared"}
+
 # ============ ADDRESS ENDPOINTS ============
 
 @api_router.get("/addresses")
