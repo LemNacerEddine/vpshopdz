@@ -29,26 +29,29 @@ const AppRouter = () => {
     return <AuthCallback />;
   }
 
-  // Admin routes - separate layout
-  if (location.pathname.startsWith('/admin')) {
-    return <AdminRouter />;
-  }
-
   return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/products" element={<ProductsPage />} />
-        <Route path="/products/:productId" element={<ProductDetailPage />} />
-        <Route path="/categories" element={<CategoriesPage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/orders" element={<ProfilePage />} />
-      </Routes>
-    </Layout>
+    <Routes>
+      {/* Admin routes */}
+      <Route path="/admin/*" element={<AdminRouter />} />
+      
+      {/* Public routes with Layout */}
+      <Route path="/*" element={
+        <Layout>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/products/:productId" element={<ProductDetailPage />} />
+            <Route path="/categories" element={<CategoriesPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/orders" element={<ProfilePage />} />
+          </Routes>
+        </Layout>
+      } />
+    </Routes>
   );
 };
 
