@@ -188,6 +188,123 @@ class AgroYousfiAPITester:
         # Restore original token
         self.session_token = original_token
 
+    def test_phone_authentication_flow(self):
+        """Test complete phone authentication flow"""
+        # Test phone number for registration
+        test_phone = "0555111222"
+        
+        # Step 1: Send OTP to phone
+        phone_data = {"phone": test_phone}
+        otp_result = self.run_test("Send Phone OTP", "POST", "auth/phone/send-otp", 200, phone_data)
+        
+        if not otp_result or 'demo_code' not in otp_result:
+            self.log_test("Phone Authentication Flow", False, "Failed to get OTP code")
+            return None
+        
+        # Step 2: Verify OTP (should return new_user status for new phone)
+        verify_data = {"phone": test_phone, "code": otp_result['demo_code']}
+        verify_result = self.run_test("Verify Phone OTP (New User)", "POST", "auth/phone/verify-otp", 200, verify_data)
+        
+        if not verify_result or verify_result.get('status') != 'new_user':
+            self.log_test("Phone Authentication Flow", False, "Expected new_user status")
+            return None
+        
+        # Step 3: Complete registration
+        register_data = {
+            "phone": test_phone,
+            "name": "أحمد محمد",
+            "wilaya": "16 - الجزائر (Alger)",
+            "address": "شارع الاستقلال، الجزائر العاصمة"
+        }
+        register_result = self.run_test("Complete Phone Registration", "POST", "auth/phone/register", 200, register_data)
+        
+        if register_result and 'session_token' in register_result:
+            self.session_token = register_result['session_token']
+            
+            # Step 4: Test login with existing phone user
+            # Send OTP again
+            otp_result2 = self.run_test("Send Phone OTP (Existing)", "POST", "auth/phone/send-otp", 200, phone_data)
+            if otp_result2 and 'demo_code' in otp_result2:
+                verify_data2 = {"phone": test_phone, "code": otp_result2['demo_code']}
+                verify_result2 = self.run_test("Verify Phone OTP (Existing User)", "POST", "auth/phone/verify-otp", 200, verify_data2)
+                
+                if verify_result2 and verify_result2.get('status') == 'existing_user':
+                    self.session_token = verify_result2['session_token']
+                    return register_result
+        
+        return register_result
+
+    def test_link_email_feature(self):
+        """Test linking email to phone account"""
+        if not self.session_token:
+            self.log_test("Link Email Feature", False, "No authenticated session")
+            return
+        
+        # Test linking email
+        link_data = {"email": f"linked_{datetime.now().strftime('%H%M%S')}@test.com"}
+        return self.run_test("Link Email to Phone Account", "POST", "auth/link-email", 200, link_data)
+
+    def test_wishlist_operations(self):
+        """Test wishlist operations (requires authentication)"""
+        if not self.session_token:
+            self.log_test("Wishlist Operations", False, "No authenticated session")
+            return
+        
+        # Get a product for wishlist testing
+        products = self.run_test("Get Products for Wishlist", "GET", "products?limit=1", 200)
+        if not products or not products:
+            self.log_test("Wishlist Operations", False, "No products available")
+            return
+        
+        product_id = products[0]['product_id']
+        
+        # Add to wishlist
+        self.run_test("Add to Wishlist", "POST", f"wishlist/{product_id}", 200)
+        
+        # Get wishlist
+        wishlist = self.run_test("Get Wishlist", "GET", "wishlist", 200)
+        
+        # Remove from wishlist
+        self.run_test("Remove from Wishlist", "DELETE", f"wishlist/{product_id}", 200)
+        
+        return wishlist
+
+    def test_addresses_operations(self):
+        """Test address management operations (requires authentication)"""
+        if not self.session_token:
+            self.log_test("Address Operations", False, "No authenticated session")
+            return
+        
+        # Add new address
+        address_data = {
+            "title": "المنزل",
+            "phone": "0555123456",
+            "address": "شارع الاستقلال، حي النصر",
+            "wilaya": "16 - الجزائر (Alger)",
+            "isDefault": True
+        }
+        add_result = self.run_test("Add Address", "POST", "addresses", 200, address_data)
+        
+        # Get addresses
+        addresses = self.run_test("Get Addresses", "GET", "addresses", 200)
+        
+        # Delete address if we got an address_id
+        if add_result and 'address_id' in add_result:
+            address_id = add_result['address_id']
+            self.run_test("Delete Address", "DELETE", f"addresses/{address_id}", 200)
+        
+        return addresses
+
+    def test_product_search_arabic_english(self):
+        """Test product search with Arabic and English queries"""
+        # Test Arabic search
+        arabic_result = self.run_test("Search Products (Arabic)", "GET", "products?search=بذور", 200)
+        
+        # Test English search  
+        english_result = self.run_test("Search Products (English)", "GET", "products?search=wheat", 200)
+        
+        return arabic_result, english_result
+
     def test_order_creation(self):
         """Test order creation"""
         # First add items to cart
