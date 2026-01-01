@@ -304,26 +304,21 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: |
-      New features implemented:
-      1. Product Gallery like AliExpress:
-         - Multiple images with thumbnails
-         - Video support with play/pause
-         - Zoom on hover
-         - Fullscreen lightbox
-         - Image counter
+      UI FIX COMPLETED - User Menu Arrows Removed:
       
-      2. Checkout page is complete with:
-         - Customer info form
-         - Wilaya dropdown (58 wilayas)
-         - COD payment method
-         - Order summary
+      Changes made:
+      - Removed ChevronIcon from menu items in UserMenu.jsx
+      - The arrows were inside button elements that navigate directly (not sub-menus)
+      - User requested to remove arrows since these are direct buttons, not dropdown triggers
+      
+      File modified: /app/frontend/src/components/layout/UserMenu.jsx
+      Line changed: Removed <ChevronIcon className={`h-4 w-4 ms-auto shrink-0 ${isRTL ? '' : ''}`} /> from menuItems.map
       
       Please test:
-      - Product gallery on /products/prod_wheat01 (has 4 images + 1 video)
-      - Click thumbnails to switch images
-      - Hover to zoom
-      - Click to open lightbox
-      - Cart -> Checkout flow
+      1. Login with phone: 0666777888 (will show OTP code on screen)
+      2. After login, click on user avatar in navbar to open UserMenu dropdown
+      3. Verify that menu items (طلباتك, مراجعاتك, الملف الشخصي, etc.) do NOT have arrows on the right side
+      4. All menu items should show only icon + text, no chevron arrows
   - agent: "testing"
     message: |
       TESTING COMPLETED - Product Gallery Component:
