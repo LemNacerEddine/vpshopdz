@@ -231,6 +231,18 @@ backend:
         comment: "PASSED - Product prod_wheat01 has 4 images array and video field with URL. Gallery data structure verified."
 
 frontend:
+  - task: "User Menu - Remove Arrows from Menu Items"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/layout/UserMenu.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Removed ChevronIcon from menu items as user requested - these are direct navigation buttons, not sub-menu triggers"
+
   - task: "Phone Login UI"
     implemented: true
     working: true
