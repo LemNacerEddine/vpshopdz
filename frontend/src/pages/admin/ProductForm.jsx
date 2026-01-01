@@ -40,6 +40,7 @@ const ProductForm = () => {
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     name_ar: '',
