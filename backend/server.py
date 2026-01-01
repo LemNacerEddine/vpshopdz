@@ -29,7 +29,7 @@ api_router = APIRouter(prefix="/api")
 
 class UserBase(BaseModel):
     model_config = ConfigDict(extra="ignore")
-    email: EmailStr
+    email: Optional[EmailStr] = None
     name: str
     phone: Optional[str] = None
     address: Optional[str] = None
