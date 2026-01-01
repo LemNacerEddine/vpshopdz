@@ -91,42 +91,47 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = async (productId, quantity = 1) => {
     try {
-      if (isAuthenticated) {
-        // Server-side cart
+      // Always try server first for authenticated users
+      try {
         await axios.post(
           `${API}/cart/add`,
           { product_id: productId, quantity },
           { withCredentials: true }
         );
         await initializeCart();
-      } else {
-        // Local cart for guests
-        const existingIndex = cart.items.findIndex(item => item.product_id === productId);
-        let newItems;
+        return true;
+      } catch (serverError) {
+        // If server fails (401), use local cart
+        if (serverError.response?.status === 401) {
+          // Local cart for guests
+          const existingIndex = cart.items.findIndex(item => item.product_id === productId);
+          let newItems;
 
-        if (existingIndex >= 0) {
-          newItems = cart.items.map((item, index) =>
-            index === existingIndex
-              ? { ...item, quantity: item.quantity + quantity }
-              : item
-          );
-        } else {
-          // Fetch product details
-          const response = await axios.get(`${API}/products/${productId}`);
-          newItems = [
-            ...cart.items,
-            {
-              product_id: productId,
-              quantity,
-              product: response.data
-            }
-          ];
+          if (existingIndex >= 0) {
+            newItems = cart.items.map((item, index) =>
+              index === existingIndex
+                ? { ...item, quantity: item.quantity + quantity }
+                : item
+            );
+          } else {
+            // Fetch product details
+            const response = await axios.get(`${API}/products/${productId}`);
+            newItems = [
+              ...cart.items,
+              {
+                product_id: productId,
+                quantity,
+                product: response.data
+              }
+            ];
+          }
+
+          setCart({ items: newItems });
+          saveLocalCart(newItems);
+          return true;
         }
-
-        setCart({ items: newItems });
-        saveLocalCart(newItems);
+        throw serverError;
       }
-      return true;
     } catch (error) {
       console.error('Error adding to cart:', error);
       return false;
