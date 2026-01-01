@@ -232,7 +232,7 @@ class PhoneOTPVerify(BaseModel):
     code: str
 
 class LinkEmailRequest(BaseModel):
-    email: EmailStr
+    email: Union[EmailStr, str]
 
 # ============ AUTH HELPERS ============
 
