@@ -103,7 +103,7 @@ const DashboardHome = () => {
       totalProducts: 'Total des produits',
       totalCustomers: 'Total des clients',
       pendingOrders: 'Commandes en attente',
-      recentOrders: 'Commandes récentes',
+      recentOrders: 'Commandes à traiter',
       viewAll: 'Voir tout',
       orderStatus: 'Statut des commandes',
       salesChart: 'Graphique des ventes',
