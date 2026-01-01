@@ -1305,7 +1305,7 @@ async def seed_database():
                 "https://images.pexels.com/photos/2589457/pexels-photo-2589457.jpeg",
                 "https://images.pexels.com/photos/1537169/pexels-photo-1537169.jpeg"
             ],
-            "video": "https://videos.pexels.com/video-files/2795398/2795398-uhd_2560_1440_25fps.mp4",
+            "video": "https://www.w3schools.com/html/mov_bbb.mp4",
             "featured": True,
             "unit": "kg",
             "rating": 4.8,
