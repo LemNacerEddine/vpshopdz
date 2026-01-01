@@ -284,9 +284,9 @@ export const ProductDetailPage = () => {
       </div>
 
       <div className="container mx-auto px-4 py-4">
-        <div className={`grid lg:grid-cols-5 gap-6 ${isRTL ? '' : ''}`}>
-          {/* Product Info - Temu Style (3 columns) - First in RTL */}
-          <div className={`lg:col-span-3 space-y-4 ${isRTL ? 'lg:order-1' : 'lg:order-2'}`}>
+        <div className="grid lg:grid-cols-5 gap-6">
+          {/* Product Info - On Left in RTL, On Right in LTR */}
+          <div className={`lg:col-span-3 space-y-4 ${isRTL ? 'lg:order-2' : 'lg:order-2'}`}>
             {/* Title & Rating */}
             <div>
               <h1 className="text-xl font-bold text-foreground leading-tight mb-2">
