@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }) => {
       { withCredentials: true }
     );
     setUser(response.data.user);
-    return response.data;
+    return response.data.user;  // Return user for redirect decision
   };
 
   const logout = async () => {
