@@ -64,7 +64,7 @@ export const ProductGallery = ({ images = [], video = null, productName = '', is
   }, [selectedIndex]);
 
   return (
-    <div className={`flex gap-3 ${isRTL ? '' : 'flex-row-reverse'}`}>
+    <div className="flex gap-3">
       {/* Vertical Thumbnails - Like Temu/AliExpress */}
       {media.length > 1 && (
         <div className="flex flex-col gap-2 w-16 shrink-0">
