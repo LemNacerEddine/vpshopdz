@@ -90,24 +90,19 @@ export const CartProvider = ({ children }) => {
   };
 
   const addToCart = async (productId, quantity = 1) => {
-    console.log('addToCart called:', productId, quantity);
     try {
       // Always try server first for authenticated users
       try {
-        console.log('Trying server cart...');
         await axios.post(
           `${API}/cart/add`,
           { product_id: productId, quantity },
           { withCredentials: true }
         );
-        console.log('Server cart success');
         await initializeCart();
         return true;
       } catch (serverError) {
-        console.log('Server error:', serverError.response?.status, serverError.message);
         // If server fails (401), use local cart
         if (serverError.response?.status === 401) {
-          console.log('Using local cart...');
           // Local cart for guests
           const existingIndex = cart.items.findIndex(item => item.product_id === productId);
           let newItems;
@@ -120,9 +115,7 @@ export const CartProvider = ({ children }) => {
             );
           } else {
             // Fetch product details
-            console.log('Fetching product details...');
             const response = await axios.get(`${API}/products/${productId}`);
-            console.log('Product fetched:', response.data.name_ar);
             newItems = [
               ...cart.items,
               {
@@ -133,10 +126,8 @@ export const CartProvider = ({ children }) => {
             ];
           }
 
-          console.log('Setting cart with items:', newItems.length);
           setCart({ items: newItems });
           saveLocalCart(newItems);
-          console.log('Local cart saved');
           return true;
         }
         throw serverError;
