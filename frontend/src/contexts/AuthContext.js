@@ -14,12 +14,29 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    // Try to restore user from localStorage on initial load
+    try {
+      const savedUser = localStorage.getItem('agroyousfi_user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     checkAuth();
   }, []);
+
+  // Persist user to localStorage
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('agroyousfi_user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('agroyousfi_user');
+    }
+  }, [user]);
 
   const checkAuth = async () => {
     try {
@@ -28,7 +45,11 @@ export const AuthProvider = ({ children }) => {
       });
       setUser(response.data);
     } catch (error) {
-      setUser(null);
+      // If 401, clear stored user
+      if (error.response?.status === 401) {
+        setUser(null);
+      }
+      // Keep existing user if network error (offline support)
     } finally {
       setLoading(false);
     }
