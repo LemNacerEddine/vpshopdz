@@ -576,39 +576,43 @@ export const ProfilePage = () => {
                           </div>
 
                           {/* Order Items Preview */}
-                          <div className="flex gap-2 mb-3">
-                            {order.items?.slice(0, 4).map((item, idx) => (
-                              <div key={idx} className="w-16 h-16 rounded-lg overflow-hidden bg-muted shrink-0">
+                          <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
+                            {order.items?.map((item, idx) => (
+                              <div key={idx} className="w-16 h-16 rounded-lg overflow-hidden bg-muted shrink-0 border">
                                 <img 
-                                  src={item.product?.images?.[0] || 'https://via.placeholder.com/64'} 
-                                  alt={item.product?.[`name_${language}`]}
+                                  src={item.product?.images?.[0] || `https://via.placeholder.com/64?text=${encodeURIComponent(item.name?.charAt(0) || 'P')}`} 
+                                  alt={item.name}
                                   className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.target.src = `https://via.placeholder.com/64/22c55e/ffffff?text=${encodeURIComponent(item.name?.charAt(0) || 'P')}`;
+                                  }}
                                 />
                               </div>
                             ))}
-                            {order.items?.length > 4 && (
-                              <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center text-sm text-muted-foreground">
-                                +{order.items.length - 4}
-                              </div>
-                            )}
                           </div>
 
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-lg">
-                              {formatPrice(order.total_amount)}
-                            </span>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="rounded-full"
-                              onClick={() => {
-                                setSelectedOrder(order);
-                                setShowOrderDetail(true);
-                              }}
-                            >
-                              <Eye className="h-4 w-4 me-1" />
-                              {text.viewOrder}
-                            </Button>
+                          {/* Order Summary */}
+                          <div className="flex items-center justify-between pt-2 border-t">
+                            <div className="text-sm text-muted-foreground">
+                              {order.items?.length} {language === 'ar' ? 'منتج' : 'product(s)'}
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <span className="font-bold text-lg text-primary">
+                                {formatPrice(order.total || 0)}
+                              </span>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="rounded-full"
+                                onClick={() => {
+                                  setSelectedOrder(order);
+                                  setShowOrderDetail(true);
+                                }}
+                              >
+                                <Eye className="h-4 w-4 me-1" />
+                                {text.viewOrder}
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       );
