@@ -237,11 +237,14 @@ frontend:
     file: "/app/frontend/src/components/layout/UserMenu.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Removed ChevronIcon from menu items as user requested - these are direct navigation buttons, not sub-menu triggers"
+      - working: true
+        agent: "testing"
+        comment: "PASSED - Comprehensive testing completed. All menu items (طلباتك, مراجعاتك, الملف الشخصي, قائمة الأمنيات, العناوين, سجل التصفح) correctly display only icon + text without chevron arrows. Each menu item has exactly 1 SVG element (the main icon only). The 'View Profile' link correctly retains its arrow as expected. HTML structure verification confirms proper implementation."
 
   - task: "Phone Login UI"
     implemented: true
