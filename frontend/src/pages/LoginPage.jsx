@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Mail, Phone, Loader2, User, MapPin, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Mail, Phone, Loader2, User, MapPin, ArrowLeft, ArrowRight, Chrome } from 'lucide-react';
 
 const LOGO_URL = "https://customer-assets.emergentagent.com/job_cb33075f-a467-40a3-8ccf-6a7d58e2dd7b/artifacts/9ov58a7g_548325177_122096850867034427_2184721735778021830_n.jpg";
 
