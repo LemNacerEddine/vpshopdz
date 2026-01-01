@@ -1299,7 +1299,13 @@ async def seed_database():
             "old_price": 5000,
             "stock": 150,
             "category_id": "cat_seeds",
-            "images": ["https://images.pexels.com/photos/6041/nature-grain-moving-cereal.jpg"],
+            "images": [
+                "https://images.pexels.com/photos/6041/nature-grain-moving-cereal.jpg",
+                "https://images.pexels.com/photos/326082/pexels-photo-326082.jpeg",
+                "https://images.pexels.com/photos/2589457/pexels-photo-2589457.jpeg",
+                "https://images.pexels.com/photos/1537169/pexels-photo-1537169.jpeg"
+            ],
+            "video": "https://videos.pexels.com/video-files/2795398/2795398-uhd_2560_1440_25fps.mp4",
             "featured": True,
             "unit": "kg",
             "rating": 4.8,
@@ -1317,7 +1323,12 @@ async def seed_database():
             "price": 1800,
             "stock": 200,
             "category_id": "cat_seeds",
-            "images": ["https://images.pexels.com/photos/2290074/pexels-photo-2290074.jpeg"],
+            "images": [
+                "https://images.pexels.com/photos/2290074/pexels-photo-2290074.jpeg",
+                "https://images.pexels.com/photos/1327838/pexels-photo-1327838.jpeg",
+                "https://images.pexels.com/photos/533280/pexels-photo-533280.jpeg",
+                "https://images.pexels.com/photos/96616/pexels-photo-96616.jpeg"
+            ],
             "featured": True,
             "unit": "pack",
             "rating": 4.5,
@@ -1335,7 +1346,11 @@ async def seed_database():
             "price": 1500,
             "stock": 180,
             "category_id": "cat_seeds",
-            "images": ["https://images.pexels.com/photos/594137/pexels-photo-594137.jpeg"],
+            "images": [
+                "https://images.pexels.com/photos/594137/pexels-photo-594137.jpeg",
+                "https://images.pexels.com/photos/128536/pexels-photo-128536.jpeg",
+                "https://images.pexels.com/photos/2893635/pexels-photo-2893635.jpeg"
+            ],
             "featured": False,
             "unit": "pack",
             "rating": 4.3,
