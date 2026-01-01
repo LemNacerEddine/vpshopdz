@@ -435,8 +435,8 @@ export const ProductDetailPage = () => {
             </div>
           </div>
 
-          {/* Images/Video Gallery - Temu Style (2 columns) */}
-          <div className={`lg:col-span-2 ${isRTL ? 'lg:order-2' : 'lg:order-1'}`}>
+          {/* Images/Video Gallery - On Right in RTL, On Left in LTR */}
+          <div className={`lg:col-span-2 ${isRTL ? 'lg:order-1' : 'lg:order-1'}`}>
             <div className="sticky top-20">
               <ProductGallery 
                 images={product.images || []}
