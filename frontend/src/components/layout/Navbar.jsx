@@ -194,18 +194,25 @@ export const Navbar = () => {
             </div>
           </nav>
 
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-4">
+          {/* Search Bar - Full Width */}
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl mx-4">
             <div className="relative w-full">
-              <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground`} />
+              <Search className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground`} />
               <Input
                 type="search"
                 placeholder={t('nav.search')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} bg-muted/50 border-0 focus:bg-background rounded-full`}
+                className={`${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'} h-11 bg-muted/50 border-2 border-transparent focus:border-primary focus:bg-background rounded-full text-base`}
                 data-testid="search-input"
               />
+              <Button 
+                type="submit" 
+                size="sm"
+                className={`absolute ${isRTL ? 'left-1.5' : 'right-1.5'} top-1/2 -translate-y-1/2 rounded-full h-8 px-4`}
+              >
+                {language === 'ar' ? 'بحث' : 'Search'}
+              </Button>
             </div>
           </form>
 
