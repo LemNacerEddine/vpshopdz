@@ -1,23 +1,23 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { LanguageProvider } from './contexts/LanguageContext';
-import { AuthProvider } from './contexts/AuthContext';
-import { CartProvider } from './contexts/CartContext';
-import { Layout } from './components/layout/Layout';
+import { LanguageProvider } from '@/contexts/LanguageContext';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { CartProvider } from '@/contexts/CartContext';
+import { Layout } from '@/components/layout/Layout';
 
 // Pages
-import HomePage from './pages/HomePage';
-import ProductsPage from './pages/ProductsPage';
-import ProductDetailPage from './pages/ProductDetailPage';
-import CategoriesPage from './pages/CategoriesPage';
-import CartPage from './pages/CartPage';
-import CheckoutPage from './pages/CheckoutPage';
-import LoginPage from './pages/LoginPage';
-import AuthCallback from './pages/AuthCallback';
-import ProfilePage from './pages/ProfilePage';
-import AdminDashboard from './pages/AdminDashboard';
+import HomePage from '@/pages/HomePage';
+import ProductsPage from '@/pages/ProductsPage';
+import ProductDetailPage from '@/pages/ProductDetailPage';
+import CategoriesPage from '@/pages/CategoriesPage';
+import CartPage from '@/pages/CartPage';
+import CheckoutPage from '@/pages/CheckoutPage';
+import LoginPage from '@/pages/LoginPage';
+import AuthCallback from '@/pages/AuthCallback';
+import ProfilePage from '@/pages/ProfilePage';
+import AdminDashboard from '@/pages/AdminDashboard';
 
-import './App.css';
+import '@/App.css';
 
 // Router wrapper to handle auth callback
 const AppRouter = () => {
