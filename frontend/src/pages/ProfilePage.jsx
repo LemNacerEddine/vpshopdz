@@ -473,6 +473,67 @@ export const ProfilePage = () => {
               {/* Menu Items */}
               <ScrollArea className="h-[calc(100vh-280px)]">
                 <div className="p-2">
+                  {/* Orders with Expandable Sub-menu */}
+                  <div className="mb-1">
+                    <button
+                      onClick={() => {
+                        setOrdersExpanded(!ordersExpanded);
+                        setActiveTab('orders');
+                      }}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
+                        activeTab === 'orders'
+                          ? 'bg-primary text-primary-foreground font-medium'
+                          : 'hover:bg-muted'
+                      }`}
+                    >
+                      <Package className="h-4 w-4 shrink-0" />
+                      <span className="flex-1 text-start">{text.orders}</span>
+                      {orders.length > 0 && (
+                        <Badge variant={activeTab === 'orders' ? "secondary" : "outline"} className="text-xs">
+                          {orders.length}
+                        </Badge>
+                      )}
+                      {ordersExpanded ? (
+                        <ChevronUp className="h-4 w-4 opacity-50" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 opacity-50" />
+                      )}
+                    </button>
+                    
+                    {/* Orders Sub-menu */}
+                    {ordersExpanded && (
+                      <div className={`${isRTL ? 'mr-6' : 'ml-6'} mt-1 space-y-0.5 border-s-2 border-muted ps-2`}>
+                        {orderSubItems.map((subItem) => {
+                          const count = subItem.filter === 'all' 
+                            ? orders.length 
+                            : orders.filter(o => o.status === subItem.filter).length;
+                          return (
+                            <button
+                              key={subItem.id}
+                              onClick={() => {
+                                setActiveTab('orders');
+                                setOrderStatusFilter(subItem.filter);
+                              }}
+                              className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all ${
+                                activeTab === 'orders' && orderStatusFilter === subItem.filter
+                                  ? 'bg-primary/10 text-primary font-medium'
+                                  : 'hover:bg-muted text-muted-foreground'
+                              }`}
+                            >
+                              <span className="flex-1 text-start">{subItem.label}</span>
+                              {count > 0 && (
+                                <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded-full">
+                                  {count}
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Other Menu Items */}
                   {sidebarItems.map((item) => (
                     <button
                       key={item.id}
