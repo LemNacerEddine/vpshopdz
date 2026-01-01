@@ -178,9 +178,12 @@ const DashboardHome = () => {
       const statsRes = await axios.get(`${API}/admin/stats`, { withCredentials: true });
       setStats(statsRes.data);
 
-      // Fetch recent orders
-      const ordersRes = await axios.get(`${API}/admin/orders?limit=5`, { withCredentials: true });
-      setRecentOrders(ordersRes.data?.slice(0, 5) || []);
+      // Fetch orders - filter to show only pending/unprocessed orders
+      const ordersRes = await axios.get(`${API}/admin/orders`, { withCredentials: true });
+      const allOrders = ordersRes.data || [];
+      // Filter only pending orders (not processed yet)
+      const pendingOrders = allOrders.filter(o => o.status === 'pending');
+      setRecentOrders(pendingOrders.slice(0, 5));
 
       // Fetch low stock products
       const productsRes = await axios.get(`${API}/products`, { withCredentials: true });
