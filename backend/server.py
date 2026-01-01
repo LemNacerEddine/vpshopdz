@@ -77,6 +77,7 @@ class ProductBase(BaseModel):
     stock: int = 0
     category_id: str
     images: List[str] = []
+    video: Optional[str] = None  # Video URL for product demo
     featured: bool = False
     unit: str = "piece"  # piece, kg, pack
 
