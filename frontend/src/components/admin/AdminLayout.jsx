@@ -55,13 +55,6 @@ const AdminLayout = ({ children }) => {
     localStorage.setItem('admin-dark-mode', darkMode);
   }, [darkMode]);
 
-  // Check admin access
-  useEffect(() => {
-    if (!isAdmin) {
-      navigate('/login');
-    }
-  }, [isAdmin, navigate]);
-
   const l = {
     ar: {
       dashboard: 'لوحة التحكم',
