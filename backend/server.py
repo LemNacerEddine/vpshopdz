@@ -10,6 +10,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import Union
 from typing import List, Optional, Dict, Any
+import base64
 import uuid
 from datetime import datetime, timezone, timedelta
 import httpx
