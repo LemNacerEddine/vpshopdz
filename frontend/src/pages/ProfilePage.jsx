@@ -42,14 +42,17 @@ import {
   Truck,
   PackageCheck,
   XCircle,
-  Eye
+  Eye,
+  Mail,
+  Phone,
+  Link as LinkIcon
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export const ProfilePage = () => {
   const { t, language, isRTL, formatPrice } = useLanguage();
-  const { user, updateProfile, loading: authLoading } = useAuth();
+  const { user, updateProfile, loading: authLoading, checkAuth } = useAuth();
   const { addToCart } = useCart();
   const navigate = useNavigate();
 
@@ -62,6 +65,9 @@ export const ProfilePage = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showOrderDetail, setShowOrderDetail] = useState(false);
   const [showAddAddress, setShowAddAddress] = useState(false);
+  const [showLinkEmail, setShowLinkEmail] = useState(false);
+  const [linkEmail, setLinkEmail] = useState('');
+  const [linkingEmail, setLinkingEmail] = useState(false);
   const [newAddress, setNewAddress] = useState({ title: '', address: '', wilaya: '', phone: '', isDefault: false });
   const [formData, setFormData] = useState({
     name: '',
@@ -318,6 +324,25 @@ export const ProfilePage = () => {
     }
   };
 
+  const handleLinkEmail = async () => {
+    if (!linkEmail) {
+      toast.error(language === 'ar' ? 'يرجى إدخال البريد الإلكتروني' : 'Please enter email');
+      return;
+    }
+    try {
+      setLinkingEmail(true);
+      await axios.post(`${API}/auth/link-email`, { email: linkEmail }, { withCredentials: true });
+      toast.success(language === 'ar' ? 'تم ربط البريد الإلكتروني بنجاح' : 'Email linked successfully');
+      setShowLinkEmail(false);
+      setLinkEmail('');
+      await checkAuth(); // Refresh user data
+    } catch (error) {
+      toast.error(error.response?.data?.detail || t('common.error'));
+    } finally {
+      setLinkingEmail(false);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
@@ -479,6 +504,67 @@ export const ProfilePage = () => {
                       {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : l.save}
                     </Button>
                   </form>
+
+                  {/* Link Email Section - For phone-registered users */}
+                  {!user.email && (
+                    <div className="mt-6 pt-6 border-t">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-semibold flex items-center gap-2">
+                            <Mail className="h-4 w-4" />
+                            {language === 'ar' ? 'ربط البريد الإلكتروني' : language === 'fr' ? 'Lier un email' : 'Link Email'}
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            {language === 'ar' 
+                              ? 'أضف بريدك الإلكتروني لتسهيل تسجيل الدخول' 
+                              : language === 'fr'
+                              ? 'Ajoutez votre email pour faciliter la connexion'
+                              : 'Add your email for easier login'
+                            }
+                          </p>
+                        </div>
+                        <Dialog open={showLinkEmail} onOpenChange={setShowLinkEmail}>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm" className="rounded-full">
+                              <LinkIcon className="h-4 w-4 me-1" />
+                              {language === 'ar' ? 'ربط' : 'Link'}
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>
+                                {language === 'ar' ? 'ربط البريد الإلكتروني' : 'Link Email'}
+                              </DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label>{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</Label>
+                                <Input
+                                  type="email"
+                                  value={linkEmail}
+                                  onChange={(e) => setLinkEmail(e.target.value)}
+                                  placeholder="example@email.com"
+                                  dir="ltr"
+                                  data-testid="link-email-input"
+                                />
+                              </div>
+                              <Button 
+                                onClick={handleLinkEmail} 
+                                className="w-full rounded-full"
+                                disabled={linkingEmail}
+                              >
+                                {linkingEmail ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  language === 'ar' ? 'ربط البريد' : 'Link Email'
+                                )}
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
