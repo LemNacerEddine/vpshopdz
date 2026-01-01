@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
+import { ProductGallery } from '@/components/products/ProductGallery';
 import { toast } from 'sonner';
 import { 
   Star, 
@@ -19,7 +20,8 @@ import {
   Truck,
   Shield,
   RotateCcw,
-  Heart
+  Heart,
+  Share2
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
