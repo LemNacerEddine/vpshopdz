@@ -11,18 +11,25 @@ import SettingsPage from '@/pages/admin/SettingsPage';
 import { useAuth } from '@/contexts/AuthContext';
 
 const AdminRouter = () => {
-  const { isAdmin, loading } = useAuth();
+  const { isAdmin, loading, user } = useAuth();
 
-  if (loading) {
+  // Show loading only if we don't have a cached user
+  if (loading && !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
       </div>
     );
   }
 
-  if (!isAdmin) {
+  // Check if user is admin (from cached or fresh data)
+  if (!isAdmin && !loading) {
     return <Navigate to="/login" replace />;
+  }
+
+  // If still loading but we have a cached admin user, show the dashboard
+  if (loading && user?.role === 'admin') {
+    // Continue to show dashboard while verifying
   }
 
   return (
