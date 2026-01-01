@@ -343,20 +343,44 @@ class AgroYousfiAPITester:
         self.test_get_categories()
         self.test_get_products()
         self.test_get_featured_products()
-        self.test_search_products()
         self.test_get_wilayas()
         
-        # Authentication
-        self.test_send_otp()
-        self.test_get_current_user()
+        # Product search (Arabic and English)
+        self.test_product_search_arabic_english()
+        
+        # Phone authentication flow (NEW)
+        print("\n📱 Testing Phone Authentication Flow...")
+        self.test_phone_authentication_flow()
+        
+        # Link email feature (NEW)
+        print("\n📧 Testing Link Email Feature...")
+        self.test_link_email_feature()
+        
+        # Wishlist operations (NEW - requires auth)
+        print("\n❤️ Testing Wishlist Operations...")
+        self.test_wishlist_operations()
+        
+        # Address operations (NEW - requires auth)
+        print("\n🏠 Testing Address Operations...")
+        self.test_addresses_operations()
         
         # Cart operations
+        print("\n🛒 Testing Cart Operations...")
         self.test_cart_operations()
         
         # Order creation
+        print("\n📦 Testing Order Creation...")
         self.test_order_creation()
         
+        # Email authentication (existing)
+        print("\n📧 Testing Email Authentication...")
+        # Reset session for email auth test
+        self.session_token = None
+        self.test_send_otp()
+        self.test_get_current_user()
+        
         # Admin operations
+        print("\n👑 Testing Admin Operations...")
         self.test_admin_login()
         self.test_admin_operations()
         
