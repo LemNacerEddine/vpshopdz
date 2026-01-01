@@ -297,7 +297,6 @@ export const UserMenu = ({ onClose }) => {
                 >
                   <item.icon className="h-4 w-4 shrink-0" />
                   <span className="truncate">{item.label}</span>
-                  <ChevronIcon className={`h-4 w-4 ms-auto shrink-0 ${isRTL ? '' : ''}`} />
                 </button>
               ))}
             </div>
