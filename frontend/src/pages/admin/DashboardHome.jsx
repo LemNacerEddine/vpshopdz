@@ -447,44 +447,66 @@ const DashboardHome = () => {
             </Link>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-start py-3 px-2 text-sm font-medium text-muted-foreground">{text.orderId}</th>
-                    <th className="text-start py-3 px-2 text-sm font-medium text-muted-foreground">{text.customer}</th>
-                    <th className="text-start py-3 px-2 text-sm font-medium text-muted-foreground">{text.amount}</th>
-                    <th className="text-start py-3 px-2 text-sm font-medium text-muted-foreground">{text.status}</th>
-                    <th className="text-start py-3 px-2 text-sm font-medium text-muted-foreground">{text.date}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentOrders.map(order => {
-                    const StatusIcon = getStatusIcon(order.status);
-                    return (
-                      <tr key={order.order_id} className="border-b last:border-0 hover:bg-muted/50">
-                        <td className="py-3 px-2">
-                          <Link to={`/admin/orders/${order.order_id}`} className="font-medium text-primary hover:underline">
-                            #{order.order_id.slice(-6)}
-                          </Link>
-                        </td>
-                        <td className="py-3 px-2">{order.customer_name}</td>
-                        <td className="py-3 px-2 font-medium">{formatPrice(order.total)}</td>
-                        <td className="py-3 px-2">
-                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                            <StatusIcon className="h-3 w-3" />
-                            {text[order.status]}
-                          </span>
-                        </td>
-                        <td className="py-3 px-2 text-sm text-muted-foreground">
-                          {format(new Date(order.created_at), 'dd/MM/yyyy', { locale })}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            {recentOrders.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <CheckCircle className="h-12 w-12 mx-auto mb-2 opacity-50 text-green-500" />
+                <p>{language === 'ar' ? 'لا توجد طلبات تحتاج معالجة' : 'No orders to process'}</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-start py-3 px-2 text-sm font-medium text-muted-foreground">{text.orderId}</th>
+                      <th className="text-start py-3 px-2 text-sm font-medium text-muted-foreground">{text.customer}</th>
+                      <th className="text-start py-3 px-2 text-sm font-medium text-muted-foreground">{text.amount}</th>
+                      <th className="text-start py-3 px-2 text-sm font-medium text-muted-foreground">{text.status}</th>
+                      <th className="text-start py-3 px-2 text-sm font-medium text-muted-foreground">{language === 'ar' ? 'الإجراءات' : 'Actions'}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentOrders.map(order => {
+                      const StatusIcon = getStatusIcon(order.status);
+                      return (
+                        <tr key={order.order_id} className="border-b last:border-0 hover:bg-muted/50">
+                          <td className="py-3 px-2">
+                            <Link to={`/admin/orders/${order.order_id}`} className="font-medium text-primary hover:underline">
+                              #{order.order_id.slice(-6)}
+                            </Link>
+                          </td>
+                          <td className="py-3 px-2">{order.customer_name}</td>
+                          <td className="py-3 px-2 font-medium">{formatPrice(order.total)}</td>
+                          <td className="py-3 px-2">
+                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                              <StatusIcon className="h-3 w-3" />
+                              {text[order.status]}
+                            </span>
+                          </td>
+                          <td className="py-3 px-2">
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 text-xs"
+                                onClick={() => handleConfirmOrder(order.order_id)}
+                              >
+                                <CheckCircle className="h-3 w-3 me-1" />
+                                {language === 'ar' ? 'تأكيد' : 'Confirm'}
+                              </Button>
+                              <Link to={`/admin/orders?id=${order.order_id}`}>
+                                <Button variant="ghost" size="sm" className="h-7 text-xs">
+                                  <Eye className="h-3 w-3" />
+                                </Button>
+                              </Link>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </CardContent>
         </Card>
 
