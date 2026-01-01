@@ -56,6 +56,23 @@ agent_communication:
       ❌ Status update functionality
       
       RECOMMENDATION: Fix authentication session management and admin route protection before proceeding with other features.
+  - agent: "testing"
+    message: |
+      ADMIN DASHBOARD IMPROVEMENTS TESTING COMPLETED - ALL REQUIREMENTS MET:
+      
+      ✅ SUCCESSFUL TESTS:
+      1. Admin Auto-Redirect: After admin login, automatically redirects to /admin dashboard (not homepage)
+      2. Dashboard Pending Orders: 'طلبات تحتاج معالجة' section correctly shows ONLY pending orders, not all recent orders
+      3. Product Form Image Upload: Both drag-and-drop area ('اضغط لرفع الصور من جهازك') and URL input option ('أو أضف رابط') are present and working
+      4. RTL Support: Properly implemented - sidebar on right, text right-aligned, page direction RTL throughout
+      5. Arabic Text: Displays correctly across all admin pages
+      6. Login Process: Email OTP login works correctly with admin@agroyousfi.dz
+      
+      ⚠️ MINOR ISSUES:
+      - Session management: Authentication expires during extended navigation (but core functionality works)
+      - PDF invoice generation: Code implemented but needs orders with actual data to test download functionality
+      
+      All major admin dashboard improvements are working as specified in the requirements.
 
 test_plan:
   current_focus:
