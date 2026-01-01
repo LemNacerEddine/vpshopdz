@@ -54,7 +54,30 @@ export const ProductDetailPage = () => {
     if (user) {
       checkWishlistStatus();
     }
+    // Add to browsing history
+    addToBrowsingHistory();
   }, [productId, user]);
+
+  const addToBrowsingHistory = async () => {
+    try {
+      let browserId = localStorage.getItem('browser_id');
+      if (!browserId) {
+        browserId = 'browser_' + Math.random().toString(36).substring(2, 15);
+        localStorage.setItem('browser_id', browserId);
+      }
+      
+      await axios.post(
+        `${API}/browsing-history/${productId}`,
+        {},
+        { 
+          withCredentials: true,
+          headers: { 'X-Browser-ID': browserId }
+        }
+      );
+    } catch (error) {
+      console.error('Error adding to browsing history:', error);
+    }
+  };
 
   const checkWishlistStatus = async () => {
     try {
