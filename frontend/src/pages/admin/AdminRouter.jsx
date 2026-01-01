@@ -6,6 +6,7 @@ import ProductsPage from '@/pages/admin/ProductsPage';
 import ProductForm from '@/pages/admin/ProductForm';
 import OrdersPage from '@/pages/admin/OrdersPage';
 import CustomersPage from '@/pages/admin/CustomersPage';
+import CategoriesPage from '@/pages/admin/CategoriesPage';
 import SettingsPage from '@/pages/admin/SettingsPage';
 import { useAuth } from '@/contexts/AuthContext';
 
