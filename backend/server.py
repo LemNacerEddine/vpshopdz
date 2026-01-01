@@ -844,6 +844,123 @@ async def get_admin_stats(user: User = Depends(require_admin)):
         "total_revenue": total_revenue
     }
 
+# ============ WISHLIST ENDPOINTS ============
+
+@api_router.get("/wishlist")
+async def get_wishlist(user: User = Depends(require_auth)):
+    """Get user wishlist with product details"""
+    wishlist_items = await db.wishlist.find({"user_id": user.user_id}, {"_id": 0}).to_list(100)
+    
+    # Fetch product details for each item
+    for item in wishlist_items:
+        product = await db.products.find_one({"product_id": item["product_id"]}, {"_id": 0})
+        if product:
+            if isinstance(product.get("created_at"), str):
+                product["created_at"] = datetime.fromisoformat(product["created_at"])
+            item["product"] = product
+    
+    return wishlist_items
+
+@api_router.post("/wishlist/{product_id}")
+async def add_to_wishlist(product_id: str, user: User = Depends(require_auth)):
+    """Add product to wishlist"""
+    # Check if product exists
+    product = await db.products.find_one({"product_id": product_id})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    # Check if already in wishlist
+    existing = await db.wishlist.find_one({"user_id": user.user_id, "product_id": product_id})
+    if existing:
+        return {"message": "Already in wishlist"}
+    
+    await db.wishlist.insert_one({
+        "user_id": user.user_id,
+        "product_id": product_id,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {"message": "Added to wishlist"}
+
+@api_router.delete("/wishlist/{product_id}")
+async def remove_from_wishlist(product_id: str, user: User = Depends(require_auth)):
+    """Remove product from wishlist"""
+    result = await db.wishlist.delete_one({"user_id": user.user_id, "product_id": product_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Item not in wishlist")
+    return {"message": "Removed from wishlist"}
+
+# ============ ADDRESS ENDPOINTS ============
+
+@api_router.get("/addresses")
+async def get_addresses(user: User = Depends(require_auth)):
+    """Get user saved addresses"""
+    addresses = await db.addresses.find({"user_id": user.user_id}, {"_id": 0}).to_list(20)
+    return addresses
+
+@api_router.post("/addresses")
+async def add_address(request: Request, user: User = Depends(require_auth)):
+    """Add new address"""
+    body = await request.json()
+    
+    address_id = f"addr_{uuid.uuid4().hex[:8]}"
+    address = {
+        "address_id": address_id,
+        "user_id": user.user_id,
+        "title": body.get("title", ""),
+        "phone": body.get("phone", ""),
+        "address": body.get("address", ""),
+        "wilaya": body.get("wilaya", ""),
+        "isDefault": body.get("isDefault", False),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # If this is set as default, unset other defaults
+    if address["isDefault"]:
+        await db.addresses.update_many(
+            {"user_id": user.user_id},
+            {"$set": {"isDefault": False}}
+        )
+    
+    await db.addresses.insert_one(address)
+    
+    return {"message": "Address added", "address_id": address_id}
+
+@api_router.put("/addresses/{address_id}")
+async def update_address(address_id: str, request: Request, user: User = Depends(require_auth)):
+    """Update address"""
+    body = await request.json()
+    
+    update_data = {}
+    for field in ["title", "phone", "address", "wilaya", "isDefault"]:
+        if field in body:
+            update_data[field] = body[field]
+    
+    # If setting as default, unset other defaults
+    if update_data.get("isDefault"):
+        await db.addresses.update_many(
+            {"user_id": user.user_id, "address_id": {"$ne": address_id}},
+            {"$set": {"isDefault": False}}
+        )
+    
+    result = await db.addresses.update_one(
+        {"address_id": address_id, "user_id": user.user_id},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Address not found")
+    
+    return {"message": "Address updated"}
+
+@api_router.delete("/addresses/{address_id}")
+async def delete_address(address_id: str, user: User = Depends(require_auth)):
+    """Delete address"""
+    result = await db.addresses.delete_one({"address_id": address_id, "user_id": user.user_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Address not found")
+    return {"message": "Address deleted"}
+
 # ============ SEED DATA ============
 
 @api_router.post("/seed")
