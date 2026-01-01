@@ -125,11 +125,14 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Implemented /api/auth/phone/send-otp - sends 6-digit OTP code"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: Phone OTP send API working correctly. Returns demo_code for testing. API responds with 200 status."
 
   - task: "Phone OTP Verify API"
     implemented: true
@@ -137,11 +140,14 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Implemented /api/auth/phone/verify-otp - returns new_user or existing_user status"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: Phone OTP verification working correctly. Returns appropriate status (new_user/existing_user) and session tokens."
 
   - task: "Phone Registration API"
     implemented: true
@@ -149,23 +155,29 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Implemented /api/auth/phone/register - creates user with phone, name, wilaya, address"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: Phone registration API working correctly. Creates user with Arabic name, wilaya selection, and address. Returns session token. Fixed Pydantic validation issue with None email field."
 
   - task: "Link Email API"
     implemented: true
-    working: NA
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: NA
         agent: "main"
         comment: "Implemented /api/auth/link-email - allows phone users to link email"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: Link email API working correctly. Allows phone-registered users to link email to their account. Validates email uniqueness."
 
   - task: "Wilayas API"
     implemented: true
@@ -173,11 +185,14 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Implemented /api/wilayas - returns 58 Algerian wilayas"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: Wilayas API working correctly. Returns all 58 Algerian wilayas with Arabic and French names."
 
   - task: "Product Search API"
     implemented: true
@@ -185,11 +200,14 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Search working - tested with Arabic and English queries"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: Product search working correctly with both Arabic (بذور) and English (wheat) queries. Returns relevant products."
 
   - task: "Wishlist APIs"
     implemented: true
@@ -197,11 +215,14 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "GET/POST/DELETE wishlist endpoints working"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: All wishlist APIs working correctly. POST /api/wishlist/{product_id}, GET /api/wishlist, DELETE /api/wishlist/{product_id}. Requires authentication."
 
   - task: "Addresses APIs"
     implemented: true
@@ -209,11 +230,14 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "GET/POST/PUT/DELETE addresses endpoints working"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: All address APIs working correctly. POST /api/addresses, GET /api/addresses, DELETE /api/addresses/{address_id}. Supports Arabic addresses and wilaya selection. Requires authentication."
 
 frontend:
   - task: "Phone Login UI"
