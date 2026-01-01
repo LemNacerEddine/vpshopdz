@@ -47,10 +47,12 @@ export const HomePage = () => {
         
         const [catRes, prodRes] = await Promise.all([
           axios.get(`${API}/categories`),
-          axios.get(`${API}/products?featured=true&limit=8`)
+          axios.get(`${API}/products?limit=8`)  // Get all products for home page
         ]);
         setCategories(catRes.data);
-        setFeaturedProducts(prodRes.data);
+        // Filter featured products client-side or show all if none are featured
+        const featured = prodRes.data.filter(p => p.featured);
+        setFeaturedProducts(featured.length > 0 ? featured : prodRes.data.slice(0, 8));
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
