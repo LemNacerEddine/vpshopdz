@@ -770,6 +770,51 @@ async def delete_product(product_id: str, user: User = Depends(require_admin)):
         raise HTTPException(status_code=404, detail="Product not found")
     return {"message": "Product deleted"}
 
+# ============ IMAGE UPLOAD ENDPOINT ============
+
+# Create uploads directory
+UPLOAD_DIR = ROOT_DIR / "uploads"
+UPLOAD_DIR.mkdir(exist_ok=True)
+
+@api_router.post("/upload/image")
+async def upload_image(file: UploadFile = File(...), user: User = Depends(require_admin)):
+    """Upload an image file (admin only)"""
+    # Validate file type
+    allowed_types = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Invalid file type. Allowed: JPEG, PNG, WebP, GIF")
+    
+    # Validate file size (max 5MB)
+    contents = await file.read()
+    if len(contents) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large. Max size: 5MB")
+    
+    # Generate unique filename
+    ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
+    filename = f"{uuid.uuid4().hex}.{ext}"
+    filepath = UPLOAD_DIR / filename
+    
+    # Save file
+    with open(filepath, "wb") as f:
+        f.write(contents)
+    
+    # Return the URL
+    # In production, this would be a CDN URL
+    image_url = f"/api/uploads/{filename}"
+    
+    return {"url": image_url, "filename": filename}
+
+# Serve uploaded images
+from fastapi.responses import FileResponse
+
+@api_router.get("/uploads/{filename}")
+async def get_uploaded_image(filename: str):
+    """Serve uploaded images"""
+    filepath = UPLOAD_DIR / filename
+    if not filepath.exists():
+        raise HTTPException(status_code=404, detail="Image not found")
+    return FileResponse(filepath)
+
 # ============ CART ENDPOINTS ============
 
 @api_router.get("/cart")
