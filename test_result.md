@@ -294,97 +294,22 @@ agent_communication:
   - agent: "main"
     message: |
       New features implemented:
-      1. Phone-based registration with OTP verification
-      2. Registration form with name, wilaya (dropdown with 58 wilayas), address
-      3. Link email feature for phone-registered users
-      4. Search functionality - navbar search redirects to products page with search filter
-      5. Wishlist button on product detail page
-      6. Profile page enhancements (wishlist tab, addresses tab)
+      1. Product Gallery like AliExpress:
+         - Multiple images with thumbnails
+         - Video support with play/pause
+         - Zoom on hover
+         - Fullscreen lightbox
+         - Image counter
+      
+      2. Checkout page is complete with:
+         - Customer info form
+         - Wilaya dropdown (58 wilayas)
+         - COD payment method
+         - Order summary
       
       Please test:
-      - Full phone registration flow (send OTP -> verify -> register)
-      - Search from navbar and products page
-      - Add/remove from wishlist
-      - Profile page tabs (orders, wishlist, addresses)
-      - Google OAuth flow
-      
-      Test credentials:
-      - Use any phone number for testing (demo code shown in response)
-      - For existing features, use email OTP flow (demo code shown in response)
-  - agent: "testing"
-    message: |
-      ✅ BACKEND TESTING COMPLETE - ALL TESTS PASSED (36/36)
-      
-      TESTED SUCCESSFULLY:
-      📱 Phone Authentication Flow:
-      - Send OTP to phone ✅
-      - Verify OTP (new_user/existing_user) ✅
-      - Complete registration with Arabic name, wilaya, address ✅
-      - Link email to phone account ✅
-      
-      🔍 Search APIs:
-      - Arabic search (بذور) ✅
-      - English search (wheat) ✅
-      - Wilayas API (58 Algerian wilayas) ✅
-      
-      ❤️ Wishlist APIs (authenticated):
-      - Add to wishlist ✅
-      - Get wishlist ✅
-      - Remove from wishlist ✅
-      
-      🏠 Address APIs (authenticated):
-      - Add address with Arabic text ✅
-      - Get addresses ✅
-      - Delete address ✅
-      
-      🛒 Cart & Orders:
-      - Cart operations ✅
-      - Order creation ✅
-      
-      👑 Admin Operations:
-      - Admin authentication ✅
-      - Admin stats ✅
-      - Admin orders ✅
-      
-      FIXED ISSUES:
-      - Pydantic validation error with None email field in User model
-      
-      All backend APIs are working correctly with proper authentication, Arabic text support, and error handling.
-  - agent: "testing"
-    message: |
-      ✅ FRONTEND TESTING COMPLETE - ALL MAJOR FEATURES WORKING
-      
-      TESTED SUCCESSFULLY:
-      🏠 Homepage & Navigation:
-      - Homepage loads with proper Arabic RTL layout ✅
-      - Navigation between pages working ✅
-      - Search bar visible and functional ✅
-      - Category mega menu with 6 categories ✅
-      
-      📱 Phone Registration Flow:
-      - Phone/Email tabs properly implemented ✅
-      - Registration form with name, wilaya, address fields ✅
-      - Google OAuth button visible and functional ✅
-      
-      🔍 Search Functionality:
-      - Search accepts Arabic input (بذور) ✅
-      - Properly navigates to /products?search= with URL encoding ✅
-      - Products page reads search parameters correctly ✅
-      
-      🛍️ Product Features:
-      - Product detail page loads correctly ✅
-      - Wishlist heart button visible and positioned correctly ✅
-      - Add to cart button functional ✅
-      - Product features displayed (توصيل سريع, ضمان الجودة, إرجاع سهل) ✅
-      
-      👤 Profile Page:
-      - 4 tabs structure confirmed (المعلومات الشخصية, طلباتي, قائمة الأمنيات, عناويني) ✅
-      - Wishlist and addresses tabs implemented ✅
-      - Link email feature available for phone users ✅
-      
-      🎨 UI/UX:
-      - Proper Arabic RTL layout throughout ✅
-      - Responsive design working ✅
-      - Professional styling with shadcn components ✅
-      
-      All frontend features are working correctly. The AgroYousfi e-commerce platform is ready for production use.
+      - Product gallery on /products/prod_wheat01 (has 4 images + 1 video)
+      - Click thumbnails to switch images
+      - Hover to zoom
+      - Click to open lightbox
+      - Cart -> Checkout flow
