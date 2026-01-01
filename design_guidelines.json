@@ -1,0 +1,109 @@
+{
+  "brand_identity": {
+    "name": "AgroYousfi",
+    "tagline": "Harvesting the Future of Algeria",
+    "description": "A fusion of traditional Algerian agriculture and modern e-commerce efficiency. The design should feel like 'Digital Clay'—grounded, organic, yet precise.",
+    "emotional_tone": "Trust, Growth, Abundance, Modernity",
+    "archetype": "Organic & Earthy (Archetype 1) with a Swiss Utility twist for data",
+    "logo_url": "https://customer-assets.emergentagent.com/job_cb33075f-a467-40a3-8ccf-6a7d58e2dd7b/artifacts/9ov58a7g_548325177_122096850867034427_2184721735778021830_n.jpg"
+  },
+  "typography": {
+    "primary_font": "Manrope",
+    "secondary_font": "Tajawal",
+    "font_import_url": "https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;800&family=Tajawal:wght@300;400;500;700;900&display=swap",
+    "usage_rules": {
+      "headings": "Tajawal (Arabic) / Manrope (English) - Weight 700/800. Tight tracking.",
+      "body": "Tajawal (Arabic) / Manrope (English) - Weight 400. Relaxed leading.",
+      "ui_elements": "Manrope - Weight 500/600. Uppercase for labels."
+    }
+  },
+  "colors": {
+    "palette": {
+      "primary": "#1A4D2E",
+      "primary_foreground": "#F4F1DE",
+      "secondary": "#E07A5F",
+      "secondary_foreground": "#FFFFFF",
+      "accent": "#F2CC8F",
+      "accent_foreground": "#1A4D2E",
+      "background": "#F4F1DE",
+      "foreground": "#1A4D2E",
+      "card": "#FFFFFF",
+      "card_foreground": "#1A4D2E",
+      "muted": "#EAE7D6",
+      "muted_foreground": "#5C6B5F",
+      "border": "#D6D1C0",
+      "input": "#FFFFFF",
+      "ring": "#E07A5F"
+    },
+    "gradients": {
+      "hero_overlay": "linear-gradient(180deg, rgba(26, 77, 46, 0.00) 0%, rgba(26, 77, 46, 0.80) 100%)",
+      "subtle_glow": "radial-gradient(circle at center, rgba(242, 204, 143, 0.2) 0%, rgba(244, 241, 222, 0) 70%)"
+    },
+    "dark_mode_palette": {
+      "background": "#0D1F12",
+      "foreground": "#F4F1DE",
+      "card": "#142919",
+      "border": "#2A4530"
+    }
+  },
+  "layout": {
+    "direction": "rtl",
+    "container_width": "max-w-7xl",
+    "spacing_scale": "Generous (2x standard). Use p-8, p-12 for sections.",
+    "grid_system": "Bento Grid (Asymmetric). Avoid equal 3-column grids.",
+    "border_radius": "rounded-xl (12px) for cards, rounded-full for buttons"
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 py-6 shadow-lg hover:shadow-xl transition-all duration-300",
+      "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full px-8 py-6",
+      "outline": "border-2 border-primary text-primary hover:bg-primary/10 rounded-full px-8 py-6"
+    },
+    "cards": {
+      "product": "bg-card border border-border/50 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 rounded-2xl overflow-hidden group",
+      "feature": "bg-muted/50 border-none hover:bg-muted transition-colors rounded-3xl p-8"
+    },
+    "inputs": {
+      "style": "bg-input border-2 border-border focus:border-primary rounded-lg h-12 px-4"
+    }
+  },
+  "visual_enhancers": {
+    "textures": "Use subtle grain overlay on the main background to give a 'paper' feel.",
+    "shadows": "Soft, colored shadows. shadow-[0_10px_40px_-10px_rgba(26,77,46,0.1)]",
+    "icons": "Lucide React. Use stroke-width={1.5} for a refined look."
+  },
+  "image_urls": {
+    "hero": [
+      "https://images.pexels.com/photos/5529765/pexels-photo-5529765.jpeg",
+      "https://images.pexels.com/photos/7457521/pexels-photo-7457521.jpeg"
+    ],
+    "products": [
+      "https://images.pexels.com/photos/2290074/pexels-photo-2290074.jpeg",
+      "https://images.pexels.com/photos/176169/pexels-photo-176169.jpeg",
+      "https://images.pexels.com/photos/6041/nature-grain-moving-cereal.jpg",
+      "https://images.pexels.com/photos/35382177/pexels-photo-35382177.jpeg"
+    ],
+    "tools": [
+      "https://images.pexels.com/photos/4856725/pexels-photo-4856725.jpeg",
+      "https://images.pexels.com/photos/12495821/pexels-photo-12495821.jpeg"
+    ]
+  },
+  "instructions_to_main_agent": [
+    "CRITICAL: Implement 'dir=rtl' on the root HTML element for Arabic support.",
+    "CRITICAL: Use the 'Tajawal' font for all Arabic text. It is essential for legibility.",
+    "Do not use standard Shadcn 'slate' colors. Override them with the 'Warm Beige' and 'Deep Green' palette provided.",
+    "For the Hero section, use a 'Split Layout' or 'Asymmetric Grid' rather than a centered text over image.",
+    "Ensure all prices are displayed clearly in DZD (e.g., '1,500 د.ج').",
+    "Use the 'Bento Grid' layout for the Categories section.",
+    "Add 'data-testid' to all interactive elements.",
+    "Use 'sonner' for toast notifications.",
+    "For the Admin Dashboard, switch to a denser 'Swiss Utility' layout but keep the brand colors."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Avoid 'AI Slop' - no generic centered layouts.",
+    "Create depth through z-index and layered elements.",
+    "Use glassmorphism sparingly (only for sticky headers/overlays).",
+    "Micro-animations on hover are mandatory.",
+    "Never use 'Lorem Ipsum'. Use realistic agricultural placeholder text (e.g., 'Premium Wheat Seeds', 'Organic Fertilizer')."
+  ]
+}
