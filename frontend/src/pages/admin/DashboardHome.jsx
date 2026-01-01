@@ -138,7 +138,7 @@ const DashboardHome = () => {
       totalProducts: 'Total Products',
       totalCustomers: 'Total Customers',
       pendingOrders: 'Pending Orders',
-      recentOrders: 'Recent Orders',
+      recentOrders: 'Orders to Process',
       viewAll: 'View All',
       orderStatus: 'Order Status',
       salesChart: 'Sales Chart',
