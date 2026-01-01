@@ -144,7 +144,13 @@ export const LoginPage = () => {
         // Existing user, logged in
         await checkAuth();
         toast.success(t('auth.welcome'));
-        navigate(from, { replace: true });
+        
+        // Redirect admin to dashboard
+        if (response.data.user?.role === 'admin') {
+          navigate('/admin', { replace: true });
+        } else {
+          navigate(from, { replace: true });
+        }
       }
     } catch (error) {
       toast.error(error.response?.data?.detail || t('common.error'));
