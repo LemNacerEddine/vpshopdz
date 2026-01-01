@@ -196,31 +196,15 @@ export const ProductDetailPage = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-2 gap-12">
-          {/* Images */}
-          <div className="space-y-4">
-            <div className="aspect-square rounded-3xl overflow-hidden bg-muted">
-              <img
-                src={product.images?.[selectedImage] || 'https://via.placeholder.com/600'}
-                alt={name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            {product.images?.length > 1 && (
-              <div className="flex gap-4 overflow-x-auto pb-2">
-                {product.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-colors ${
-                      selectedImage === index ? 'border-primary' : 'border-transparent'
-                    }`}
-                  >
-                    <img src={image} alt="" className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
+          {/* Images/Video Gallery - AliExpress Style */}
+          <div className="sticky top-24">
+            <ProductGallery 
+              images={product.images || []}
+              video={product.video || null}
+              productName={name}
+              isRTL={isRTL}
+            />
           </div>
 
           {/* Details */}
