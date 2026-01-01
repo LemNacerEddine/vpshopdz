@@ -223,6 +223,47 @@ const ProductForm = () => {
     }
   };
 
+  const handleFileUpload = async (event) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    
+    try {
+      for (const file of files) {
+        const formDataFile = new FormData();
+        formDataFile.append('file', file);
+        
+        const response = await axios.post(`${API}/upload/image`, formDataFile, {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        
+        if (response.data?.url) {
+          // Convert relative URL to full URL
+          const fullUrl = response.data.url.startsWith('http') 
+            ? response.data.url 
+            : `${process.env.REACT_APP_BACKEND_URL}${response.data.url}`;
+          
+          setFormData(prev => ({
+            ...prev,
+            images: [...prev.images, fullUrl]
+          }));
+        }
+      }
+      toast.success(language === 'ar' ? 'تم رفع الصورة بنجاح' : 'Image uploaded successfully');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error(language === 'ar' ? 'خطأ في رفع الصورة' : 'Error uploading image');
+    } finally {
+      setUploading(false);
+      // Reset file input
+      event.target.value = '';
+    }
+  };
+
   const removeImage = (index) => {
     setFormData(prev => ({
       ...prev,
