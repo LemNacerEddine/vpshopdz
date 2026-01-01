@@ -161,6 +161,19 @@ export const ProductGallery = ({ images = [], video = null, productName = '', is
           </>
         )}
 
+        {/* Fullscreen Button */}
+        <Button
+          variant="secondary"
+          size="icon"
+          className="absolute top-4 end-4 h-10 w-10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+          onClick={(e) => {
+            e.stopPropagation();
+            openLightbox(selectedIndex);
+          }}
+        >
+          <Maximize2 className="h-5 w-5" />
+        </Button>
+
         {/* Image Counter */}
         <div className="absolute bottom-4 start-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
           {selectedIndex + 1} / {media.length}
