@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
-import { useLanguage } from '../contexts/LanguageContext';
-import { ProductCard } from '../components/products/ProductCard';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Skeleton } from '../components/ui/skeleton';
-import { Badge } from '../components/ui/badge';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { ProductCard } from '@/components/products/ProductCard';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../components/ui/select';
+} from '@/components/ui/select';
 import { Search, SlidersHorizontal, X, Leaf } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;

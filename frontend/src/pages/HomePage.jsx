@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { useLanguage } from '../../contexts/LanguageContext';
-import { useCart } from '../../contexts/CartContext';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { Skeleton } from '../ui/skeleton';
-import { ProductCard } from './ProductCard';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useCart } from '@/contexts/CartContext';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ProductCard } from '@/components/products/ProductCard';
 import { 
   ChevronRight, 
   ChevronLeft,

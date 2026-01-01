@@ -1,7 +1,7 @@
 import React from 'react';
-import { Navbar } from './Navbar';
-import { Footer } from './Footer';
-import { Toaster } from '../ui/sonner';
+import { Navbar } from '@/components/layout/Navbar';
+import { Footer } from '@/components/layout/Footer';
+import { Toaster } from '@/components/ui/sonner';
 
 export const Layout = ({ children }) => {
   return (
