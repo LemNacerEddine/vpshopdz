@@ -104,7 +104,7 @@ export const Navbar = () => {
             {/* Language Selector */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="hidden sm:flex" data-testid="language-selector">
+                <Button variant="ghost" size="icon" data-testid="language-selector">
                   <Globe className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
