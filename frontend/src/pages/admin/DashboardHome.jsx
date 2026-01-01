@@ -198,6 +198,23 @@ const DashboardHome = () => {
     }
   };
 
+  // Confirm order - change status to confirmed
+  const handleConfirmOrder = async (orderId) => {
+    try {
+      await axios.put(
+        `${API}/admin/orders/${orderId}/status`,
+        { status: 'confirmed' },
+        { withCredentials: true }
+      );
+      // Remove from list
+      setRecentOrders(prev => prev.filter(o => o.order_id !== orderId));
+      toast.success(language === 'ar' ? 'تم تأكيد الطلب بنجاح' : 'Order confirmed successfully');
+    } catch (error) {
+      console.error('Error confirming order:', error);
+      toast.error(language === 'ar' ? 'خطأ في تأكيد الطلب' : 'Error confirming order');
+    }
+  };
+
   // Generate mock sales data for chart
   const generateSalesData = () => {
     const days = period === 'today' ? 24 : period === 'week' ? 7 : 30;
