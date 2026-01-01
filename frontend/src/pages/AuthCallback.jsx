@@ -25,10 +25,15 @@ export const AuthCallback = () => {
       }
 
       try {
-        await processGoogleSession(sessionId);
+        const user = await processGoogleSession(sessionId);
         // Clear the hash from URL
         window.history.replaceState(null, '', window.location.pathname);
-        navigate('/', { replace: true });
+        // Redirect admin to dashboard, others to homepage
+        if (user?.role === 'admin') {
+          navigate('/admin', { replace: true });
+        } else {
+          navigate('/', { replace: true });
+        }
       } catch (error) {
         console.error('Auth error:', error);
         navigate('/login');
