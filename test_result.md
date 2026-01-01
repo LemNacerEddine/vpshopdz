@@ -26,6 +26,36 @@ agent_communication:
       3. Orders page - list, status update, PDF invoice
       4. Settings page - tabs
       5. RTL Arabic support throughout
+  - agent: "testing"
+    message: |
+      ADMIN DASHBOARD TESTING COMPLETED - CRITICAL AUTHENTICATION ISSUES FOUND:
+      
+      CRITICAL PROBLEMS:
+      1. Authentication session expires quickly - users get logged out when navigating between admin pages
+      2. Admin route protection not working properly - redirects to login page unexpectedly
+      3. Orders and Settings pages not loading correctly after navigation
+      
+      WORKING FEATURES:
+      ✓ Login process with email OTP works correctly
+      ✓ Dashboard home page displays stats cards (Total Revenue, Orders, Products, Customers)
+      ✓ Sales chart (Area chart) displays correctly with mock data
+      ✓ Order status pie chart displays correctly
+      ✓ Products page shows table with search functionality
+      ✓ RTL layout is properly implemented
+      ✓ Arabic text displays correctly throughout
+      ✓ Sidebar navigation is visible and styled correctly
+      
+      FAILED TESTS:
+      ❌ Session management - users get logged out during navigation
+      ❌ Orders page - not accessible due to auth issues
+      ❌ Settings page - not accessible due to auth issues
+      ❌ Action buttons (view, edit, delete) not found in products table
+      ❌ Category filter dropdown not working
+      ❌ Order details dialog functionality
+      ❌ PDF invoice generation
+      ❌ Status update functionality
+      
+      RECOMMENDATION: Fix authentication session management and admin route protection before proceeding with other features.
 
 test_plan:
   current_focus:
