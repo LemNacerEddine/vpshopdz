@@ -36,6 +36,12 @@ test_plan:
 frontend:
   - task: "Admin Dashboard"
     implemented: true
-    working: true
-    needs_retesting: true
+    working: false
+    needs_retesting: false
     priority: "high"
+    stuck_count: 0
+    file: "/app/frontend/src/pages/admin/"
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "CRITICAL ISSUES FOUND: 1) Authentication session expires quickly - user gets logged out when navigating between admin pages. 2) Admin route protection may not be working properly. 3) Some admin pages (orders, settings) are not loading correctly after navigation. WORKING FEATURES: Dashboard home page displays correctly with stats cards, sales chart, and pie chart. Products page shows table with search functionality. RTL layout is properly implemented. Arabic text displays correctly. Login process with email OTP works."
