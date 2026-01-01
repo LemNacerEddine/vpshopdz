@@ -84,7 +84,7 @@ export const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 w-full glass border-b border-border/40">
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center gap-3">
+        <div className="flex h-16 items-center gap-2">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 shrink-0" data-testid="logo-link">
             <img 
@@ -92,23 +92,23 @@ export const Navbar = () => {
               alt="AgroYousfi" 
               className="h-10 w-10 rounded-full object-cover shadow-md"
             />
-            <span className="hidden md:block font-bold text-lg text-primary">
+            <span className="hidden xl:block font-bold text-lg text-primary">
               AgroYousfi
             </span>
           </Link>
 
           {/* Desktop Navigation - Compact */}
-          <nav className="hidden lg:flex items-center gap-1 shrink-0">
+          <nav className="hidden lg:flex items-center shrink-0">
             <Link
               to="/"
-              className="px-3 py-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium rounded-lg hover:bg-muted"
+              className="px-3 py-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium rounded-lg hover:bg-muted whitespace-nowrap"
               data-testid="nav-home"
             >
               {t('nav.home')}
             </Link>
             <Link
               to="/products"
-              className="px-3 py-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium rounded-lg hover:bg-muted"
+              className="px-3 py-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium rounded-lg hover:bg-muted whitespace-nowrap"
               data-testid="nav-products"
             >
               {t('nav.products')}
@@ -121,7 +121,7 @@ export const Navbar = () => {
               onMouseLeave={() => setShowCategoriesMenu(false)}
             >
               <button
-                className="flex items-center gap-1 px-3 py-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium rounded-lg hover:bg-muted"
+                className="flex items-center gap-1 px-3 py-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium rounded-lg hover:bg-muted whitespace-nowrap"
                 data-testid="nav-categories"
                 onClick={() => setShowCategoriesMenu(!showCategoriesMenu)}
               >
@@ -190,21 +190,20 @@ export const Navbar = () => {
           </nav>
 
           {/* Search Bar - Takes all remaining space */}
-          <form onSubmit={handleSearch} className="hidden md:flex flex-1 mx-2">
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 min-w-0">
             <div className="relative w-full">
-              <Search className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground`} />
+              <Search className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none`} />
               <Input
                 type="search"
-                placeholder={t('nav.search')}
+                placeholder={language === 'ar' ? 'ابحث عن منتجات...' : language === 'fr' ? 'Rechercher des produits...' : 'Search for products...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`${isRTL ? 'pr-12 pl-24' : 'pl-12 pr-24'} h-11 w-full bg-muted/50 border-2 border-transparent focus:border-primary focus:bg-background rounded-full text-base`}
+                className={`${isRTL ? 'pr-12 pl-28' : 'pl-12 pr-28'} h-11 w-full bg-muted/50 border-2 border-transparent focus:border-primary focus:bg-background rounded-full text-base`}
                 data-testid="search-input"
               />
               <Button 
                 type="submit" 
-                size="sm"
-                className={`absolute ${isRTL ? 'left-1.5' : 'right-1.5'} top-1/2 -translate-y-1/2 rounded-full h-8 px-5`}
+                className={`absolute ${isRTL ? 'left-1' : 'right-1'} top-1/2 -translate-y-1/2 rounded-full h-9 px-6`}
               >
                 {language === 'ar' ? 'بحث' : language === 'fr' ? 'Chercher' : 'Search'}
               </Button>
