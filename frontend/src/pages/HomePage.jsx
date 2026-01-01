@@ -19,7 +19,9 @@ import {
   Truck,
   Headphones,
   BadgePercent,
-  Star
+  Star,
+  Sparkles,
+  Clock
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -37,6 +39,7 @@ export const HomePage = () => {
   const { t, language, isRTL, formatPrice } = useLanguage();
   const [categories, setCategories] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [newArrivals, setNewArrivals] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,12 +50,18 @@ export const HomePage = () => {
         
         const [catRes, prodRes] = await Promise.all([
           axios.get(`${API}/categories`),
-          axios.get(`${API}/products?limit=8`)  // Get all products for home page
+          axios.get(`${API}/products?limit=20`)
         ]);
         setCategories(catRes.data);
-        // Filter featured products client-side or show all if none are featured
-        const featured = prodRes.data.filter(p => p.featured);
-        setFeaturedProducts(featured.length > 0 ? featured : prodRes.data.slice(0, 8));
+        
+        const allProducts = prodRes.data;
+        // Featured products (with discount or marked as featured)
+        const featured = allProducts.filter(p => p.featured || p.old_price);
+        setFeaturedProducts(featured.length > 0 ? featured.slice(0, 4) : allProducts.slice(0, 4));
+        
+        // New arrivals (latest products - different from featured)
+        const arrivals = allProducts.filter(p => !p.featured && !p.old_price);
+        setNewArrivals(arrivals.length > 0 ? arrivals.slice(0, 4) : allProducts.slice(4, 8));
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -90,6 +99,30 @@ export const HomePage = () => {
       color: 'bg-accent/20 text-accent-foreground'
     }
   ];
+
+  const newArrivalsTitle = {
+    ar: 'وصل حديثاً',
+    fr: 'Nouveautés',
+    en: 'New Arrivals'
+  };
+
+  const newArrivalsSubtitle = {
+    ar: 'أحدث المنتجات المضافة لمتجرنا',
+    fr: 'Les derniers produits ajoutés à notre boutique',
+    en: 'Latest products added to our store'
+  };
+
+  const offersTitle = {
+    ar: 'عروض مميزة',
+    fr: 'Offres Spéciales',
+    en: 'Special Offers'
+  };
+
+  const offersSubtitle = {
+    ar: 'خصومات حصرية على منتجات مختارة',
+    fr: 'Remises exclusives sur des produits sélectionnés',
+    en: 'Exclusive discounts on selected products'
+  };
 
   return (
     <div className="min-h-screen" data-testid="home-page">
@@ -209,17 +242,22 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* Featured Products */}
+      {/* New Arrivals Section */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-10">
-            <div>
-              <h2 className="text-3xl font-bold text-foreground mb-2">
-                {t('hero.featured')}
-              </h2>
-              <p className="text-muted-foreground">
-                {language === 'ar' ? 'أفضل منتجاتنا المختارة لك' : language === 'fr' ? 'Nos meilleurs produits sélectionnés pour vous' : 'Our best products selected for you'}
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-2xl bg-secondary/10 flex items-center justify-center">
+                <Sparkles className="h-6 w-6 text-secondary" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-foreground">
+                  {newArrivalsTitle[language]}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {newArrivalsSubtitle[language]}
+                </p>
+              </div>
             </div>
             <Link to="/products" className="hidden sm:block">
               <Button variant="outline" className="rounded-full">
@@ -230,13 +268,54 @@ export const HomePage = () => {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {[...Array(8)].map((_, i) => (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => (
                 <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {newArrivals.map((product) => (
+                <ProductCard key={product.product_id} product={product} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Special Offers / Featured Products */}
+      <section className="py-16 bg-gradient-to-b from-accent/5 to-background">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-2xl bg-accent/20 flex items-center justify-center">
+                <BadgePercent className="h-6 w-6 text-accent-foreground" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-foreground">
+                  {offersTitle[language]}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {offersSubtitle[language]}
+                </p>
+              </div>
+            </div>
+            <Link to="/products" className="hidden sm:block">
+              <Button variant="outline" className="rounded-full">
+                {t('categories.viewAll')}
+                <ChevronIcon className="h-4 w-4 ms-1" />
+              </Button>
+            </Link>
+          </div>
+
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {featuredProducts.map((product) => (
                 <ProductCard key={product.product_id} product={product} />
               ))}
