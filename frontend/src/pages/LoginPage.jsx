@@ -90,9 +90,15 @@ export const LoginPage = () => {
 
     try {
       setLoading(true);
-      await verifyOTP(email, emailCode);
+      const result = await verifyOTP(email, emailCode);
       toast.success(t('auth.welcome'));
-      navigate(from, { replace: true });
+      
+      // Redirect admin to dashboard
+      if (result.user?.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
     } catch (error) {
       toast.error(error.response?.data?.detail || t('common.error'));
     } finally {
