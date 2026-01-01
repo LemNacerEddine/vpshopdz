@@ -435,9 +435,22 @@ export const ProfilePage = () => {
                         <User className="h-8 w-8 text-primary" />
                       </div>
                     )}
-                    <div>
+                    <div className="flex-1">
                       <h2 className="text-xl font-bold">{user.name}</h2>
-                      <p className="text-muted-foreground">{user.email}</p>
+                      <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+                        {user.email && (
+                          <span className="flex items-center gap-1">
+                            <Mail className="h-3 w-3" />
+                            {user.email}
+                          </span>
+                        )}
+                        {user.phone && (
+                          <span className="flex items-center gap-1" dir="ltr">
+                            <Phone className="h-3 w-3" />
+                            {user.phone}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
