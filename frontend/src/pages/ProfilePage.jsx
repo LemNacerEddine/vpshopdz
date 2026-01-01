@@ -400,9 +400,8 @@ export const ProfilePage = () => {
     cancelled: { label: language === 'ar' ? 'ملغي' : 'Cancelled', icon: XCircle, color: 'text-red-500' }
   };
 
-  // Sidebar menu items
+  // Sidebar menu items (without orders - it will be handled separately)
   const sidebarItems = [
-    { id: 'orders', icon: Package, label: text.orders, count: orders.length },
     { id: 'reviews', icon: Star, label: text.reviews, disabled: true },
     { id: 'profile', icon: User, label: text.profile },
     { id: 'wishlist', icon: Heart, label: text.wishlist, count: wishlist.length },
@@ -412,6 +411,15 @@ export const ProfilePage = () => {
     { id: 'payment', icon: CreditCard, label: text.paymentMethods, disabled: true },
     { id: 'security', icon: Shield, label: text.accountSecurity, disabled: true },
     { id: 'notifications', icon: Bell, label: text.notifications, disabled: true },
+  ];
+
+  // Order status sub-menu items
+  const orderSubItems = [
+    { id: 'all', label: text.allOrders, filter: 'all' },
+    { id: 'pending', label: text.processing, filter: 'pending' },
+    { id: 'shipped', label: text.shipped, filter: 'shipped' },
+    { id: 'delivered', label: text.delivered, filter: 'delivered' },
+    { id: 'cancelled', label: text.returns, filter: 'cancelled' },
   ];
 
   // Filter orders
