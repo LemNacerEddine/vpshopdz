@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -21,7 +21,7 @@ import {
   BadgePercent,
   Star,
   Sparkles,
-  Clock
+  ShoppingCart
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -37,9 +37,12 @@ const iconMap = {
 
 export const HomePage = () => {
   const { t, language, isRTL, formatPrice } = useLanguage();
+  const { addToCart } = useCart();
   const [categories, setCategories] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [newArrivals, setNewArrivals] = useState([]);
+  const [heroProducts, setHeroProducts] = useState([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,6 +58,11 @@ export const HomePage = () => {
         setCategories(catRes.data);
         
         const allProducts = prodRes.data;
+        
+        // Hero products (products with discounts for slider)
+        const discounted = allProducts.filter(p => p.old_price && p.old_price > p.price);
+        setHeroProducts(discounted.length > 0 ? discounted.slice(0, 4) : allProducts.filter(p => p.featured).slice(0, 4));
+        
         // Featured products (with discount or marked as featured)
         const featured = allProducts.filter(p => p.featured || p.old_price);
         setFeaturedProducts(featured.length > 0 ? featured.slice(0, 4) : allProducts.slice(0, 4));
@@ -71,6 +79,24 @@ export const HomePage = () => {
     fetchData();
   }, []);
 
+  // Auto-slide effect
+  useEffect(() => {
+    if (heroProducts.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % heroProducts.length);
+      }, 4000);
+      return () => clearInterval(interval);
+    }
+  }, [heroProducts.length]);
+
+  const nextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % heroProducts.length);
+  }, [heroProducts.length]);
+
+  const prevSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev - 1 + heroProducts.length) % heroProducts.length);
+  }, [heroProducts.length]);
+
   const ChevronIcon = isRTL ? ChevronLeft : ChevronRight;
 
   const features = [
@@ -78,25 +104,21 @@ export const HomePage = () => {
       icon: Star,
       title: t('whyUs.quality'),
       description: t('whyUs.qualityDesc'),
-      color: 'bg-accent/20 text-accent-foreground'
     },
     {
       icon: Truck,
       title: t('whyUs.delivery'),
       description: t('whyUs.deliveryDesc'),
-      color: 'bg-secondary/20 text-secondary'
     },
     {
       icon: Headphones,
       title: t('whyUs.support'),
       description: t('whyUs.supportDesc'),
-      color: 'bg-primary/20 text-primary'
     },
     {
       icon: BadgePercent,
       title: t('whyUs.prices'),
       description: t('whyUs.pricesDesc'),
-      color: 'bg-accent/20 text-accent-foreground'
     }
   ];
 
@@ -124,12 +146,14 @@ export const HomePage = () => {
     en: 'Exclusive discounts on selected products'
   };
 
+  const currentHeroProduct = heroProducts[currentSlide];
+
   return (
     <div className="min-h-screen" data-testid="home-page">
-      {/* Hero Section */}
+      {/* Hero Section with Product Slider */}
       <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 to-background">
-        <div className="container mx-auto px-4 py-16 lg:py-24">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="container mx-auto px-4 py-12 lg:py-20">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Content */}
             <div className={`space-y-6 ${isRTL ? 'lg:order-2' : ''}`}>
               <Badge variant="secondary" className="px-4 py-1.5">
@@ -159,28 +183,113 @@ export const HomePage = () => {
               </div>
             </div>
 
-            {/* Hero Image */}
+            {/* Product Slider */}
             <div className={`relative ${isRTL ? 'lg:order-1' : ''}`}>
-              <div className="relative aspect-square max-w-lg mx-auto">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-3xl rotate-6"></div>
-                <img
-                  src="https://images.pexels.com/photos/5529765/pexels-photo-5529765.jpeg"
-                  alt="Agriculture"
-                  className="relative z-10 w-full h-full object-cover rounded-3xl shadow-soft-lg"
-                />
-                {/* Floating Cards */}
-                <div className={`absolute -bottom-4 ${isRTL ? '-left-4' : '-right-4'} z-20 bg-card rounded-2xl p-4 shadow-lg`}>
-                  <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-full bg-accent/20 flex items-center justify-center">
-                      <Leaf className="h-6 w-6 text-primary" />
+              {loading ? (
+                <Skeleton className="aspect-square max-w-lg mx-auto rounded-3xl" />
+              ) : heroProducts.length > 0 && currentHeroProduct ? (
+                <div className="relative max-w-lg mx-auto">
+                  {/* Main Product Card */}
+                  <Link 
+                    to={`/products/${currentHeroProduct.product_id}`}
+                    className="block relative aspect-square rounded-3xl overflow-hidden bg-card shadow-soft-lg group"
+                  >
+                    {/* Product Image */}
+                    <img
+                      src={currentHeroProduct.images?.[0] || 'https://via.placeholder.com/500'}
+                      alt={currentHeroProduct[`name_${language}`] || currentHeroProduct.name_ar}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    
+                    {/* Overlay Gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                    
+                    {/* Discount Badge */}
+                    {currentHeroProduct.old_price && (
+                      <div className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'}`}>
+                        <Badge className="bg-secondary text-white text-lg px-3 py-1">
+                          -{Math.round((1 - currentHeroProduct.price / currentHeroProduct.old_price) * 100)}%
+                        </Badge>
+                      </div>
+                    )}
+                    
+                    {/* Product Info */}
+                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                      <h3 className="text-xl sm:text-2xl font-bold mb-2 line-clamp-2">
+                        {currentHeroProduct[`name_${language}`] || currentHeroProduct.name_ar}
+                      </h3>
+                      
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className="text-2xl sm:text-3xl font-bold text-accent">
+                          {formatPrice(currentHeroProduct.price)}
+                        </span>
+                        {currentHeroProduct.old_price && (
+                          <span className="text-lg text-white/60 line-through">
+                            {formatPrice(currentHeroProduct.old_price)}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Rating */}
+                      {currentHeroProduct.rating > 0 && (
+                        <div className="flex items-center gap-1 mb-4">
+                          <Star className="h-5 w-5 fill-accent text-accent" />
+                          <span className="font-medium">{currentHeroProduct.rating}</span>
+                          <span className="text-white/70">({currentHeroProduct.reviews_count} {t('products.reviews')})</span>
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <p className="text-2xl font-bold text-primary">500+</p>
-                      <p className="text-sm text-muted-foreground">{t('admin.totalProducts')}</p>
+                  </Link>
+                  
+                  {/* Navigation Arrows */}
+                  {heroProducts.length > 1 && (
+                    <>
+                      <button
+                        onClick={prevSlide}
+                        className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? '-right-4 sm:-right-6' : '-left-4 sm:-left-6'} h-12 w-12 rounded-full bg-card shadow-lg flex items-center justify-center hover:bg-muted transition-colors z-10`}
+                        aria-label="Previous"
+                      >
+                        {isRTL ? <ChevronRight className="h-6 w-6" /> : <ChevronLeft className="h-6 w-6" />}
+                      </button>
+                      <button
+                        onClick={nextSlide}
+                        className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? '-left-4 sm:-left-6' : '-right-4 sm:-right-6'} h-12 w-12 rounded-full bg-card shadow-lg flex items-center justify-center hover:bg-muted transition-colors z-10`}
+                        aria-label="Next"
+                      >
+                        {isRTL ? <ChevronLeft className="h-6 w-6" /> : <ChevronRight className="h-6 w-6" />}
+                      </button>
+                    </>
+                  )}
+                  
+                  {/* Dots Indicator */}
+                  {heroProducts.length > 1 && (
+                    <div className="flex justify-center gap-2 mt-4">
+                      {heroProducts.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentSlide(index)}
+                          className={`h-2 rounded-full transition-all ${
+                            index === currentSlide 
+                              ? 'w-8 bg-primary' 
+                              : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                          }`}
+                          aria-label={`Go to slide ${index + 1}`}
+                        />
+                      ))}
                     </div>
-                  </div>
+                  )}
                 </div>
-              </div>
+              ) : (
+                // Fallback if no products
+                <div className="relative aspect-square max-w-lg mx-auto">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-3xl rotate-6"></div>
+                  <img
+                    src="https://images.pexels.com/photos/5529765/pexels-photo-5529765.jpeg"
+                    alt="Agriculture"
+                    className="relative z-10 w-full h-full object-cover rounded-3xl shadow-soft-lg"
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
