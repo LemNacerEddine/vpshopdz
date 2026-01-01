@@ -1,34 +1,102 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* AgroYousfi Styles */
+
+/* Remove default App styles */
+.App {
+  min-height: 100vh;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+/* Custom styles */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.App-link {
-    color: #61dafb;
+/* RTL Support */
+[dir="rtl"] .ms-1 {
+  margin-right: 0.25rem;
+  margin-left: 0;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+[dir="rtl"] .ms-2 {
+  margin-right: 0.5rem;
+  margin-left: 0;
+}
+
+[dir="rtl"] .me-1 {
+  margin-left: 0.25rem;
+  margin-right: 0;
+}
+
+[dir="rtl"] .me-2 {
+  margin-left: 0.5rem;
+  margin-right: 0;
+}
+
+[dir="ltr"] .ms-1 {
+  margin-left: 0.25rem;
+}
+
+[dir="ltr"] .ms-2 {
+  margin-left: 0.5rem;
+}
+
+[dir="ltr"] .me-1 {
+  margin-right: 0.25rem;
+}
+
+[dir="ltr"] .me-2 {
+  margin-right: 0.5rem;
+}
+
+/* Smooth transitions */
+* {
+  scroll-behavior: smooth;
+}
+
+/* Fix for input placeholders in RTL */
+[dir="rtl"] input::placeholder,
+[dir="rtl"] textarea::placeholder {
+  text-align: right;
+}
+
+/* Loading skeleton animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Hide scrollbar but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
 }
