@@ -107,6 +107,8 @@ export const ProfilePage = () => {
     setSearchParams({ tab });
   };
 
+  const [ordersExpanded, setOrdersExpanded] = useState(true);
+
   const ChevronIcon = isRTL ? ChevronLeft : ChevronRight;
 
   useEffect(() => {
