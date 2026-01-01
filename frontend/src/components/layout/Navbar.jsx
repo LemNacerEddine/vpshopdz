@@ -13,14 +13,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from '@/components/ui/navigation-menu';
 import { 
   ShoppingCart, 
   User, 
@@ -30,7 +22,6 @@ import {
   LogOut,
   LayoutDashboard,
   Package,
-  X,
   Leaf,
   Droplets,
   Wrench,
@@ -90,39 +81,38 @@ export const Navbar = () => {
     { code: 'en', label: 'English', flag: '🇬🇧' }
   ];
 
-  const navLinks = [
-    { href: '/', label: t('nav.home') },
-    { href: '/products', label: t('nav.products') },
-  ];
-
   return (
     <header className="sticky top-0 z-50 w-full glass border-b border-border/40">
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between gap-4">
+        <div className="flex h-16 items-center gap-3">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 shrink-0" data-testid="logo-link">
+          <Link to="/" className="flex items-center gap-2 shrink-0" data-testid="logo-link">
             <img 
               src={LOGO_URL} 
               alt="AgroYousfi" 
-              className="h-12 w-12 rounded-full object-cover shadow-md"
+              className="h-10 w-10 rounded-full object-cover shadow-md"
             />
-            <span className="hidden sm:block font-bold text-xl text-primary">
+            <span className="hidden md:block font-bold text-lg text-primary">
               AgroYousfi
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                className="text-muted-foreground hover:text-primary transition-colors font-medium"
-                data-testid={`nav-${link.href.replace('/', '') || 'home'}`}
-              >
-                {link.label}
-              </Link>
-            ))}
+          {/* Desktop Navigation - Compact */}
+          <nav className="hidden lg:flex items-center gap-1 shrink-0">
+            <Link
+              to="/"
+              className="px-3 py-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium rounded-lg hover:bg-muted"
+              data-testid="nav-home"
+            >
+              {t('nav.home')}
+            </Link>
+            <Link
+              to="/products"
+              className="px-3 py-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium rounded-lg hover:bg-muted"
+              data-testid="nav-products"
+            >
+              {t('nav.products')}
+            </Link>
             
             {/* Categories Mega Menu */}
             <div 
@@ -131,71 +121,76 @@ export const Navbar = () => {
               onMouseLeave={() => setShowCategoriesMenu(false)}
             >
               <button
-                className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors font-medium"
+                className="flex items-center gap-1 px-3 py-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium rounded-lg hover:bg-muted"
                 data-testid="nav-categories"
+                onClick={() => setShowCategoriesMenu(!showCategoriesMenu)}
               >
                 {t('nav.categories')}
                 <ChevronDown className={`h-4 w-4 transition-transform ${showCategoriesMenu ? 'rotate-180' : ''}`} />
               </button>
               
-              {/* Mega Menu Dropdown */}
+              {/* Mega Menu Dropdown - with padding-top for hover gap */}
               {showCategoriesMenu && (
-                <div className="absolute top-full mt-2 bg-card rounded-2xl shadow-xl border p-4 min-w-[500px] z-50"
-                     style={{ [isRTL ? 'right' : 'left']: 0 }}>
-                  <div className="grid grid-cols-3 gap-3">
-                    {categories.map((category) => {
-                      const IconComponent = iconMap[category.icon] || Leaf;
-                      const name = category[`name_${language}`] || category.name_ar;
-                      
-                      return (
-                        <Link
-                          key={category.category_id}
-                          to={`/products?category=${category.category_id}`}
-                          className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors group"
-                          onClick={() => setShowCategoriesMenu(false)}
-                          data-testid={`mega-menu-${category.category_id}`}
-                        >
-                          <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-muted shrink-0">
-                            {category.image ? (
-                              <img 
-                                src={category.image} 
-                                alt={name}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-primary/10">
-                                <IconComponent className="h-6 w-6 text-primary" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="font-medium text-sm text-foreground group-hover:text-primary truncate">
-                              {name}
-                            </p>
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                  
-                  {/* View All Link */}
-                  <div className="mt-3 pt-3 border-t">
-                    <Link
-                      to="/categories"
-                      className="flex items-center justify-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-                      onClick={() => setShowCategoriesMenu(false)}
-                    >
-                      {t('categories.viewAll')}
-                      <ChevronDown className={`h-4 w-4 ${isRTL ? 'rotate-90' : '-rotate-90'}`} />
-                    </Link>
+                <div 
+                  className="absolute top-full pt-2 z-50"
+                  style={{ [isRTL ? 'right' : 'left']: 0 }}
+                >
+                  <div className="bg-card rounded-2xl shadow-xl border p-4 min-w-[500px]">
+                    <div className="grid grid-cols-3 gap-3">
+                      {categories.map((category) => {
+                        const IconComponent = iconMap[category.icon] || Leaf;
+                        const name = category[`name_${language}`] || category.name_ar;
+                        
+                        return (
+                          <Link
+                            key={category.category_id}
+                            to={`/products?category=${category.category_id}`}
+                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors group"
+                            onClick={() => setShowCategoriesMenu(false)}
+                            data-testid={`mega-menu-${category.category_id}`}
+                          >
+                            <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-muted shrink-0">
+                              {category.image ? (
+                                <img 
+                                  src={category.image} 
+                                  alt={name}
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-primary/10">
+                                  <IconComponent className="h-5 w-5 text-primary" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-medium text-sm text-foreground group-hover:text-primary truncate">
+                                {name}
+                              </p>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                    
+                    {/* View All Link */}
+                    <div className="mt-3 pt-3 border-t">
+                      <Link
+                        to="/categories"
+                        className="flex items-center justify-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                        onClick={() => setShowCategoriesMenu(false)}
+                      >
+                        {t('categories.viewAll')}
+                        <ChevronDown className={`h-4 w-4 ${isRTL ? 'rotate-90' : '-rotate-90'}`} />
+                      </Link>
+                    </div>
                   </div>
                 </div>
               )}
             </div>
           </nav>
 
-          {/* Search Bar - Full Width */}
-          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl mx-4">
+          {/* Search Bar - Takes all remaining space */}
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 mx-2">
             <div className="relative w-full">
               <Search className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground`} />
               <Input
@@ -203,25 +198,25 @@ export const Navbar = () => {
                 placeholder={t('nav.search')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'} h-11 bg-muted/50 border-2 border-transparent focus:border-primary focus:bg-background rounded-full text-base`}
+                className={`${isRTL ? 'pr-12 pl-24' : 'pl-12 pr-24'} h-11 w-full bg-muted/50 border-2 border-transparent focus:border-primary focus:bg-background rounded-full text-base`}
                 data-testid="search-input"
               />
               <Button 
                 type="submit" 
                 size="sm"
-                className={`absolute ${isRTL ? 'left-1.5' : 'right-1.5'} top-1/2 -translate-y-1/2 rounded-full h-8 px-4`}
+                className={`absolute ${isRTL ? 'left-1.5' : 'right-1.5'} top-1/2 -translate-y-1/2 rounded-full h-8 px-5`}
               >
-                {language === 'ar' ? 'بحث' : 'Search'}
+                {language === 'ar' ? 'بحث' : language === 'fr' ? 'Chercher' : 'Search'}
               </Button>
             </div>
           </form>
 
           {/* Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 shrink-0">
             {/* Language Selector */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" data-testid="language-selector">
+                <Button variant="ghost" size="icon" className="h-9 w-9" data-testid="language-selector">
                   <Globe className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
@@ -242,7 +237,7 @@ export const Navbar = () => {
 
             {/* Cart */}
             <Link to="/cart" data-testid="cart-link">
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative h-9 w-9">
                 <ShoppingCart className="h-5 w-5" />
                 {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-secondary text-white text-xs flex items-center justify-center font-bold">
@@ -256,7 +251,7 @@ export const Navbar = () => {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" data-testid="user-menu">
+                  <Button variant="ghost" size="icon" className="h-9 w-9" data-testid="user-menu">
                     {user.picture ? (
                       <img src={user.picture} alt={user.name} className="h-8 w-8 rounded-full" />
                     ) : (
@@ -290,7 +285,7 @@ export const Navbar = () => {
               </DropdownMenu>
             ) : (
               <Link to="/login" data-testid="login-link">
-                <Button variant="default" size="sm" className="rounded-full">
+                <Button variant="default" size="sm" className="rounded-full h-9 px-4">
                   {t('nav.login')}
                 </Button>
               </Link>
@@ -299,7 +294,7 @@ export const Navbar = () => {
             {/* Mobile Menu */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden" data-testid="mobile-menu-btn">
+                <Button variant="ghost" size="icon" className="lg:hidden h-9 w-9" data-testid="mobile-menu-btn">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
