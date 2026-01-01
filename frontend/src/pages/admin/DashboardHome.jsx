@@ -68,7 +68,7 @@ const DashboardHome = () => {
       totalProducts: 'إجمالي المنتجات',
       totalCustomers: 'إجمالي العملاء',
       pendingOrders: 'طلبات معلقة',
-      recentOrders: 'أحدث الطلبات',
+      recentOrders: 'طلبات تحتاج معالجة',
       viewAll: 'عرض الكل',
       orderStatus: 'حالة الطلبات',
       salesChart: 'رسم بياني للمبيعات',
