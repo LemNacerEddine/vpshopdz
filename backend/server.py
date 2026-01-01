@@ -152,6 +152,87 @@ class OTPVerify(BaseModel):
     email: EmailStr
     code: str
 
+# ============ ALGERIAN WILAYAS ============
+
+WILAYAS = [
+    "01 - أدرار (Adrar)",
+    "02 - الشلف (Chlef)",
+    "03 - الأغواط (Laghouat)",
+    "04 - أم البواقي (Oum El Bouaghi)",
+    "05 - باتنة (Batna)",
+    "06 - بجاية (Béjaïa)",
+    "07 - بسكرة (Biskra)",
+    "08 - بشار (Béchar)",
+    "09 - البليدة (Blida)",
+    "10 - البويرة (Bouira)",
+    "11 - تمنراست (Tamanrasset)",
+    "12 - تبسة (Tébessa)",
+    "13 - تلمسان (Tlemcen)",
+    "14 - تيارت (Tiaret)",
+    "15 - تيزي وزو (Tizi Ouzou)",
+    "16 - الجزائر (Alger)",
+    "17 - الجلفة (Djelfa)",
+    "18 - جيجل (Jijel)",
+    "19 - سطيف (Sétif)",
+    "20 - سعيدة (Saïda)",
+    "21 - سكيكدة (Skikda)",
+    "22 - سيدي بلعباس (Sidi Bel Abbès)",
+    "23 - عنابة (Annaba)",
+    "24 - قالمة (Guelma)",
+    "25 - قسنطينة (Constantine)",
+    "26 - المدية (Médéa)",
+    "27 - مستغانم (Mostaganem)",
+    "28 - المسيلة (M'Sila)",
+    "29 - معسكر (Mascara)",
+    "30 - ورقلة (Ouargla)",
+    "31 - وهران (Oran)",
+    "32 - البيض (El Bayadh)",
+    "33 - إليزي (Illizi)",
+    "34 - برج بوعريريج (Bordj Bou Arréridj)",
+    "35 - بومرداس (Boumerdès)",
+    "36 - الطارف (El Tarf)",
+    "37 - تندوف (Tindouf)",
+    "38 - تيسمسيلت (Tissemsilt)",
+    "39 - الوادي (El Oued)",
+    "40 - خنشلة (Khenchela)",
+    "41 - سوق أهراس (Souk Ahras)",
+    "42 - تيبازة (Tipaza)",
+    "43 - ميلة (Mila)",
+    "44 - عين الدفلى (Aïn Defla)",
+    "45 - النعامة (Naâma)",
+    "46 - عين تموشنت (Aïn Témouchent)",
+    "47 - غرداية (Ghardaïa)",
+    "48 - غليزان (Relizane)",
+    "49 - تيميمون (Timimoun)",
+    "50 - برج باجي مختار (Bordj Badji Mokhtar)",
+    "51 - أولاد جلال (Ouled Djellal)",
+    "52 - بني عباس (Béni Abbès)",
+    "53 - عين صالح (In Salah)",
+    "54 - عين قزام (In Guezzam)",
+    "55 - توقرت (Touggourt)",
+    "56 - جانت (Djanet)",
+    "57 - المغير (El M'Ghair)",
+    "58 - المنيعة (El Meniaa)"
+]
+
+# ============ NEW AUTH MODELS ============
+
+class PhoneRegisterRequest(BaseModel):
+    phone: str
+    name: str
+    wilaya: str
+    address: Optional[str] = None
+
+class PhoneOTPRequest(BaseModel):
+    phone: str
+
+class PhoneOTPVerify(BaseModel):
+    phone: str
+    code: str
+
+class LinkEmailRequest(BaseModel):
+    email: EmailStr
+
 # ============ AUTH HELPERS ============
 
 async def get_current_user(request: Request) -> Optional[User]:
@@ -393,6 +474,158 @@ async def update_profile(request: Request, user: User = Depends(require_auth)):
         updated_user["created_at"] = datetime.fromisoformat(updated_user["created_at"])
     
     return User(**updated_user)
+
+# ============ PHONE-BASED REGISTRATION ============
+
+@api_router.post("/auth/phone/send-otp")
+async def send_phone_otp(data: PhoneOTPRequest):
+    """Send OTP code to phone (simulated - prints to console)"""
+    code = ''.join(random.choices(string.digits, k=6))
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+    
+    await db.phone_otp_codes.update_one(
+        {"phone": data.phone},
+        {"$set": {
+            "phone": data.phone,
+            "code": code,
+            "expires_at": expires_at.isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }},
+        upsert=True
+    )
+    
+    # In production, send SMS here
+    logging.info(f"OTP for {data.phone}: {code}")
+    
+    return {"message": "OTP sent successfully", "demo_code": code}
+
+@api_router.post("/auth/phone/verify-otp")
+async def verify_phone_otp(data: PhoneOTPVerify, response: Response):
+    """Verify phone OTP and login/register user"""
+    otp_doc = await db.phone_otp_codes.find_one({"phone": data.phone}, {"_id": 0})
+    
+    if not otp_doc:
+        raise HTTPException(status_code=400, detail="No OTP found for this phone")
+    
+    if otp_doc["code"] != data.code:
+        raise HTTPException(status_code=400, detail="Invalid OTP code")
+    
+    expires_at = datetime.fromisoformat(otp_doc["expires_at"])
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if expires_at < datetime.now(timezone.utc):
+        raise HTTPException(status_code=400, detail="OTP expired")
+    
+    # Delete used OTP
+    await db.phone_otp_codes.delete_one({"phone": data.phone})
+    
+    # Find user by phone
+    user = await db.users.find_one({"phone": data.phone}, {"_id": 0})
+    
+    if not user:
+        # Return indicator that user needs to complete registration
+        return {"status": "new_user", "phone": data.phone, "message": "Please complete registration"}
+    
+    # User exists, create session
+    session_token = f"session_{uuid.uuid4().hex}"
+    session_expires = datetime.now(timezone.utc) + timedelta(days=7)
+    
+    await db.user_sessions.insert_one({
+        "user_id": user["user_id"],
+        "session_token": session_token,
+        "expires_at": session_expires.isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    # Set cookie
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=7*24*60*60,
+        path="/"
+    )
+    
+    if isinstance(user.get("created_at"), str):
+        user["created_at"] = datetime.fromisoformat(user["created_at"])
+    
+    return {"status": "existing_user", "user": User(**user), "session_token": session_token}
+
+@api_router.post("/auth/phone/register")
+async def register_with_phone(data: PhoneRegisterRequest, response: Response):
+    """Complete registration with phone number"""
+    # Check if phone already registered
+    existing = await db.users.find_one({"phone": data.phone}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="Phone number already registered")
+    
+    # Create new user
+    user_id = f"user_{uuid.uuid4().hex[:12]}"
+    user = {
+        "user_id": user_id,
+        "phone": data.phone,
+        "name": data.name,
+        "wilaya": data.wilaya,
+        "address": data.address or "",
+        "email": None,
+        "role": "customer",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.users.insert_one(user)
+    
+    # Create session
+    session_token = f"session_{uuid.uuid4().hex}"
+    session_expires = datetime.now(timezone.utc) + timedelta(days=7)
+    
+    await db.user_sessions.insert_one({
+        "user_id": user_id,
+        "session_token": session_token,
+        "expires_at": session_expires.isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    # Set cookie
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=7*24*60*60,
+        path="/"
+    )
+    
+    user["created_at"] = datetime.fromisoformat(user["created_at"])
+    
+    return {"user": User(**user), "session_token": session_token}
+
+@api_router.post("/auth/link-email")
+async def link_email_to_account(data: LinkEmailRequest, user: User = Depends(require_auth)):
+    """Link email to existing phone-based account"""
+    # Check if email already used
+    existing = await db.users.find_one({"email": data.email, "user_id": {"$ne": user.user_id}}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already used by another account")
+    
+    await db.users.update_one(
+        {"user_id": user.user_id},
+        {"$set": {"email": data.email}}
+    )
+    
+    updated_user = await db.users.find_one({"user_id": user.user_id}, {"_id": 0})
+    if isinstance(updated_user.get("created_at"), str):
+        updated_user["created_at"] = datetime.fromisoformat(updated_user["created_at"])
+    
+    return {"message": "Email linked successfully", "user": User(**updated_user)}
+
+# ============ WILAYAS ENDPOINT ============
+
+@api_router.get("/wilayas")
+async def get_wilayas():
+    """Get list of all Algerian wilayas"""
+    return WILAYAS
 
 # ============ CATEGORY ENDPOINTS ============
 
