@@ -308,7 +308,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Cart and Authentication Integration"
+    - "User Menu - Remove Arrows from Menu Items"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
