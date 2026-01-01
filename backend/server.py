@@ -948,7 +948,7 @@ async def create_order(data: OrderCreate, request: Request):
     
     return order
 
-@api_router.get("/orders", response_model=List[Order])
+@api_router.get("/orders")
 async def get_orders(request: Request, user: User = Depends(require_auth)):
     """Get user orders"""
     orders = await db.orders.find({"user_id": user.user_id}, {"_id": 0}).sort("created_at", -1).to_list(100)
@@ -959,12 +959,16 @@ async def get_orders(request: Request, user: User = Depends(require_auth)):
             order["created_at"] = datetime.fromisoformat(order["created_at"])
         
         # Add product details to each item
+        enriched_items = []
         for item in order.get("items", []):
             product = await db.products.find_one({"product_id": item.get("product_id")}, {"_id": 0})
+            item_with_product = dict(item)
             if product:
                 if isinstance(product.get("created_at"), str):
                     product["created_at"] = datetime.fromisoformat(product["created_at"])
-                item["product"] = product
+                item_with_product["product"] = product
+            enriched_items.append(item_with_product)
+        order["items"] = enriched_items
     
     return orders
 
