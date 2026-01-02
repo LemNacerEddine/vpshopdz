@@ -200,6 +200,29 @@ agent_communication:
       3. Toggle behavior consistency with other menus
       
       ASSESSMENT: Fix appears to be properly implemented in code. The previous inverted toggle behavior should be resolved.
+  - agent: "main"
+    message: |
+      ADMIN SIDEBAR NAVIGATION FIX COMPLETED:
+      
+      ✅ CHANGES MADE TO AdminLayout.jsx:
+      1. Added `isMenuActive()` function to check if current path belongs to a menu's children
+      2. Updated submenu rendering condition to use `(expandedMenus.includes(item.id) || isMenuActive(item.id))`
+      3. This ensures submenu items remain visible when on any child page
+      4. Updated both desktop and mobile sidebar with the same fix
+      5. Removed problematic useEffect that was causing state update issues
+      6. Added localStorage persistence for expandedMenus state
+      
+      ✅ EXPECTED BEHAVIOR AFTER FIX:
+      - Products submenu visible by default (initialized with ['products'])
+      - Submenu stays visible when navigating to /admin/products, /admin/products/new, /admin/categories
+      - Other menus (Orders, Settings) continue to work correctly
+      - Toggle behavior is now consistent across all menus
+      
+      📊 BACKEND TESTING RESULTS: All 58 API tests passed (100% success rate)
+      - Admin authentication, dashboard stats, orders management all working
+      - Phone registration flow working correctly
+      - Products and categories APIs working correctly
+      
   - agent: "testing"
     message: |
       ADMIN DASHBOARD BACKEND API TESTING COMPLETED - ALL SCENARIOS SUCCESSFUL:
