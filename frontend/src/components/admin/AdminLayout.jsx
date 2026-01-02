@@ -271,9 +271,35 @@ const AdminLayout = ({ children }) => {
     }
   };
 
-  const isActive = (path) => {
-    if (path === '/admin') return location.pathname === '/admin';
-    return location.pathname.startsWith(path);
+  // Check if a menu item is active (including query parameters for filters)
+  const isActive = (itemPath) => {
+    if (itemPath === '/admin') return location.pathname === '/admin';
+    
+    // Check if the path has query parameters
+    if (itemPath.includes('?')) {
+      const [basePath, queryString] = itemPath.split('?');
+      const itemParams = new URLSearchParams(queryString);
+      const currentParams = new URLSearchParams(location.search);
+      
+      // Check if base path matches and all item params match current params
+      if (location.pathname !== basePath) return false;
+      
+      for (const [key, value] of itemParams.entries()) {
+        if (currentParams.get(key) !== value) return false;
+      }
+      return true;
+    }
+    
+    // For paths without query params, check exact match or no query params
+    if (location.pathname === itemPath || location.pathname.startsWith(itemPath + '/')) {
+      // If it's the base orders page (/admin/orders), only active if no status filter
+      if (itemPath === '/admin/orders' && location.search) {
+        return false;
+      }
+      return true;
+    }
+    
+    return false;
   };
 
   const languages = [
