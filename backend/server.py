@@ -247,6 +247,31 @@ class PhoneOTPVerify(BaseModel):
 class LinkEmailRequest(BaseModel):
     email: Union[EmailStr, str]
 
+# ============ PASSWORD AUTH MODELS ============
+
+class RegisterRequest(BaseModel):
+    """Registration with email or phone + password"""
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    password: str
+    name: str
+    wilaya: str
+    address: Optional[str] = None
+
+class LoginRequest(BaseModel):
+    """Login with email or phone + password"""
+    identifier: str  # Can be email or phone
+    password: str
+
+class ForgotPasswordRequest(BaseModel):
+    """Request password reset"""
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    """Reset password with token"""
+    token: str
+    new_password: str
+
 # ============ AUTH HELPERS ============
 
 async def get_current_user(request: Request) -> Optional[User]:
