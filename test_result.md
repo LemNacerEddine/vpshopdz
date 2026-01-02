@@ -155,10 +155,10 @@ test_plan:
 frontend:
   - task: "Admin Dashboard"
     implemented: true
-    working: true
+    working: false
     needs_retesting: false
     priority: "high"
-    stuck_count: 0
+    stuck_count: 1
     file: "/app/frontend/src/pages/admin/"
     status_history:
       - working: false
@@ -167,3 +167,6 @@ frontend:
       - working: true
         agent: "testing"
         comment: "ADMIN DASHBOARD TESTING COMPLETED - ALL MAJOR FEATURES WORKING: ✅ Admin login with email OTP works correctly. ✅ Admin auto-redirect to /admin dashboard works as expected. ✅ Dashboard 'طلبات تحتاج معالجة' section correctly shows ONLY pending orders (not all recent orders). ✅ Product form has both drag-and-drop upload area with text 'اضغط لرفع الصور من جهازك' and URL input option with 'أو أضف رابط'. ✅ RTL layout is properly implemented throughout - sidebar on right, text right-aligned, page direction RTL. ✅ Arabic text displays correctly. Minor Issue: Session management - authentication expires during extended navigation, but core functionality works. PDF invoice generation code is implemented but needs orders with data to test fully."
+      - working: false
+        agent: "testing"
+        comment: "CRITICAL SIDEBAR NAVIGATION ISSUE CONFIRMED: Products submenu items ('إضافة منتج', 'جميع المنتجات', 'التصنيفات') do NOT render after clicking Products menu button. React conditional rendering logic in AdminLayout.jsx (lines 356-372) is failing specifically for Products menu while working correctly for Orders and Settings menus. Session management also expires quickly requiring re-login. Direct page access works when session valid. ROOT CAUSE: expandedMenus state management issue in AdminLayout.jsx - Products menu not properly expanding submenu despite correct button styling and state initialization."
