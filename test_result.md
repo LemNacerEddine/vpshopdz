@@ -325,9 +325,22 @@ agent_communication:
 
 test_plan:
   current_focus:
-    - "Admin Dashboard Backend APIs - COMPLETED"
+    - "New Authentication System Testing - COMPLETED"
   test_all: false
   test_priority: "high_first"
+
+frontend:
+  - task: "New Authentication System"
+    implemented: true
+    working: true
+    needs_retesting: false
+    priority: "high"
+    stuck_count: 0
+    file: "/app/frontend/src/pages/LoginPage.jsx"
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "COMPREHENSIVE NEW AUTHENTICATION SYSTEM TESTING COMPLETED - ALL SCENARIOS SUCCESSFUL: ✅ Admin Login: Successfully logged in with admin@agroyousfi.dz/admin123, correctly redirected to /admin dashboard. ✅ User Registration: Email tab default, unique email registration working, all form fields functional, wilaya dropdown working, redirects to homepage. ✅ Regular User Login: Successfully logged in, correctly stayed on main site (not /admin). ✅ Forgot Password: Page loads correctly, reset link sent successfully, success message displayed. ✅ Google Login Button: Visible, clickable, and enabled on both login/register pages. Password-based authentication system fully functional with proper role detection, form validations, Arabic RTL layout, and all authentication flows working correctly."
 
 backend:
   - task: "Admin Authentication APIs"
