@@ -325,7 +325,7 @@ agent_communication:
 
 test_plan:
   current_focus:
-    - "New Authentication System Testing - COMPLETED"
+    - "Orders Management Page Testing - COMPLETED"
   test_all: false
   test_priority: "high_first"
 
