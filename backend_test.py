@@ -346,6 +346,136 @@ class AgroYousfiAPITester:
             # Test getting the order
             self.run_test("Get Order", "GET", f"orders/{order_id}", 200)
 
+    def test_admin_dashboard_scenarios(self):
+        """Test specific admin dashboard scenarios as requested"""
+        print("\n🎯 Testing Admin Dashboard Scenarios...")
+        
+        # Test Scenario 1: Authentication Flow
+        print("\n📋 Test Scenario 1: Authentication Flow")
+        
+        # Step 1: Send OTP to admin email
+        admin_email = "admin@agroyousfi.dz"
+        data = {"email": admin_email}
+        otp_result = self.run_test("1.1 Send OTP to admin email", "POST", "auth/send-otp", 200, data)
+        
+        if not otp_result or 'demo_code' not in otp_result:
+            self.log_test("Admin Dashboard Scenarios", False, "Failed to get admin OTP")
+            return
+        
+        demo_code = otp_result['demo_code']
+        print(f"    Demo OTP Code: {demo_code}")
+        
+        # Step 2: Verify OTP
+        verify_data = {"email": admin_email, "code": demo_code}
+        verify_result = self.run_test("1.2 Verify OTP", "POST", "auth/verify-otp", 200, verify_data)
+        
+        if not verify_result or 'session_token' not in verify_result:
+            self.log_test("Admin Dashboard Scenarios", False, "Failed to verify admin OTP")
+            return
+        
+        # Step 3: Check user role is admin
+        user = verify_result.get('user', {})
+        if user.get('role') == 'admin':
+            self.log_test("1.3 Check admin role", True, f"User role: {user.get('role')}")
+        else:
+            self.log_test("1.3 Check admin role", False, f"Expected admin role, got: {user.get('role')}")
+        
+        # Store admin session for further tests
+        self.admin_token = verify_result['session_token']
+        original_token = self.session_token
+        self.session_token = self.admin_token
+        
+        # Step 4: Test /api/auth/me with session cookie
+        me_result = self.run_test("1.4 Test /auth/me with session", "GET", "auth/me", 200)
+        if me_result and me_result.get('role') == 'admin':
+            self.log_test("1.4 Auth/me admin verification", True, "Admin session verified")
+        else:
+            self.log_test("1.4 Auth/me admin verification", False, "Admin session not verified")
+        
+        # Test Scenario 2: Admin Dashboard APIs
+        print("\n📋 Test Scenario 2: Admin Dashboard APIs")
+        
+        # Step 1: GET /api/admin/stats
+        stats_result = self.run_test("2.1 GET /admin/stats", "GET", "admin/stats", 200)
+        if stats_result:
+            required_fields = ['total_products', 'total_orders', 'pending_orders', 'total_users', 'total_revenue']
+            missing_fields = [field for field in required_fields if field not in stats_result]
+            if missing_fields:
+                self.log_test("2.1 Admin stats fields check", False, f"Missing fields: {missing_fields}")
+            else:
+                self.log_test("2.1 Admin stats fields check", True, f"All required fields present: {list(stats_result.keys())}")
+                print(f"    Stats: Products={stats_result.get('total_products')}, Orders={stats_result.get('total_orders')}, Pending={stats_result.get('pending_orders')}, Users={stats_result.get('total_users')}, Revenue={stats_result.get('total_revenue')}")
+        
+        # Step 2: GET /api/admin/orders
+        orders_result = self.run_test("2.2 GET /admin/orders", "GET", "admin/orders", 200)
+        if orders_result is not None:
+            self.log_test("2.2 Admin orders list", True, f"Retrieved {len(orders_result)} orders")
+        
+        # Step 3: PUT /api/admin/orders/{order_id}/status (if orders exist)
+        if orders_result and len(orders_result) > 0:
+            order_id = orders_result[0]['order_id']
+            status_data = {"status": "confirmed"}
+            status_result = self.run_test("2.3 PUT /admin/orders/status", "PUT", f"admin/orders/{order_id}/status", 200, status_data)
+            if status_result:
+                self.log_test("2.3 Order status update", True, f"Updated order {order_id} to confirmed")
+        else:
+            self.log_test("2.3 Order status update", False, "No orders available to update status")
+        
+        # Step 4: GET /api/products
+        products_result = self.run_test("2.4 GET /products", "GET", "products", 200)
+        if products_result is not None:
+            self.log_test("2.4 Products list", True, f"Retrieved {len(products_result)} products")
+        
+        # Step 5: GET /api/categories
+        categories_result = self.run_test("2.5 GET /categories", "GET", "categories", 200)
+        if categories_result is not None:
+            self.log_test("2.5 Categories list", True, f"Retrieved {len(categories_result)} categories")
+        
+        # Test Scenario 3: User Registration via Phone
+        print("\n📋 Test Scenario 3: User Registration via Phone")
+        
+        # Restore original session for phone testing
+        self.session_token = original_token
+        
+        # Step 1: Send OTP to new phone
+        test_phone = f"0555{datetime.now().strftime('%H%M%S')}"
+        phone_data = {"phone": test_phone}
+        phone_otp_result = self.run_test("3.1 Send OTP to new phone", "POST", "auth/phone/send-otp", 200, phone_data)
+        
+        if not phone_otp_result or 'demo_code' not in phone_otp_result:
+            self.log_test("3.1 Phone OTP generation", False, "Failed to get phone OTP")
+            return
+        
+        phone_demo_code = phone_otp_result['demo_code']
+        print(f"    Phone Demo OTP Code: {phone_demo_code}")
+        
+        # Step 2: Verify OTP - should return status="new_user"
+        phone_verify_data = {"phone": test_phone, "code": phone_demo_code}
+        phone_verify_result = self.run_test("3.2 Verify phone OTP", "POST", "auth/phone/verify-otp", 200, phone_verify_data)
+        
+        if phone_verify_result and phone_verify_result.get('status') == 'new_user':
+            self.log_test("3.2 New user status check", True, f"Status: {phone_verify_result.get('status')}")
+        else:
+            self.log_test("3.2 New user status check", False, f"Expected 'new_user', got: {phone_verify_result.get('status') if phone_verify_result else 'None'}")
+        
+        # Step 3: Complete registration
+        register_data = {
+            "phone": test_phone,
+            "name": "أحمد محمد التجريبي",
+            "wilaya": "16 - الجزائر (Alger)",
+            "address": "شارع الاستقلال، الجزائر العاصمة"
+        }
+        register_result = self.run_test("3.3 Complete registration", "POST", "auth/phone/register", 200, register_data)
+        
+        if register_result and 'session_token' in register_result:
+            self.log_test("3.3 Phone registration completion", True, "Registration completed with session token")
+            user_data = register_result.get('user', {})
+            print(f"    Registered user: {user_data.get('name')} in {user_data.get('wilaya')}")
+        else:
+            self.log_test("3.3 Phone registration completion", False, "Registration failed or no session token")
+        
+        print("\n📊 Admin Dashboard Scenarios Summary Complete")
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting AgroYousfi API Tests...")
@@ -396,6 +526,9 @@ class AgroYousfiAPITester:
         print("\n👑 Testing Admin Operations...")
         self.test_admin_login()
         self.test_admin_operations()
+        
+        # SPECIFIC ADMIN DASHBOARD SCENARIOS (NEW)
+        self.test_admin_dashboard_scenarios()
         
         # Print summary
         print("\n" + "=" * 50)
