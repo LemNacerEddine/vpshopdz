@@ -1900,12 +1900,17 @@ async def seed_database():
     
     await db.products.insert_many(products)
     
-    # Create admin user
+    # Create admin user with password
     admin_user = {
         "user_id": f"user_{uuid.uuid4().hex[:12]}",
         "email": "admin@agroyousfi.dz",
         "name": "مدير المتجر",
+        "password_hash": hash_password("admin123"),  # Default admin password
         "role": "admin",
+        "phone": None,
+        "wilaya": "16 - الجزائر (Alger)",
+        "address": "",
+        "picture": None,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.users.insert_one(admin_user)
