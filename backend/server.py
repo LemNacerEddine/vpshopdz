@@ -141,7 +141,7 @@ class Order(BaseModel):
     notes: Optional[str] = None
     items: List[OrderItem]
     total: float
-    status: str = "pending"  # pending, confirmed, shipped, delivered, cancelled
+    status: str = "pending"  # pending, confirmed, processing, shipped, delivered, cancelled
     created_at: datetime
 
 class ReviewCreate(BaseModel):
