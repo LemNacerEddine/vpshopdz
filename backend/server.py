@@ -1307,7 +1307,7 @@ async def update_order_status(order_id: str, request: Request, user: User = Depe
     body = await request.json()
     new_status = body.get("status")
     
-    if new_status not in ["pending", "confirmed", "shipped", "delivered", "cancelled"]:
+    if new_status not in ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"]:
         raise HTTPException(status_code=400, detail="Invalid status")
     
     result = await db.orders.update_one(
