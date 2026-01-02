@@ -234,16 +234,6 @@ export const UserMenu = ({ onClose }) => {
     { icon: Bell, label: text.notifications, path: '/notifications', testId: 'menu-notifications', disabled: true },
   ];
 
-  if (isAdmin) {
-    menuItems.unshift({ 
-      icon: LayoutDashboard, 
-      label: text.adminDashboard, 
-      path: '/admin', 
-      testId: 'menu-admin',
-      highlight: true 
-    });
-  }
-
   return (
     <div 
       ref={menuRef}
