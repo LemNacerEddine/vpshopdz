@@ -218,12 +218,37 @@ const AdminLayout = ({ children }) => {
     }
   ];
 
-  const toggleMenu = (menuId) => {
-    setExpandedMenus(prev => 
-      prev.includes(menuId) 
+  const toggleMenu = (menuId, forceExpand = false) => {
+    setExpandedMenus(prev => {
+      // If forceExpand is true, always expand
+      if (forceExpand) {
+        if (!prev.includes(menuId)) {
+          return [...prev, menuId];
+        }
+        return prev;
+      }
+      // Regular toggle behavior
+      return prev.includes(menuId) 
         ? prev.filter(id => id !== menuId)
-        : [...prev, menuId]
-    );
+        : [...prev, menuId];
+    });
+  };
+
+  // Keep menu expanded when on a child page
+  const isMenuActive = (menuId) => {
+    const path = location.pathname;
+    switch (menuId) {
+      case 'products':
+        return path.startsWith('/admin/products') || path.startsWith('/admin/categories');
+      case 'orders':
+        return path.startsWith('/admin/orders');
+      case 'finance':
+        return path.startsWith('/admin/finance');
+      case 'settings':
+        return path.startsWith('/admin/settings');
+      default:
+        return false;
+    }
   };
 
   // Auto-expand menu based on current path
