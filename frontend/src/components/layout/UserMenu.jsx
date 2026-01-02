@@ -148,6 +148,80 @@ export const UserMenu = ({ onClose }) => {
 
   const text = l[language] || l.ar;
 
+  // If admin, show simplified admin menu
+  if (isAdmin) {
+    return (
+      <div 
+        ref={menuRef}
+        className="absolute top-full end-0 mt-2 z-50 bg-card rounded-2xl shadow-2xl border overflow-hidden"
+        style={{ width: '320px' }}
+      >
+        <div className="p-4">
+          {/* Admin Header */}
+          <div className="flex items-center gap-3 pb-4 mb-4 border-b">
+            <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-primary/30">
+              <Shield className="h-7 w-7 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">{text.welcome}</p>
+              <p className="font-bold text-lg truncate">{user?.name || 'مدير'}</p>
+              <p className="text-xs text-primary font-medium">{language === 'ar' ? 'حساب المدير' : language === 'fr' ? 'Compte Admin' : 'Admin Account'}</p>
+            </div>
+          </div>
+
+          {/* Admin Dashboard - Primary Action */}
+          <Link
+            to="/admin"
+            onClick={() => onClose?.()}
+            className="flex items-center gap-3 p-4 rounded-xl bg-primary text-white hover:bg-primary/90 transition-colors mb-3"
+          >
+            <LayoutDashboard className="h-6 w-6" />
+            <div>
+              <p className="font-semibold">{text.adminDashboard}</p>
+              <p className="text-xs text-white/80">{language === 'ar' ? 'إدارة المتجر والطلبات' : language === 'fr' ? 'Gérer le magasin' : 'Manage store & orders'}</p>
+            </div>
+            <ChevronIcon className="h-5 w-5 ms-auto" />
+          </Link>
+
+          {/* Quick Admin Links */}
+          <div className="space-y-1 mb-4">
+            <Link
+              to="/admin/orders?status=pending"
+              onClick={() => onClose?.()}
+              className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
+            >
+              <Package className="h-5 w-5 text-yellow-600" />
+              <span className="text-sm">{language === 'ar' ? 'طلبات جديدة' : language === 'fr' ? 'Nouvelles commandes' : 'New Orders'}</span>
+              <ChevronIcon className="h-4 w-4 ms-auto text-muted-foreground" />
+            </Link>
+            <Link
+              to="/admin/products"
+              onClick={() => onClose?.()}
+              className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
+            >
+              <Package className="h-5 w-5 text-blue-600" />
+              <span className="text-sm">{language === 'ar' ? 'إدارة المنتجات' : language === 'fr' ? 'Gérer les produits' : 'Manage Products'}</span>
+              <ChevronIcon className="h-4 w-4 ms-auto text-muted-foreground" />
+            </Link>
+          </div>
+
+          {/* Logout Button */}
+          <div className="pt-3 border-t">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 p-3 rounded-lg text-sm text-destructive hover:bg-destructive/10 transition-colors"
+              data-testid="menu-logout"
+            >
+              <LogOut className="h-5 w-5" />
+              {text.logout}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Regular customer menu
   const menuItems = [
     { icon: Package, label: text.yourOrders, path: '/profile?tab=orders', testId: 'menu-orders' },
     { icon: Star, label: text.yourReviews, path: '/profile?tab=reviews', testId: 'menu-reviews' },
