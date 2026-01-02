@@ -475,7 +475,7 @@ agent_communication:
 
 test_plan:
   current_focus:
-    - "Enhanced Dashboard Orders Section Testing - COMPLETED"
+    - "Orders Dropdown Menu Testing - COMPLETED"
   test_all: false
   test_priority: "high_first"
 
