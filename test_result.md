@@ -491,6 +491,17 @@ frontend:
       - working: true
         agent: "testing"
         comment: "ENHANCED DASHBOARD ORDERS SECTION TESTING COMPLETED - ALL REQUIREMENTS VERIFIED: ✅ Admin Login: Successfully logged in with admin@agroyousfi.dz / admin123, redirected to /admin dashboard with proper Arabic RTL layout. ✅ Dashboard Stats: Found all 4 required stat cards (إجمالي الإيرادات: 54.000 دج, إجمالي الطلبات: 11, إجمالي المنتجات: 10, إجمالي العملاء: 26) with proper icons and values. ✅ Orders to Process Section: Found 'طلبات تحتاج معالجة' section with 8 pending order cards. Each card displays: Order ID (#XXXXXX format), Customer names, Phone numbers with green call buttons, Copy phone icons, Wilaya with orange map pin icons, Address information, Total amounts in DZD, Number of items, Green 'تأكيد الطلب' buttons, Expand/collapse chevron buttons. ✅ Enhanced Features: RTL Arabic layout, proper color coding (green for phone/confirm, orange for location), responsive design, clean card layout, all Arabic text rendering correctly. ⚠️ Minor: Session expires quickly but doesn't affect core functionality. All specified requirements for enhanced Orders to Process section are working perfectly."
+  - task: "Orders Dropdown Menu"
+    implemented: true
+    working: true
+    needs_retesting: false
+    priority: "high"
+    stuck_count: 0
+    file: "/app/frontend/src/components/admin/AdminLayout.jsx"
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "ORDERS DROPDOWN MENU TESTING COMPLETED - ALL REQUIREMENTS MET: ✅ Admin Login: Successfully logged in via API with admin@agroyousfi.dz / admin123, accessed admin dashboard correctly. ✅ Orders Dropdown Menu: Found 'الطلبات' (Orders) menu in sidebar, clicked to expand dropdown successfully. ✅ All 7 Submenu Items Verified: Found all required submenu items with correct Arabic text and navigation URLs: 'جميع الطلبات' → /admin/orders, 'قيد الانتظار' → /admin/orders?status=pending, 'مؤكدة' → /admin/orders?status=confirmed, 'قيد التجهيز' → /admin/orders?status=processing, 'تم الشحن' → /admin/orders?status=shipped, 'تم التوصيل' → /admin/orders?status=delivered, 'ملغية' → /admin/orders?status=cancelled. ✅ Navigation Testing: Successfully tested navigation to each filter URL, verified correct URL parameters and page loading. ✅ Filter Persistence: Status parameters correctly maintained in URL (status=pending, status=confirmed tested). ✅ Status Cards: Found status indicator elements that highlight active filters. All Orders dropdown menu functionality working as specified in test requirements."
 
 backend:
   - task: "Admin Authentication APIs"
