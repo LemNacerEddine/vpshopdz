@@ -43,7 +43,26 @@ const AdminLayout = ({ children }) => {
     }
     return false;
   });
-  const [expandedMenus, setExpandedMenus] = useState(['products']);
+  
+  // Initialize expanded menus from localStorage or default to products
+  const [expandedMenus, setExpandedMenus] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('admin-expanded-menus');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+          return ['products'];
+        }
+      }
+    }
+    return ['products'];
+  });
+
+  // Save expanded menus to localStorage
+  useEffect(() => {
+    localStorage.setItem('admin-expanded-menus', JSON.stringify(expandedMenus));
+  }, [expandedMenus]);
 
   // Apply dark mode
   useEffect(() => {
