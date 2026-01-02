@@ -480,17 +480,17 @@ test_plan:
   test_priority: "high_first"
 
 frontend:
-  - task: "Orders Management Page"
+  - task: "Enhanced Dashboard Orders Section"
     implemented: true
     working: true
     needs_retesting: false
     priority: "high"
     stuck_count: 0
-    file: "/app/frontend/src/pages/admin/OrdersPage.jsx"
+    file: "/app/frontend/src/pages/admin/DashboardHome.jsx"
     status_history:
       - working: true
         agent: "testing"
-        comment: "ORDERS MANAGEMENT PAGE TESTING COMPLETED - ALL FEATURES WORKING PERFECTLY: ✅ Page Access: Admin authentication working, orders page accessible at /admin/orders, loads correctly with Arabic RTL layout. ✅ Status Summary Cards: Found 6 status cards (pending, confirmed, processing, shipped, delivered, cancelled) with correct counts, clickable filtering, proper Arabic text and icons. ✅ Search & Filters: Search bar with Arabic placeholder working, date filter dropdown with 4 options functional. ✅ Order Cards: 11 orders displayed with Order ID (#fd94a8), customer name, phone with tel: link, copy button, wilaya, address, total amount in DZD, item count, status badge with Arabic text, action buttons present. ✅ Order Expansion: Chevron button expands details showing product list (1 product), action buttons (اتصل بالعميل, طباعة الفاتورة, إلغاء الطلب). ✅ Status Workflow: 20 workflow buttons found, status-specific actions (تأكيد الطلب, تجهيز الطلب, إرسال للشحن) clickable and functional. ✅ Filter by Status: Status cards act as filters, orders list updates, visual feedback works. All backend integration verified, no critical errors, Arabic text rendering properly, RTL layout correct, responsive design working."
+        comment: "ENHANCED DASHBOARD ORDERS SECTION TESTING COMPLETED - ALL REQUIREMENTS VERIFIED: ✅ Admin Login: Successfully logged in with admin@agroyousfi.dz / admin123, redirected to /admin dashboard with proper Arabic RTL layout. ✅ Dashboard Stats: Found all 4 required stat cards (إجمالي الإيرادات: 54.000 دج, إجمالي الطلبات: 11, إجمالي المنتجات: 10, إجمالي العملاء: 26) with proper icons and values. ✅ Orders to Process Section: Found 'طلبات تحتاج معالجة' section with 8 pending order cards. Each card displays: Order ID (#XXXXXX format), Customer names, Phone numbers with green call buttons, Copy phone icons, Wilaya with orange map pin icons, Address information, Total amounts in DZD, Number of items, Green 'تأكيد الطلب' buttons, Expand/collapse chevron buttons. ✅ Enhanced Features: RTL Arabic layout, proper color coding (green for phone/confirm, orange for location), responsive design, clean card layout, all Arabic text rendering correctly. ⚠️ Minor: Session expires quickly but doesn't affect core functionality. All specified requirements for enhanced Orders to Process section are working perfectly."
 
 backend:
   - task: "Admin Authentication APIs"
