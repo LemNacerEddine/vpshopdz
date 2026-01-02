@@ -514,6 +514,218 @@ async def update_profile(request: Request, user: User = Depends(require_auth)):
     
     return User(**updated_user)
 
+# ============ PASSWORD-BASED AUTH ============
+
+@api_router.post("/auth/register")
+async def register_user(data: RegisterRequest, response: Response):
+    """Register new user with email or phone + password"""
+    # Validate that at least email or phone is provided
+    if not data.email and not data.phone:
+        raise HTTPException(status_code=400, detail="Email or phone is required")
+    
+    # Validate password length
+    if len(data.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    
+    # Check if user already exists
+    if data.email:
+        existing = await db.users.find_one({"email": data.email}, {"_id": 0})
+        if existing:
+            raise HTTPException(status_code=400, detail="Email already registered")
+    
+    if data.phone:
+        existing = await db.users.find_one({"phone": data.phone}, {"_id": 0})
+        if existing:
+            raise HTTPException(status_code=400, detail="Phone number already registered")
+    
+    # Create new user
+    user_id = f"user_{uuid.uuid4().hex[:12]}"
+    user = {
+        "user_id": user_id,
+        "email": data.email,
+        "phone": data.phone,
+        "password_hash": hash_password(data.password),
+        "name": data.name,
+        "wilaya": data.wilaya,
+        "address": data.address or "",
+        "role": "customer",
+        "picture": None,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.users.insert_one(user)
+    
+    # Create session
+    session_token = f"session_{uuid.uuid4().hex}"
+    session_expires = datetime.now(timezone.utc) + timedelta(days=7)
+    
+    await db.user_sessions.insert_one({
+        "user_id": user_id,
+        "session_token": session_token,
+        "expires_at": session_expires.isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    # Set cookie
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=7*24*60*60,
+        path="/"
+    )
+    
+    # Remove password_hash from response
+    user.pop("password_hash", None)
+    if isinstance(user.get("created_at"), str):
+        user["created_at"] = datetime.fromisoformat(user["created_at"])
+    
+    return {"user": User(**user), "session_token": session_token, "message": "Registration successful"}
+
+@api_router.post("/auth/login")
+async def login_user(data: LoginRequest, response: Response):
+    """Login with email or phone + password"""
+    # Find user by email or phone
+    user = None
+    if "@" in data.identifier:
+        user = await db.users.find_one({"email": data.identifier}, {"_id": 0})
+    else:
+        # Try as phone number
+        user = await db.users.find_one({"phone": data.identifier}, {"_id": 0})
+        if not user:
+            # Also try as email without @ (unlikely but possible)
+            user = await db.users.find_one({"email": data.identifier}, {"_id": 0})
+    
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email/phone or password")
+    
+    # Check if user has password_hash (old users might not have one)
+    if not user.get("password_hash"):
+        raise HTTPException(status_code=401, detail="Please reset your password or use Google login")
+    
+    # Verify password
+    if not verify_password(data.password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid email/phone or password")
+    
+    # Create session
+    session_token = f"session_{uuid.uuid4().hex}"
+    session_expires = datetime.now(timezone.utc) + timedelta(days=7)
+    
+    await db.user_sessions.insert_one({
+        "user_id": user["user_id"],
+        "session_token": session_token,
+        "expires_at": session_expires.isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    # Set cookie
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=7*24*60*60,
+        path="/"
+    )
+    
+    # Remove password_hash from response
+    user.pop("password_hash", None)
+    if isinstance(user.get("created_at"), str):
+        user["created_at"] = datetime.fromisoformat(user["created_at"])
+    
+    return {"user": User(**user), "session_token": session_token}
+
+@api_router.post("/auth/forgot-password")
+async def forgot_password(data: ForgotPasswordRequest):
+    """Send password reset link to email"""
+    user = await db.users.find_one({"email": data.email}, {"_id": 0})
+    
+    # Always return success to prevent email enumeration
+    if not user:
+        return {"message": "If this email exists, a reset link has been sent"}
+    
+    # Generate reset token
+    reset_token = f"reset_{uuid.uuid4().hex}"
+    expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
+    
+    await db.password_resets.update_one(
+        {"email": data.email},
+        {"$set": {
+            "email": data.email,
+            "token": reset_token,
+            "expires_at": expires_at.isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }},
+        upsert=True
+    )
+    
+    # In production, send email with reset link
+    logging.info(f"Password reset token for {data.email}: {reset_token}")
+    
+    return {"message": "If this email exists, a reset link has been sent", "demo_token": reset_token}
+
+@api_router.post("/auth/reset-password")
+async def reset_password(data: ResetPasswordRequest, response: Response):
+    """Reset password using token"""
+    # Validate password length
+    if len(data.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    
+    # Find reset token
+    reset_doc = await db.password_resets.find_one({"token": data.token}, {"_id": 0})
+    
+    if not reset_doc:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+    
+    expires_at = datetime.fromisoformat(reset_doc["expires_at"])
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if expires_at < datetime.now(timezone.utc):
+        raise HTTPException(status_code=400, detail="Reset token expired")
+    
+    # Update password
+    await db.users.update_one(
+        {"email": reset_doc["email"]},
+        {"$set": {"password_hash": hash_password(data.new_password)}}
+    )
+    
+    # Delete reset token
+    await db.password_resets.delete_one({"token": data.token})
+    
+    # Get user and create session
+    user = await db.users.find_one({"email": reset_doc["email"]}, {"_id": 0})
+    
+    # Create session
+    session_token = f"session_{uuid.uuid4().hex}"
+    session_expires = datetime.now(timezone.utc) + timedelta(days=7)
+    
+    await db.user_sessions.insert_one({
+        "user_id": user["user_id"],
+        "session_token": session_token,
+        "expires_at": session_expires.isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    # Set cookie
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=7*24*60*60,
+        path="/"
+    )
+    
+    # Remove password_hash from response
+    user.pop("password_hash", None)
+    if isinstance(user.get("created_at"), str):
+        user["created_at"] = datetime.fromisoformat(user["created_at"])
+    
+    return {"user": User(**user), "session_token": session_token, "message": "Password reset successful"}
+
 # ============ PHONE-BASED REGISTRATION ============
 
 @api_router.post("/auth/phone/send-otp")
