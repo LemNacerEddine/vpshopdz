@@ -580,22 +580,34 @@ const AdminLayout = ({ children }) => {
                 </div>
                 <div className="text-start hidden xl:block">
                   <p className="text-sm font-medium">{user?.name}</p>
-                  <p className="text-xs text-gray-500">Admin</p>
+                  <p className="text-xs text-gray-500">{language === 'ar' ? 'مدير' : 'Admin'}</p>
                 </div>
                 <ChevronDown className="h-4 w-4 hidden xl:block" />
               </button>
-              <div className="absolute top-full end-0 mt-2 w-48 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                <Link to="/profile" className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
-                  <User className="h-4 w-4" />
-                  {text.profile}
+              <div className="absolute top-full end-0 mt-2 w-56 py-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg border dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                {/* Admin Info */}
+                <div className="px-4 py-3 border-b dark:border-gray-700">
+                  <p className="font-semibold">{user?.name}</p>
+                  <p className="text-xs text-gray-500">{user?.email}</p>
+                </div>
+                {/* Admin Links */}
+                <Link to="/admin/settings" className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <Settings className="h-4 w-4" />
+                  {language === 'ar' ? 'إعدادات المتجر' : language === 'fr' ? 'Paramètres' : 'Store Settings'}
                 </Link>
-                <button
-                  onClick={logout}
-                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                >
-                  <LogOut className="h-4 w-4" />
-                  {text.logout}
-                </button>
+                <Link to="/" className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <Store className="h-4 w-4" />
+                  {language === 'ar' ? 'زيارة المتجر' : language === 'fr' ? 'Voir le magasin' : 'Visit Store'}
+                </Link>
+                <div className="border-t dark:border-gray-700 mt-2 pt-2">
+                  <button
+                    onClick={logout}
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    {text.logout}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
