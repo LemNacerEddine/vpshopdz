@@ -73,6 +73,31 @@ agent_communication:
       - PDF invoice generation: Code implemented but needs orders with actual data to test download functionality
       
       All major admin dashboard improvements are working as specified in the requirements.
+  - agent: "main"
+    message: |
+      TESTING REQUEST - ADMIN DASHBOARD NAVIGATION FIX:
+      
+      Testing Scope:
+      1. Admin Login Flow: Login with email admin@agroyousfi.dz, enter OTP, verify redirect to /admin
+      2. Sidebar Navigation: 
+         - Click on "المنتجات" (Products) menu to expand submenu
+         - Click on "إضافة منتج" (Add Product) - verify navigation to /admin/products/new
+         - Click on "جميع المنتجات" (All Products) - verify navigation to /admin/products
+         - Click on "التصنيفات" (Categories) - verify navigation to /admin/categories
+      3. Orders Submenu: 
+         - Click on "الطلبات" (Orders) menu to expand
+         - Click on submenu items
+      4. Settings Submenu: Test all settings submenu items
+      5. Direct page access: Test /admin/products, /admin/products/new, /admin/categories, /admin/orders
+      
+      Login credentials:
+      - Email: admin@agroyousfi.dz
+      - OTP will be displayed in the UI after sending
+      
+      Critical Issue to verify:
+      - Sidebar submenu links (like "إضافة منتج" under "المنتجات") were reported as not working
+      - Session management during navigation between admin pages
+      
   - agent: "testing"
     message: |
       COMPREHENSIVE ADMIN DASHBOARD AND AUTHENTICATION TESTING COMPLETED:
