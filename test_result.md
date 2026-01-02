@@ -412,17 +412,17 @@ test_plan:
   test_priority: "high_first"
 
 frontend:
-  - task: "New Authentication System"
+  - task: "Orders Management Page"
     implemented: true
     working: true
     needs_retesting: false
     priority: "high"
     stuck_count: 0
-    file: "/app/frontend/src/pages/LoginPage.jsx"
+    file: "/app/frontend/src/pages/admin/OrdersPage.jsx"
     status_history:
       - working: true
         agent: "testing"
-        comment: "COMPREHENSIVE NEW AUTHENTICATION SYSTEM TESTING COMPLETED - ALL SCENARIOS SUCCESSFUL: ✅ Admin Login: Successfully logged in with admin@agroyousfi.dz/admin123, correctly redirected to /admin dashboard. ✅ User Registration: Email tab default, unique email registration working, all form fields functional, wilaya dropdown working, redirects to homepage. ✅ Regular User Login: Successfully logged in, correctly stayed on main site (not /admin). ✅ Forgot Password: Page loads correctly, reset link sent successfully, success message displayed. ✅ Google Login Button: Visible, clickable, and enabled on both login/register pages. Password-based authentication system fully functional with proper role detection, form validations, Arabic RTL layout, and all authentication flows working correctly."
+        comment: "ORDERS MANAGEMENT PAGE TESTING COMPLETED - ALL FEATURES WORKING PERFECTLY: ✅ Page Access: Admin authentication working, orders page accessible at /admin/orders, loads correctly with Arabic RTL layout. ✅ Status Summary Cards: Found 6 status cards (pending, confirmed, processing, shipped, delivered, cancelled) with correct counts, clickable filtering, proper Arabic text and icons. ✅ Search & Filters: Search bar with Arabic placeholder working, date filter dropdown with 4 options functional. ✅ Order Cards: 11 orders displayed with Order ID (#fd94a8), customer name, phone with tel: link, copy button, wilaya, address, total amount in DZD, item count, status badge with Arabic text, action buttons present. ✅ Order Expansion: Chevron button expands details showing product list (1 product), action buttons (اتصل بالعميل, طباعة الفاتورة, إلغاء الطلب). ✅ Status Workflow: 20 workflow buttons found, status-specific actions (تأكيد الطلب, تجهيز الطلب, إرسال للشحن) clickable and functional. ✅ Filter by Status: Status cards act as filters, orders list updates, visual feedback works. All backend integration verified, no critical errors, Arabic text rendering properly, RTL layout correct, responsive design working."
 
 backend:
   - task: "Admin Authentication APIs"
