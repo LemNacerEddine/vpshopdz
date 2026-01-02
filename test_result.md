@@ -184,8 +184,8 @@ frontend:
     working: false
     needs_retesting: false
     priority: "high"
-    stuck_count: 1
-    file: "/app/frontend/src/pages/admin/"
+    stuck_count: 2
+    file: "/app/frontend/src/components/admin/AdminLayout.jsx"
     status_history:
       - working: false
         agent: "testing"
@@ -196,3 +196,6 @@ frontend:
       - working: false
         agent: "testing"
         comment: "CRITICAL SIDEBAR NAVIGATION ISSUE CONFIRMED: Products submenu items ('إضافة منتج', 'جميع المنتجات', 'التصنيفات') do NOT render after clicking Products menu button. React conditional rendering logic in AdminLayout.jsx (lines 356-372) is failing specifically for Products menu while working correctly for Orders and Settings menus. Session management also expires quickly requiring re-login. Direct page access works when session valid. ROOT CAUSE: expandedMenus state management issue in AdminLayout.jsx - Products menu not properly expanding submenu despite correct button styling and state initialization."
+      - working: false
+        agent: "testing"
+        comment: "FINAL TESTING CONFIRMS CRITICAL PRODUCTS MENU BUG: Products menu ('المنتجات') has INVERTED toggle behavior - starts expanded showing submenu items but clicking it COLLAPSES the submenu instead of keeping it open. Orders and Settings menus work correctly. Login process works perfectly with admin@agroyousfi.dz. Dashboard loads correctly with RTL layout. Session expires quickly causing login redirects. ROOT CAUSE: Products menu toggle logic is inverted in expandedMenus state management - it collapses when it should expand, while other menus work correctly. IMMEDIATE FIX: Debug Products menu ID or toggle logic in AdminLayout.jsx toggleMenu function."
