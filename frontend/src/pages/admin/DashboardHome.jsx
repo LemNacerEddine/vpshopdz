@@ -503,36 +503,38 @@ const DashboardHome = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title={text.totalRevenue}
-          value={formatPrice(stats?.total_revenue || 0)}
-          icon={DollarSign}
-          trend="up"
-          trendValue="+12.5%"
-          color="bg-green-500"
-        />
-        <StatCard
-          title={text.totalOrders}
-          value={stats?.total_orders || 0}
-          icon={ShoppingCart}
-          trend="up"
-          trendValue="+8.2%"
-          color="bg-blue-500"
-        />
-        <StatCard
-          title={text.totalProducts}
-          value={stats?.total_products || 0}
-          icon={Package}
-          color="bg-purple-500"
-        />
-        <StatCard
-          title={text.totalCustomers}
-          value={stats?.total_users || 0}
-          icon={Users}
-          trend="up"
-          trendValue="+5.1%"
-          color="bg-orange-500"
-        />
+        {renderStatCard(
+          text.totalRevenue,
+          formatPrice(stats?.total_revenue || 0),
+          DollarSign,
+          "up",
+          "+12.5%",
+          "bg-green-500"
+        )}
+        {renderStatCard(
+          text.totalOrders,
+          stats?.total_orders || 0,
+          ShoppingCart,
+          "up",
+          "+8.2%",
+          "bg-blue-500"
+        )}
+        {renderStatCard(
+          text.totalProducts,
+          stats?.total_products || 0,
+          Package,
+          null,
+          null,
+          "bg-purple-500"
+        )}
+        {renderStatCard(
+          text.totalCustomers,
+          stats?.total_users || 0,
+          Users,
+          "up",
+          "+5.1%",
+          "bg-orange-500"
+        )}
       </div>
 
       {/* Orders to Process - Full Width */}
