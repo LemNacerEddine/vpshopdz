@@ -180,10 +180,23 @@ class AgroYousfiAPITester:
         self.session_token = self.admin_token
         
         # Test admin stats
-        self.run_test("Get Admin Stats", "GET", "admin/stats", 200)
+        stats_result = self.run_test("Get Admin Stats", "GET", "admin/stats", 200)
+        if stats_result:
+            required_fields = ['total_products', 'total_orders', 'pending_orders', 'total_users', 'total_revenue']
+            missing_fields = [field for field in required_fields if field not in stats_result]
+            if missing_fields:
+                self.log_test("Admin Stats Fields", False, f"Missing fields: {missing_fields}")
+            else:
+                self.log_test("Admin Stats Fields", True, "All required fields present")
         
         # Test admin orders
-        self.run_test("Get Admin Orders", "GET", "admin/orders", 200)
+        orders_result = self.run_test("Get Admin Orders", "GET", "admin/orders", 200)
+        
+        # Test order status update if we have orders
+        if orders_result and len(orders_result) > 0:
+            order_id = orders_result[0]['order_id']
+            status_data = {"status": "confirmed"}
+            self.run_test("Update Order Status", "PUT", f"admin/orders/{order_id}/status", 200, status_data)
         
         # Restore original token
         self.session_token = original_token
