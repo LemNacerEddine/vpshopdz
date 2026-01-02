@@ -196,7 +196,12 @@ const AdminLayout = ({ children }) => {
       label: text.orders,
       children: [
         { label: text.allOrders, path: '/admin/orders' },
-        { label: text.pendingOrders, path: '/admin/orders?status=pending' }
+        { label: text.pendingOrders, path: '/admin/orders?status=pending' },
+        { label: text.confirmedOrders, path: '/admin/orders?status=confirmed' },
+        { label: text.processingOrders, path: '/admin/orders?status=processing' },
+        { label: text.shippedOrders, path: '/admin/orders?status=shipped' },
+        { label: text.deliveredOrders, path: '/admin/orders?status=delivered' },
+        { label: text.cancelledOrders, path: '/admin/orders?status=cancelled' }
       ]
     },
     {
