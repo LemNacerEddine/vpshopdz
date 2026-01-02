@@ -453,7 +453,7 @@ const AdminLayout = ({ children }) => {
                       onClick={() => sidebarOpen && toggleMenu(item.id)}
                       title={!sidebarOpen ? item.label : undefined}
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                        (expandedMenus.includes(item.id) || isMenuActive(item.id)) && sidebarOpen
+                        (expandedMenus.includes(item.id) || hasActiveChild(item.id)) && sidebarOpen
                           ? 'bg-primary/10 text-primary'
                           : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                       } ${!sidebarOpen ? 'justify-center' : ''}`}
@@ -462,11 +462,11 @@ const AdminLayout = ({ children }) => {
                       {sidebarOpen && (
                         <>
                           <span className="flex-1 text-start">{item.label}</span>
-                          <ChevronDown className={`h-4 w-4 transition-transform ${(expandedMenus.includes(item.id) || isMenuActive(item.id)) ? 'rotate-180' : ''}`} />
+                          <ChevronDown className={`h-4 w-4 transition-transform ${expandedMenus.includes(item.id) ? 'rotate-180' : ''}`} />
                         </>
                       )}
                     </button>
-                    {(expandedMenus.includes(item.id) || isMenuActive(item.id)) && sidebarOpen && (
+                    {expandedMenus.includes(item.id) && sidebarOpen && (
                       <div className="mt-1 space-y-1 ps-8">
                         {item.children.map((child, idx) => (
                           <Link
