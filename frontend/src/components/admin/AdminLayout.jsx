@@ -428,7 +428,7 @@ const AdminLayout = ({ children }) => {
                         </>
                       )}
                     </button>
-                    {expandedMenus.includes(item.id) && sidebarOpen && (
+                    {(expandedMenus.includes(item.id) || isMenuActive(item.id)) && sidebarOpen && (
                       <div className="mt-1 space-y-1 ps-8">
                         {item.children.map((child, idx) => (
                           <Link
