@@ -251,37 +251,6 @@ const AdminLayout = ({ children }) => {
     }
   };
 
-  // Auto-expand menu based on current path
-  useEffect(() => {
-    const path = location.pathname;
-    const menuToExpand = [];
-    
-    // Check which parent menu should be expanded based on current path
-    if (path.startsWith('/admin/products') || path.startsWith('/admin/categories')) {
-      menuToExpand.push('products');
-    }
-    if (path.startsWith('/admin/orders')) {
-      menuToExpand.push('orders');
-    }
-    if (path.startsWith('/admin/finance')) {
-      menuToExpand.push('finance');
-    }
-    if (path.startsWith('/admin/settings')) {
-      menuToExpand.push('settings');
-    }
-    
-    // Add menus that should be expanded but aren't
-    setExpandedMenus(prev => {
-      const newExpanded = [...prev];
-      menuToExpand.forEach(menu => {
-        if (!newExpanded.includes(menu)) {
-          newExpanded.push(menu);
-        }
-      });
-      return newExpanded;
-    });
-  }, [location.pathname]);
-
   const isActive = (path) => {
     if (path === '/admin') return location.pathname === '/admin';
     return location.pathname.startsWith(path);
