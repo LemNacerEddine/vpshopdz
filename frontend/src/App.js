@@ -14,6 +14,8 @@ import CategoriesPage from '@/pages/CategoriesPage';
 import CartPage from '@/pages/CartPage';
 import CheckoutPage from '@/pages/CheckoutPage';
 import LoginPage from '@/pages/LoginPage';
+import RegisterPage from '@/pages/RegisterPage';
+import ForgotPasswordPage from '@/pages/ForgotPasswordPage';
 import AuthCallback from '@/pages/AuthCallback';
 import ProfilePage from '@/pages/ProfilePage';
 import AdminRouter from '@/pages/admin/AdminRouter';
@@ -45,6 +47,8 @@ const AppRouter = () => {
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/orders" element={<ProfilePage />} />
