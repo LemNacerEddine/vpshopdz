@@ -300,7 +300,8 @@ const DashboardHome = () => {
     { name: language === 'ar' ? 'مبيد حشري' : 'Insecticide', sales: 22 }
   ];
 
-  const StatCard = ({ title, value, icon: Icon, trend, trendValue, color }) => (
+  // Render stat card
+  const renderStatCard = (title, value, Icon, trend, trendValue, color) => (
     <Card className="relative overflow-hidden">
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
@@ -324,13 +325,13 @@ const DashboardHome = () => {
     </Card>
   );
 
-  // Order Card Component with full details
-  const OrderCard = ({ order }) => {
+  // Render order card
+  const renderOrderCard = (order) => {
     const isExpanded = expandedOrder === order.order_id;
     const isConfirming = confirmingOrder === order.order_id;
 
     return (
-      <div className="border rounded-xl overflow-hidden bg-card hover:shadow-md transition-shadow">
+      <div key={order.order_id} className="border rounded-xl overflow-hidden bg-card hover:shadow-md transition-shadow">
         {/* Main Info Row */}
         <div className="p-4">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
