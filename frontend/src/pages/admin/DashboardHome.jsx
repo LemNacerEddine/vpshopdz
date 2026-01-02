@@ -570,9 +570,7 @@ const DashboardHome = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {recentOrders.map(order => (
-                <OrderCard key={order.order_id} order={order} />
-              ))}
+              {recentOrders.map(order => renderOrderCard(order))}
             </div>
           )}
         </CardContent>
