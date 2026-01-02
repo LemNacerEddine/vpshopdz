@@ -119,6 +119,32 @@ agent_communication:
       - Session persistence needs improvement for extended admin navigation
       
       RECOMMENDATION: Fix session management and ensure 'إضافة منتج' submenu link is properly displayed in the Products menu.
+  - agent: "testing"
+    message: |
+      CRITICAL SIDEBAR NAVIGATION ISSUE IDENTIFIED - DETAILED TESTING COMPLETED:
+      
+      ❌ CRITICAL FINDINGS:
+      1. Products Submenu NOT Rendering: Products menu button ('المنتجات') is found and clickable, but submenu items ('إضافة منتج', 'جميع المنتجات', 'التصنيفات') do NOT appear after clicking
+      2. React State Issue: expandedMenus state appears to have 'products' by default, but conditional rendering {expandedMenus.includes(item.id) && sidebarOpen && (...)} is not working
+      3. Session Expiration: Authentication session expires within minutes, requiring re-login during testing
+      
+      ✅ WORKING FEATURES:
+      1. Login Process: Email OTP login works correctly with admin@agroyousfi.dz
+      2. Dashboard Display: Admin dashboard loads with stats, charts, and pending orders section
+      3. Other Submenus: Orders ('الطلبات') and Settings ('الإعدادات') submenus expand and work correctly
+      4. Direct Page Access: All admin pages (/admin/products, /admin/products/new, /admin/categories, /admin/orders) are accessible via direct URL when session is valid
+      5. RTL Layout: Sidebar correctly positioned on right side with Arabic text
+      
+      🔍 TECHNICAL ANALYSIS:
+      - Sidebar buttons found: Dashboard, Products, Orders, Finance, Settings
+      - Products menu has correct styling (bg-primary/10 text-primary) indicating active state
+      - Chevron icon present but submenu div not rendering
+      - No JavaScript console errors detected
+      - DOM structure shows button exists but submenu container missing
+      
+      ROOT CAUSE: React conditional rendering logic in AdminLayout.jsx line 356-372 is failing for Products menu specifically, while working for other menus.
+      
+      IMMEDIATE ACTION REQUIRED: Debug expandedMenus state management and submenu rendering logic for Products menu in AdminLayout.jsx.
 
 test_plan:
   current_focus:
