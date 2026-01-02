@@ -68,6 +68,16 @@ const OrdersPage = () => {
   const [updatingOrder, setUpdatingOrder] = useState(null);
   const [expandedOrders, setExpandedOrders] = useState([]);
 
+  // Update status filter when URL changes
+  useEffect(() => {
+    const urlStatus = searchParams.get('status');
+    if (urlStatus) {
+      setStatusFilter(urlStatus);
+    } else {
+      setStatusFilter('all');
+    }
+  }, [searchParams]);
+
   const locale = language === 'ar' ? ar : language === 'fr' ? fr : enUS;
 
   const l = {
