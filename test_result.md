@@ -145,6 +145,32 @@ agent_communication:
       ROOT CAUSE: React conditional rendering logic in AdminLayout.jsx line 356-372 is failing for Products menu specifically, while working for other menus.
       
       IMMEDIATE ACTION REQUIRED: Debug expandedMenus state management and submenu rendering logic for Products menu in AdminLayout.jsx.
+  - agent: "testing"
+    message: |
+      FINAL ADMIN DASHBOARD NAVIGATION TESTING COMPLETED - CRITICAL ISSUE CONFIRMED:
+      
+      ❌ CRITICAL ISSUE CONFIRMED:
+      1. Products Submenu Toggle Bug: Products menu ('المنتجات') starts expanded by default but clicking it COLLAPSES the submenu instead of keeping it open. This is opposite behavior from Orders and Settings menus which work correctly.
+      2. Session Management: Authentication session expires quickly (within minutes), causing redirects to login page during navigation testing.
+      
+      ✅ WORKING FEATURES:
+      1. Login Process: Email OTP login with admin@agroyousfi.dz works perfectly - OTP displays correctly and verification succeeds
+      2. Admin Dashboard: Loads correctly with stats cards, charts, and pending orders section
+      3. RTL Layout: Sidebar positioned correctly on right side with proper Arabic text display
+      4. Other Submenus: Orders ('الطلبات') and Settings ('الإعدادات') submenus expand and show items correctly
+      5. Admin Route Protection: Properly redirects to login when session expires
+      
+      🔍 DETAILED ANALYSIS:
+      - Products menu button found and clickable
+      - Submenu starts visible (showing 'إضافة منتج', 'جميع المنتجات', 'التصنيفات') 
+      - After clicking Products button, submenu disappears (count goes from visible to 0)
+      - Orders and Settings menus work correctly - clicking expands and shows submenu items
+      - No JavaScript console errors related to navigation (only chart warnings and auth 401s)
+      - Direct page access fails due to session expiration (redirects to login)
+      
+      ROOT CAUSE: Products menu toggle logic is inverted - it collapses when it should expand, while other menus work correctly. This suggests a specific issue with the Products menu ID or toggle logic in AdminLayout.jsx.
+      
+      IMMEDIATE FIX NEEDED: Debug why Products menu toggle behavior is opposite to other menus in the expandedMenus state management.
 
 test_plan:
   current_focus:
