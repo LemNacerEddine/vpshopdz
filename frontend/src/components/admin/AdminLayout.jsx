@@ -44,7 +44,7 @@ const AdminLayout = ({ children }) => {
     return false;
   });
   
-  // Initialize expanded menus from localStorage or default to products
+  // Initialize expanded menus from localStorage or based on current path
   const [expandedMenus, setExpandedMenus] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('admin-expanded-menus');
@@ -52,9 +52,25 @@ const AdminLayout = ({ children }) => {
         try {
           return JSON.parse(saved);
         } catch {
-          return ['products'];
+          // Fall through to path-based initialization
         }
       }
+      // Initialize based on current path
+      const path = window.location.pathname;
+      const initial = [];
+      if (path.startsWith('/admin/products') || path.startsWith('/admin/categories')) {
+        initial.push('products');
+      }
+      if (path.startsWith('/admin/orders')) {
+        initial.push('orders');
+      }
+      if (path.startsWith('/admin/finance')) {
+        initial.push('finance');
+      }
+      if (path.startsWith('/admin/settings')) {
+        initial.push('settings');
+      }
+      return initial.length > 0 ? initial : ['products'];
     }
     return ['products'];
   });
