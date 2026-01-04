@@ -151,6 +151,28 @@ class AgroYousfiAPITester:
         # Remove item from cart
         self.run_test("Remove from Cart", "DELETE", f"cart/remove/{product_id}", 200)
 
+    def test_admin_login_password(self):
+        """Test admin login with password (admin@agroyousfi.dz / admin123)"""
+        login_data = {
+            "identifier": "admin@agroyousfi.dz",
+            "password": "admin123"
+        }
+        
+        result = self.run_test("Admin Login with Password", "POST", "auth/login", 200, login_data)
+        
+        if result and 'session_token' in result:
+            user = result.get('user', {})
+            if user.get('role') == 'admin':
+                self.admin_token = result['session_token']
+                self.log_test("Admin Password Login Role Check", True, f"Admin role confirmed: {user.get('role')}")
+                return result
+            else:
+                self.log_test("Admin Password Login Role Check", False, f"Expected admin role, got: {user.get('role')}")
+        else:
+            self.log_test("Admin Password Login", False, "Failed to get session token")
+        
+        return result
+
     def test_admin_login(self):
         """Test admin login"""
         # Send OTP to admin email
