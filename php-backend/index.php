@@ -15,6 +15,7 @@ ini_set('log_errors', 1);
 require_once __DIR__ . '/config/cors.php';
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/utils/helpers.php';
+require_once __DIR__ . '/data/wilayas.php';
 
 // Controllers
 require_once __DIR__ . '/controllers/AuthController.php';
