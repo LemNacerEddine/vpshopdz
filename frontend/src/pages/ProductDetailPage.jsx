@@ -247,6 +247,27 @@ export const ProductDetailPage = () => {
 
   const ChevronIcon = isRTL ? ChevronLeft : ChevronRight;
 
+  // Check for new discount system (discount_percent with dates)
+  // Memoize date calculations to prevent infinite re-renders - MUST be before any returns
+  const discountDates = useMemo(() => {
+    if (!product) return { discountStart: null, discountEnd: null, isNewDiscountActive: false };
+    
+    const now = new Date();
+    const discountStart = product.discount_start ? new Date(product.discount_start) : null;
+    const discountEnd = product.discount_end ? new Date(product.discount_end) : null;
+    
+    // Determine if new discount is currently active
+    const isNewDiscountActive = product.discount_percent && product.discount_percent > 0 && (
+      (!discountStart && !discountEnd) || // No date restriction
+      (discountStart && discountEnd && now >= discountStart && now <= discountEnd) || // Within range
+      (discountStart && !discountEnd && now >= discountStart) // Started but no end
+    );
+    
+    return { discountStart, discountEnd, isNewDiscountActive };
+  }, [product?.discount_start, product?.discount_end, product?.discount_percent]);
+
+  const { discountStart, discountEnd, isNewDiscountActive } = discountDates;
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-6">
