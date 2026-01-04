@@ -30,6 +30,76 @@ import {
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
+// Discount countdown component - moved outside to avoid unstable nested component
+const DiscountCountdown = ({ endDate, language, text }) => {
+  const [timeLeft, setTimeLeft] = useState(null);
+
+  useEffect(() => {
+    const updateTimeLeft = () => {
+      const now = new Date();
+      const diff = endDate - now;
+      
+      if (diff <= 0) {
+        setTimeLeft(null);
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+      if (days > 0) {
+        setTimeLeft({ days, hours, type: 'days' });
+      } else if (hours > 0) {
+        setTimeLeft({ hours, minutes, type: 'hours' });
+      } else {
+        setTimeLeft({ minutes, type: 'minutes' });
+      }
+    };
+
+    updateTimeLeft();
+    const interval = setInterval(updateTimeLeft, 60000);
+    return () => clearInterval(interval);
+  }, [endDate]);
+
+  if (!timeLeft) return null;
+
+  const formatTime = () => {
+    if (language === 'ar') {
+      if (timeLeft.type === 'days') {
+        return `${timeLeft.days} يوم ${timeLeft.hours} ساعة`;
+      } else if (timeLeft.type === 'hours') {
+        return `${timeLeft.hours} س ${timeLeft.minutes} د`;
+      } else {
+        return `${timeLeft.minutes} دقيقة`;
+      }
+    } else if (language === 'fr') {
+      if (timeLeft.type === 'days') {
+        return `${timeLeft.days}j ${timeLeft.hours}h`;
+      } else if (timeLeft.type === 'hours') {
+        return `${timeLeft.hours}h ${timeLeft.minutes}m`;
+      } else {
+        return `${timeLeft.minutes} min`;
+      }
+    } else {
+      if (timeLeft.type === 'days') {
+        return `${timeLeft.days}d ${timeLeft.hours}h`;
+      } else if (timeLeft.type === 'hours') {
+        return `${timeLeft.hours}h ${timeLeft.minutes}m`;
+      } else {
+        return `${timeLeft.minutes} min`;
+      }
+    }
+  };
+
+  return (
+    <Badge variant="outline" className="bg-black/10 border-red-300 text-red-600 text-xs">
+      <Clock className="h-3 w-3 me-1" />
+      {text.endsIn}: {formatTime()}
+    </Badge>
+  );
+};
+
 export const ProductDetailPage = () => {
   const { productId } = useParams();
   const { t, language, isRTL, formatPrice } = useLanguage();
