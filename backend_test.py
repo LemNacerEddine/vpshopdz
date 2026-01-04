@@ -778,6 +778,10 @@ class AgroYousfiAPITester:
         # SPECIFIC ADMIN DASHBOARD SCENARIOS (NEW)
         self.test_admin_dashboard_scenarios()
         
+        # PRODUCT DISCOUNT FEATURE TESTING (NEW)
+        print("\n🏷️ Testing Product Discount Feature...")
+        self.test_product_discount_feature()
+        
         # Print summary
         print("\n" + "=" * 50)
         print(f"📊 Test Summary: {self.tests_passed}/{self.tests_run} tests passed")
