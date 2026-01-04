@@ -56,9 +56,14 @@ const ProductForm = () => {
     images: [],
     video: '',
     featured: false,
-    unit: 'piece'
+    unit: 'piece',
+    // Discount fields
+    discount_percent: '',
+    discount_start: '',
+    discount_end: ''
   });
   const [imageUrl, setImageUrl] = useState('');
+  const [discountEnabled, setDiscountEnabled] = useState(false);
 
   const l = {
     ar: {
@@ -92,7 +97,15 @@ const ProductForm = () => {
       imageUrl: 'رابط الصورة',
       video: 'رابط الفيديو (اختياري)',
       productSaved: 'تم حفظ المنتج بنجاح',
-      error: 'حدث خطأ'
+      error: 'حدث خطأ',
+      // Discount translations
+      discount: 'الخصم والعروض',
+      enableDiscount: 'تفعيل الخصم',
+      discountPercent: 'نسبة الخصم (%)',
+      discountStart: 'تاريخ بداية الخصم',
+      discountEnd: 'تاريخ نهاية الخصم',
+      priceAfterDiscount: 'السعر بعد الخصم',
+      discountNote: 'سيتم تطبيق الخصم تلقائياً في الفترة المحددة'
     },
     fr: {
       addProduct: 'Ajouter un produit',
@@ -125,7 +138,15 @@ const ProductForm = () => {
       imageUrl: 'URL de l\'image',
       video: 'URL vidéo (optionnel)',
       productSaved: 'Produit enregistré',
-      error: 'Erreur'
+      error: 'Erreur',
+      // Discount translations
+      discount: 'Remise et offres',
+      enableDiscount: 'Activer la remise',
+      discountPercent: 'Pourcentage de remise (%)',
+      discountStart: 'Date de début',
+      discountEnd: 'Date de fin',
+      priceAfterDiscount: 'Prix après remise',
+      discountNote: 'La remise sera appliquée automatiquement pendant la période'
     },
     en: {
       addProduct: 'Add New Product',
