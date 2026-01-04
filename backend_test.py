@@ -794,7 +794,9 @@ class AgroYousfiAPITester:
         
         # Admin operations
         print("\n👑 Testing Admin Operations...")
-        self.test_admin_login()
+        self.test_admin_login_password()  # Try password login first
+        if not self.admin_token:
+            self.test_admin_login()  # Fallback to OTP login
         self.test_admin_operations()
         
         # SPECIFIC ADMIN DASHBOARD SCENARIOS (NEW)
