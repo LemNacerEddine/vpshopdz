@@ -10,6 +10,7 @@ import { Toaster } from 'sonner';
 import HomePage from '@/pages/HomePage';
 import ProductsPage from '@/pages/ProductsPage';
 import ProductDetailPage from '@/pages/ProductDetailPage';
+import DealsPage from '@/pages/DealsPage';
 import CategoriesPage from '@/pages/CategoriesPage';
 import CartPage from '@/pages/CartPage';
 import CheckoutPage from '@/pages/CheckoutPage';
