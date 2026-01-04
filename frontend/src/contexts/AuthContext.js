@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 
 const AuthContext = createContext();
@@ -25,8 +25,12 @@ export const AuthProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(true);
 
+  // Memoize user_id to prevent unnecessary re-renders
+  const userId = useMemo(() => user?.user_id, [user?.user_id]);
+
   useEffect(() => {
     checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Persist user to localStorage
@@ -38,11 +42,12 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user]);
 
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       const response = await axios.get(`${API}/auth/me`, {
         withCredentials: true
       });
+      // response.data is the user object directly from /api/auth/me
       setUser(response.data);
     } catch (error) {
       // If 401, clear stored user
@@ -53,7 +58,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const sendOTP = async (email) => {
     const response = await axios.post(`${API}/auth/send-otp`, { email });
@@ -80,14 +85,14 @@ export const AuthProvider = ({ children }) => {
     return response.data.user;  // Return user for redirect decision
   };
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await axios.post(`${API}/auth/logout`, {}, { withCredentials: true });
     } catch (error) {
       console.error('Logout error:', error);
     }
     setUser(null);
-  };
+  }, []);
 
   const updateProfile = async (data) => {
     const response = await axios.put(`${API}/auth/profile`, data, {
@@ -99,8 +104,9 @@ export const AuthProvider = ({ children }) => {
 
   const isAdmin = user?.role === 'admin';
 
-  const value = {
+  const value = useMemo(() => ({
     user,
+    userId,
     loading,
     sendOTP,
     verifyOTP,
@@ -109,7 +115,7 @@ export const AuthProvider = ({ children }) => {
     updateProfile,
     checkAuth,
     isAdmin
-  };
+  }), [user, userId, loading, logout, checkAuth, isAdmin]);
 
   return (
     <AuthContext.Provider value={value}>
