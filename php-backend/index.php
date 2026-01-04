@@ -25,6 +25,10 @@ require_once __DIR__ . '/controllers/OrderController.php';
 require_once __DIR__ . '/controllers/ReviewController.php';
 require_once __DIR__ . '/controllers/WishlistController.php';
 require_once __DIR__ . '/controllers/AdminController.php';
+require_once __DIR__ . '/controllers/CartController.php';
+require_once __DIR__ . '/controllers/AddressController.php';
+require_once __DIR__ . '/controllers/BrowsingHistoryController.php';
+require_once __DIR__ . '/controllers/UploadController.php';
 
 // Get database connection
 try {
@@ -56,6 +60,10 @@ $orderController = new OrderController($db);
 $reviewController = new ReviewController($db);
 $wishlistController = new WishlistController($db);
 $adminController = new AdminController($db);
+$cartController = new CartController($db);
+$addressController = new AddressController($db);
+$historyController = new BrowsingHistoryController($db);
+$uploadController = new UploadController();
 
 // Route handling
 try {
@@ -198,6 +206,48 @@ try {
                     if ($method === 'POST') $categoryController->store();
                     break;
             }
+            break;
+
+        // ==================== CART ====================
+        case 'cart':
+            if ($id === null) {
+                if ($method === 'GET') $cartController->index();
+                if ($method === 'POST') $cartController->add();
+                if ($method === 'PUT') $cartController->update();
+                if ($method === 'DELETE') $cartController->clear();
+            } else {
+                if ($method === 'DELETE') $cartController->remove($id);
+            }
+            break;
+
+        // ==================== ADDRESSES ====================
+        case 'addresses':
+            if ($id === null) {
+                if ($method === 'GET') $addressController->index();
+                if ($method === 'POST') $addressController->store();
+            } else {
+                if ($method === 'PUT') $addressController->update($id);
+                if ($method === 'DELETE') $addressController->destroy($id);
+            }
+            break;
+
+        // ==================== BROWSING HISTORY ====================
+        case 'history':
+            if ($id === null) {
+                if ($method === 'GET') $historyController->index();
+                if ($method === 'DELETE') $historyController->clear();
+            } else {
+                if ($method === 'POST') $historyController->add($id);
+            }
+            break;
+
+        // ==================== UPLOAD ====================
+        case 'upload':
+            if ($method === 'POST') $uploadController->uploadImage();
+            break;
+
+        case 'uploads':
+            if ($id && $method === 'GET') $uploadController->serveFile($id);
             break;
 
         default:
