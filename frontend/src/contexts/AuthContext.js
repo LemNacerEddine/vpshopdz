@@ -115,7 +115,7 @@ export const AuthProvider = ({ children }) => {
     updateProfile,
     checkAuth,
     isAdmin
-  }), [user, userId, loading, logout, checkAuth, isAdmin]);
+  }), [user, userId, loading, sendOTP, verifyOTP, processGoogleSession, logout, updateProfile, checkAuth, isAdmin]);
 
   return (
     <AuthContext.Provider value={value}>
