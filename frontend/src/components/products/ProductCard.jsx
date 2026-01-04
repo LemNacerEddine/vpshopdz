@@ -90,7 +90,7 @@ export const ProductCard = ({ product }) => {
   // Check wishlist status on mount
   useEffect(() => {
     const checkWishlistStatus = async () => {
-      if (!user) return;
+      if (!userId) return;
       try {
         const response = await axios.get(`${API}/wishlist`, { withCredentials: true });
         const inWishlist = response.data.some(item => item.product_id === product.product_id);
@@ -101,7 +101,7 @@ export const ProductCard = ({ product }) => {
     };
     checkWishlistStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.user_id, product.product_id]);
+  }, [userId, product.product_id]);
 
   const handleToggleWishlist = async (e) => {
     e.preventDefault();
