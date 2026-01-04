@@ -1637,6 +1637,25 @@ async def delete_address(address_id: str, user: User = Depends(require_auth)):
         raise HTTPException(status_code=404, detail="Address not found")
     return {"message": "Address deleted"}
 
+# ============ ROOT API ENDPOINT ============
+
+@api_router.get("/")
+async def api_info():
+    """API information endpoint"""
+    return {
+        "name": "AgroYousfi API",
+        "version": "1.0.0",
+        "description": "E-commerce API for agricultural products",
+        "status": "running",
+        "endpoints": {
+            "products": "/api/products",
+            "categories": "/api/categories", 
+            "wilayas": "/api/wilayas",
+            "auth": "/api/auth/*",
+            "admin": "/api/admin/*"
+        }
+    }
+
 # ============ SEED DATA ============
 
 @api_router.post("/seed")
