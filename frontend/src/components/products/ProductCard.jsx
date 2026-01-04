@@ -280,25 +280,12 @@ export const ProductCard = ({ product }) => {
               )}
             </div>
             
-            {/* Savings Amount */}
+            {/* Savings Amount - Smaller */}
             {hasDiscount && strikePrice && (
-              <p className="text-xs text-green-600 font-medium mt-1">
+              <p className="text-[10px] text-green-600 font-medium mt-0.5">
                 {language === 'ar' ? 'وفّر ' : language === 'fr' ? 'Économisez ' : 'Save '}
                 {formatPrice(strikePrice - displayPrice)}
               </p>
-            )}
-          </div>
-
-          {/* Stock Status */}
-          <div className="mt-2">
-            {product.stock > 0 ? (
-              <span className="text-xs text-green-600 font-medium">
-                {t('products.inStock')}
-              </span>
-            ) : (
-              <span className="text-xs text-destructive font-medium">
-                {t('products.outOfStock')}
-              </span>
             )}
           </div>
         </div>
