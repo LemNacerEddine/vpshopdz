@@ -60,14 +60,16 @@ export const ProductCard = ({ product }) => {
 
   // Calculate time remaining for discount
   useEffect(() => {
-    if (!isDiscountActive || !discountEnd) {
+    if (!isDiscountActive || !product.discount_end) {
       setTimeLeft(null);
       return;
     }
 
+    const endDate = new Date(product.discount_end);
+    
     const updateTimeLeft = () => {
       const now = new Date();
-      const diff = discountEnd - now;
+      const diff = endDate - now;
       
       if (diff <= 0) {
         setTimeLeft(null);
@@ -91,7 +93,7 @@ export const ProductCard = ({ product }) => {
     const interval = setInterval(updateTimeLeft, 60000); // Update every minute
 
     return () => clearInterval(interval);
-  }, [isDiscountActive, discountEnd]);
+  }, [isDiscountActive, product.discount_end]);
 
   // Check wishlist status on mount
   useEffect(() => {
