@@ -204,9 +204,33 @@ export const ProductDetailPage = () => {
 
   const name = product[`name_${language}`] || product.name_ar;
   const description = product[`description_${language}`] || product.description_ar;
-  const discountPercent = product.old_price 
+  
+  // Check for new discount system (discount_percent with dates)
+  const now = new Date();
+  const discountStart = product.discount_start ? new Date(product.discount_start) : null;
+  const discountEnd = product.discount_end ? new Date(product.discount_end) : null;
+  
+  // Determine if new discount is currently active
+  const isNewDiscountActive = product.discount_percent && product.discount_percent > 0 && (
+    (!discountStart && !discountEnd) || // No date restriction
+    (discountStart && discountEnd && now >= discountStart && now <= discountEnd) || // Within range
+    (discountStart && !discountEnd && now >= discountStart) // Started but no end
+  );
+
+  // Calculate prices based on active discount system
+  const hasLegacyDiscount = !isNewDiscountActive && product.old_price && product.old_price > product.price;
+  const legacyDiscountPercent = hasLegacyDiscount 
     ? Math.round((1 - product.price / product.old_price) * 100) 
     : 0;
+  
+  // Use new discount system if active, otherwise fall back to legacy
+  const discountPercent = isNewDiscountActive ? product.discount_percent : legacyDiscountPercent;
+  const originalPrice = isNewDiscountActive ? product.price : (hasLegacyDiscount ? product.old_price : product.price);
+  const displayPrice = isNewDiscountActive 
+    ? product.price * (1 - product.discount_percent / 100) 
+    : product.price;
+  const savingsAmount = originalPrice - displayPrice;
+  const hasDiscount = discountPercent > 0;
 
   const l = {
     ar: {
