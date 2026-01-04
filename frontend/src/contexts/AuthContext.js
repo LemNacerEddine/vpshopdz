@@ -60,12 +60,12 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const sendOTP = async (email) => {
+  const sendOTP = useCallback(async (email) => {
     const response = await axios.post(`${API}/auth/send-otp`, { email });
     return response.data;
-  };
+  }, []);
 
-  const verifyOTP = async (email, code) => {
+  const verifyOTP = useCallback(async (email, code) => {
     const response = await axios.post(
       `${API}/auth/verify-otp`,
       { email, code },
@@ -73,9 +73,9 @@ export const AuthProvider = ({ children }) => {
     );
     setUser(response.data.user);
     return response.data;
-  };
+  }, []);
 
-  const processGoogleSession = async (sessionId) => {
+  const processGoogleSession = useCallback(async (sessionId) => {
     const response = await axios.post(
       `${API}/auth/session`,
       { session_id: sessionId },
@@ -83,7 +83,7 @@ export const AuthProvider = ({ children }) => {
     );
     setUser(response.data.user);
     return response.data.user;  // Return user for redirect decision
-  };
+  }, []);
 
   const logout = useCallback(async () => {
     try {
@@ -94,13 +94,13 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   }, []);
 
-  const updateProfile = async (data) => {
+  const updateProfile = useCallback(async (data) => {
     const response = await axios.put(`${API}/auth/profile`, data, {
       withCredentials: true
     });
     setUser(response.data);
     return response.data;
-  };
+  }, []);
 
   const isAdmin = user?.role === 'admin';
 
