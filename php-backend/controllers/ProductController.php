@@ -22,7 +22,7 @@ class ProductController {
     // Get all products
     public function index() {
         $filters = [
-            'category' => $_GET['category'] ?? null,
+            'category' => $_GET['category'] ?? $_GET['category_id'] ?? null,
             'search' => $_GET['search'] ?? null,
             'featured' => isset($_GET['featured']),
             'limit' => $_GET['limit'] ?? 50,
