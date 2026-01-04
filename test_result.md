@@ -482,7 +482,7 @@ agent_communication:
 
 test_plan:
   current_focus:
-    - "Orders Dropdown Menu Testing - COMPLETED"
+    - "Product Discount Feature Testing - IN PROGRESS"
   test_all: false
   test_priority: "high_first"
 
