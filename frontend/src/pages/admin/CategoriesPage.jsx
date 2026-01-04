@@ -445,22 +445,85 @@ const CategoriesPage = () => {
                 onChange={(e) => setFormData(prev => ({ ...prev, name_en: e.target.value }))}
               />
             </div>
+            
+            {/* Image Section with Tabs */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <ImageIcon className="h-4 w-4" />
                 {text.image}
               </Label>
-              <Input
-                value={formData.image}
-                onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                placeholder="https://..."
-              />
+              
+              <Tabs value={imageTab} onValueChange={setImageTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="url" className="flex items-center gap-2">
+                    <LinkIcon className="h-4 w-4" />
+                    {text.urlTab}
+                  </TabsTrigger>
+                  <TabsTrigger value="upload" className="flex items-center gap-2">
+                    <Upload className="h-4 w-4" />
+                    {text.uploadTab}
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="url" className="mt-3">
+                  <Input
+                    value={formData.image}
+                    onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
+                    placeholder={text.enterUrl}
+                    dir="ltr"
+                  />
+                </TabsContent>
+                
+                <TabsContent value="upload" className="mt-3">
+                  <div
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors"
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/jpg,image/webp"
+                      onChange={(e) => handleFileUpload(e.target.files[0])}
+                      className="hidden"
+                    />
+                    {uploading ? (
+                      <div className="flex flex-col items-center">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+                        <p className="text-sm text-muted-foreground">
+                          {language === 'ar' ? 'جاري الرفع...' : 'Uploading...'}
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                        <p className="text-sm font-medium">{text.selectFile}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{text.dragDrop}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{text.supportedFormats}</p>
+                      </>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
+              
+              {/* Image Preview */}
               {formData.image && (
-                <img
-                  src={formData.image}
-                  alt="Preview"
-                  className="h-20 w-20 object-cover rounded-lg mt-2"
-                />
+                <div className="relative inline-block mt-3">
+                  <img
+                    src={formData.image}
+                    alt="Preview"
+                    className="h-24 w-24 object-cover rounded-lg border"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, image: '' }))}
+                    className="absolute -top-2 -end-2 h-6 w-6 bg-destructive text-white rounded-full flex items-center justify-center hover:bg-destructive/90"
+                    title={text.removeImage}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
               )}
             </div>
           </div>
