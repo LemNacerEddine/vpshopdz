@@ -1,22 +1,84 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Star, ShoppingCart } from 'lucide-react';
+import { Star, ShoppingCart, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const ProductCard = ({ product }) => {
   const { t, language, formatPrice, isRTL } = useLanguage();
   const { addToCart } = useCart();
+  const [timeLeft, setTimeLeft] = useState(null);
 
   const name = product[`name_${language}`] || product.name_ar;
-  const hasDiscount = product.old_price && product.old_price > product.price;
-  const discountPercent = hasDiscount 
+  
+  // Check for time-limited discount
+  const now = new Date();
+  const discountStart = product.discount_start ? new Date(product.discount_start) : null;
+  const discountEnd = product.discount_end ? new Date(product.discount_end) : null;
+  
+  // Determine if discount is currently active
+  const isDiscountActive = product.discount_percent && product.discount_percent > 0 && (
+    (!discountStart && !discountEnd) || // No date restriction
+    (discountStart && discountEnd && now >= discountStart && now <= discountEnd) || // Within range
+    (discountStart && !discountEnd && now >= discountStart) // Started but no end
+  );
+
+  // Calculate prices
+  const originalPrice = product.price;
+  const discountedPrice = isDiscountActive 
+    ? originalPrice * (1 - product.discount_percent / 100) 
+    : null;
+  
+  // Legacy discount support (old_price field)
+  const hasLegacyDiscount = !isDiscountActive && product.old_price && product.old_price > product.price;
+  const legacyDiscountPercent = hasLegacyDiscount 
     ? Math.round((1 - product.price / product.old_price) * 100) 
     : 0;
+
+  // Determine which discount to show
+  const hasDiscount = isDiscountActive || hasLegacyDiscount;
+  const discountPercent = isDiscountActive ? product.discount_percent : legacyDiscountPercent;
+  const displayPrice = isDiscountActive ? discountedPrice : product.price;
+  const strikePrice = isDiscountActive ? originalPrice : (hasLegacyDiscount ? product.old_price : null);
+
+  // Calculate time remaining for discount
+  useEffect(() => {
+    if (!isDiscountActive || !discountEnd) {
+      setTimeLeft(null);
+      return;
+    }
+
+    const updateTimeLeft = () => {
+      const now = new Date();
+      const diff = discountEnd - now;
+      
+      if (diff <= 0) {
+        setTimeLeft(null);
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+      if (days > 0) {
+        setTimeLeft({ days, hours, type: 'days' });
+      } else if (hours > 0) {
+        setTimeLeft({ hours, minutes, type: 'hours' });
+      } else {
+        setTimeLeft({ minutes, type: 'minutes' });
+      }
+    };
+
+    updateTimeLeft();
+    const interval = setInterval(updateTimeLeft, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, [isDiscountActive, discountEnd]);
 
   const handleAddToCart = async (e) => {
     e.preventDefault();
@@ -29,9 +91,39 @@ export const ProductCard = ({ product }) => {
     }
   };
 
+  const formatTimeLeft = () => {
+    if (!timeLeft) return null;
+    
+    if (language === 'ar') {
+      if (timeLeft.type === 'days') {
+        return `${timeLeft.days} يوم ${timeLeft.hours} س`;
+      } else if (timeLeft.type === 'hours') {
+        return `${timeLeft.hours} س ${timeLeft.minutes} د`;
+      } else {
+        return `${timeLeft.minutes} دقيقة`;
+      }
+    } else if (language === 'fr') {
+      if (timeLeft.type === 'days') {
+        return `${timeLeft.days}j ${timeLeft.hours}h`;
+      } else if (timeLeft.type === 'hours') {
+        return `${timeLeft.hours}h ${timeLeft.minutes}m`;
+      } else {
+        return `${timeLeft.minutes} min`;
+      }
+    } else {
+      if (timeLeft.type === 'days') {
+        return `${timeLeft.days}d ${timeLeft.hours}h`;
+      } else if (timeLeft.type === 'hours') {
+        return `${timeLeft.hours}h ${timeLeft.minutes}m`;
+      } else {
+        return `${timeLeft.minutes} min`;
+      }
+    }
+  };
+
   return (
     <Link to={`/products/${product.product_id}`} data-testid={`product-card-${product.product_id}`}>
-      <Card className="product-card group h-full flex flex-col">
+      <Card className="product-card group h-full flex flex-col overflow-hidden">
         {/* Image */}
         <div className="relative aspect-square overflow-hidden bg-muted">
           <img
@@ -40,19 +132,38 @@ export const ProductCard = ({ product }) => {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
           
-          {/* Badges */}
-          <div className={`absolute top-3 ${isRTL ? 'right-3' : 'left-3'} flex flex-col gap-2`}>
-            {hasDiscount && (
-              <Badge className="bg-secondary text-white">
+          {/* Discount Badge */}
+          {hasDiscount && (
+            <div className={`absolute top-0 ${isRTL ? 'right-0' : 'left-0'}`}>
+              <div className="bg-red-500 text-white px-3 py-1.5 text-sm font-bold shadow-lg"
+                   style={{ 
+                     clipPath: isRTL 
+                       ? 'polygon(0 0, 100% 0, 100% 100%, 20% 100%)' 
+                       : 'polygon(0 0, 100% 0, 80% 100%, 0 100%)' 
+                   }}>
                 -{discountPercent}%
-              </Badge>
-            )}
-            {product.featured && (
+              </div>
+            </div>
+          )}
+
+          {/* Featured Badge */}
+          {product.featured && !hasDiscount && (
+            <div className={`absolute top-3 ${isRTL ? 'right-3' : 'left-3'}`}>
               <Badge className="bg-accent text-accent-foreground">
                 {t('products.featured')}
               </Badge>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* Time Left Badge */}
+          {timeLeft && (
+            <div className={`absolute bottom-3 ${isRTL ? 'right-3' : 'left-3'}`}>
+              <Badge variant="secondary" className="bg-black/70 text-white border-0 flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                <span className="text-xs">{formatTimeLeft()}</span>
+              </Badge>
+            </div>
+          )}
 
           {/* Quick Add Button */}
           <Button
@@ -84,14 +195,24 @@ export const ProductCard = ({ product }) => {
           )}
 
           {/* Price */}
-          <div className="mt-auto flex items-center gap-2">
-            <span className="text-lg font-bold text-primary">
-              {formatPrice(product.price)}
-            </span>
-            {hasDiscount && (
-              <span className="text-sm text-muted-foreground line-through">
-                {formatPrice(product.old_price)}
+          <div className="mt-auto">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={`text-lg font-bold ${hasDiscount ? 'text-red-500' : 'text-primary'}`}>
+                {formatPrice(displayPrice)}
               </span>
+              {strikePrice && (
+                <span className="text-sm text-muted-foreground line-through">
+                  {formatPrice(strikePrice)}
+                </span>
+              )}
+            </div>
+            
+            {/* Savings Amount */}
+            {hasDiscount && strikePrice && (
+              <p className="text-xs text-green-600 font-medium mt-1">
+                {language === 'ar' ? 'وفّر ' : language === 'fr' ? 'Économisez ' : 'Save '}
+                {formatPrice(strikePrice - displayPrice)}
+              </p>
             )}
           </div>
 
