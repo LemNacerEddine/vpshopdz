@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
@@ -22,35 +22,41 @@ export const ProductCard = ({ product }) => {
 
   const name = product[`name_${language}`] || product.name_ar;
   
-  // Check for time-limited discount
-  const now = new Date();
-  const discountStart = product.discount_start ? new Date(product.discount_start) : null;
-  const discountEnd = product.discount_end ? new Date(product.discount_end) : null;
-  
-  // Determine if discount is currently active
-  const isDiscountActive = product.discount_percent && product.discount_percent > 0 && (
-    (!discountStart && !discountEnd) || // No date restriction
-    (discountStart && discountEnd && now >= discountStart && now <= discountEnd) || // Within range
-    (discountStart && !discountEnd && now >= discountStart) // Started but no end
-  );
+  // Memoize discount calculations to prevent infinite re-renders
+  const discountData = useMemo(() => {
+    const now = new Date();
+    const discountStart = product.discount_start ? new Date(product.discount_start) : null;
+    const discountEnd = product.discount_end ? new Date(product.discount_end) : null;
+    
+    // Determine if discount is currently active
+    const isDiscountActive = product.discount_percent && product.discount_percent > 0 && (
+      (!discountStart && !discountEnd) || // No date restriction
+      (discountStart && discountEnd && now >= discountStart && now <= discountEnd) || // Within range
+      (discountStart && !discountEnd && now >= discountStart) // Started but no end
+    );
 
-  // Calculate prices
-  const originalPrice = product.price;
-  const discountedPrice = isDiscountActive 
-    ? originalPrice * (1 - product.discount_percent / 100) 
-    : null;
-  
-  // Legacy discount support (old_price field)
-  const hasLegacyDiscount = !isDiscountActive && product.old_price && product.old_price > product.price;
-  const legacyDiscountPercent = hasLegacyDiscount 
-    ? Math.round((1 - product.price / product.old_price) * 100) 
-    : 0;
+    // Calculate prices
+    const originalPrice = product.price;
+    const discountedPrice = isDiscountActive 
+      ? originalPrice * (1 - product.discount_percent / 100) 
+      : null;
+    
+    // Legacy discount support (old_price field)
+    const hasLegacyDiscount = !isDiscountActive && product.old_price && product.old_price > product.price;
+    const legacyDiscountPercent = hasLegacyDiscount 
+      ? Math.round((1 - product.price / product.old_price) * 100) 
+      : 0;
 
-  // Determine which discount to show
-  const hasDiscount = isDiscountActive || hasLegacyDiscount;
-  const discountPercent = isDiscountActive ? product.discount_percent : legacyDiscountPercent;
-  const displayPrice = isDiscountActive ? discountedPrice : product.price;
-  const strikePrice = isDiscountActive ? originalPrice : (hasLegacyDiscount ? product.old_price : null);
+    // Determine which discount to show
+    const hasDiscount = isDiscountActive || hasLegacyDiscount;
+    const discountPercent = isDiscountActive ? product.discount_percent : legacyDiscountPercent;
+    const displayPrice = isDiscountActive ? discountedPrice : product.price;
+    const strikePrice = isDiscountActive ? originalPrice : (hasLegacyDiscount ? product.old_price : null);
+
+    return { discountStart, discountEnd, isDiscountActive, hasDiscount, discountPercent, displayPrice, strikePrice };
+  }, [product.discount_start, product.discount_end, product.discount_percent, product.price, product.old_price]);
+
+  const { discountEnd, isDiscountActive, hasDiscount, discountPercent, displayPrice, strikePrice } = discountData;
 
   // Calculate time remaining for discount
   useEffect(() => {
