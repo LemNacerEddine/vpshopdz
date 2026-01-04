@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -22,7 +23,10 @@ import {
   RefreshCw,
   AlertCircle,
   Loader2,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Link as LinkIcon,
+  Upload,
+  X
 } from 'lucide-react';
 import { toast } from 'sonner';
 
