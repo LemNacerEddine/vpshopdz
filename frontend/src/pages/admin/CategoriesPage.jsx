@@ -37,9 +37,12 @@ const CategoriesPage = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [search, setSearch] = useState('');
   const [editDialog, setEditDialog] = useState({ open: false, category: null });
   const [deleteDialog, setDeleteDialog] = useState({ open: false, category: null });
+  const [imageTab, setImageTab] = useState('url');
+  const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     name_ar: '',
     name_fr: '',
@@ -58,7 +61,15 @@ const CategoriesPage = () => {
       nameAr: 'الاسم بالعربية',
       nameFr: 'الاسم بالفرنسية',
       nameEn: 'الاسم بالإنجليزية',
-      image: 'رابط الصورة',
+      image: 'صورة التصنيف',
+      imageUrl: 'رابط الصورة',
+      uploadImage: 'رفع من الجهاز',
+      urlTab: 'رابط',
+      uploadTab: 'رفع ملف',
+      enterUrl: 'أدخل رابط الصورة',
+      selectFile: 'اختر ملف',
+      dragDrop: 'أو اسحب وأفلت هنا',
+      supportedFormats: 'PNG, JPG, WEBP (حد أقصى 5MB)',
       products: 'المنتجات',
       save: 'حفظ',
       cancel: 'إلغاء',
@@ -69,7 +80,10 @@ const CategoriesPage = () => {
       noCategories: 'لا توجد تصنيفات',
       categorySaved: 'تم حفظ التصنيف بنجاح',
       categoryDeleted: 'تم حذف التصنيف بنجاح',
-      error: 'حدث خطأ'
+      error: 'حدث خطأ',
+      uploadSuccess: 'تم رفع الصورة بنجاح',
+      uploadError: 'خطأ في رفع الصورة',
+      removeImage: 'إزالة الصورة'
     },
     fr: {
       categories: 'Catégories',
@@ -80,7 +94,15 @@ const CategoriesPage = () => {
       nameAr: 'Nom en arabe',
       nameFr: 'Nom en français',
       nameEn: 'Nom en anglais',
-      image: 'URL de l\'image',
+      image: 'Image de la catégorie',
+      imageUrl: 'URL de l\'image',
+      uploadImage: 'Télécharger depuis l\'appareil',
+      urlTab: 'Lien',
+      uploadTab: 'Télécharger',
+      enterUrl: 'Entrez l\'URL de l\'image',
+      selectFile: 'Sélectionner un fichier',
+      dragDrop: 'ou glisser-déposer ici',
+      supportedFormats: 'PNG, JPG, WEBP (max 5MB)',
       products: 'Produits',
       save: 'Enregistrer',
       cancel: 'Annuler',
@@ -91,7 +113,10 @@ const CategoriesPage = () => {
       noCategories: 'Aucune catégorie',
       categorySaved: 'Catégorie enregistrée',
       categoryDeleted: 'Catégorie supprimée',
-      error: 'Erreur'
+      error: 'Erreur',
+      uploadSuccess: 'Image téléchargée',
+      uploadError: 'Erreur de téléchargement',
+      removeImage: 'Supprimer l\'image'
     },
     en: {
       categories: 'Categories',
@@ -102,7 +127,15 @@ const CategoriesPage = () => {
       nameAr: 'Name in Arabic',
       nameFr: 'Name in French',
       nameEn: 'Name in English',
-      image: 'Image URL',
+      image: 'Category Image',
+      imageUrl: 'Image URL',
+      uploadImage: 'Upload from device',
+      urlTab: 'URL',
+      uploadTab: 'Upload',
+      enterUrl: 'Enter image URL',
+      selectFile: 'Select file',
+      dragDrop: 'or drag and drop here',
+      supportedFormats: 'PNG, JPG, WEBP (max 5MB)',
       products: 'Products',
       save: 'Save',
       cancel: 'Cancel',
@@ -113,7 +146,10 @@ const CategoriesPage = () => {
       noCategories: 'No categories found',
       categorySaved: 'Category saved successfully',
       categoryDeleted: 'Category deleted successfully',
-      error: 'Error occurred'
+      error: 'Error occurred',
+      uploadSuccess: 'Image uploaded successfully',
+      uploadError: 'Error uploading image',
+      removeImage: 'Remove image'
     }
   };
 
