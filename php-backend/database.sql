@@ -162,6 +162,31 @@ CREATE TABLE browsing_history (
     FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- Carts Table
+CREATE TABLE carts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(50),
+    browser_id VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_user_id (user_id),
+    INDEX idx_browser_id (browser_id),
+    UNIQUE KEY unique_user_cart (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Cart Items Table
+CREATE TABLE cart_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cart_id INT NOT NULL,
+    product_id VARCHAR(50) NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_cart_product (cart_id, product_id),
+    FOREIGN KEY (cart_id) REFERENCES carts(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 -- Addresses Table
 CREATE TABLE addresses (
     id INT AUTO_INCREMENT PRIMARY KEY,
