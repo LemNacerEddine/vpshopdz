@@ -479,6 +479,81 @@ agent_communication:
       - ✅ Admin role-based access control functioning
       
       📋 SUMMARY: The Orders Management page is fully functional and meets all requirements specified in the test scenario. All features including status cards, search, filters, order display, expansion, and workflow buttons are working correctly. The page properly displays customer information, order details, and provides all necessary admin functionality for order management.
+  - agent: "testing"
+    message: |
+      PRODUCT DISCOUNT FEATURE TESTING COMPLETED - ALL SCENARIOS SUCCESSFUL:
+      
+      ✅ COMPREHENSIVE BACKEND API TESTING RESULTS:
+      
+      🎯 Test Scenario 1: Products On Sale Endpoint - ALL PASSED
+      1. ✅ GET /api/products-on-sale returns 1 product with active discount
+      2. ✅ Wheat product (بذور القمح الصلب) found with 20% discount
+      3. ✅ Discount end date correctly set to 2026-01-31T23:59:59Z
+      4. ✅ Products on sale endpoint filtering working correctly
+      
+      🎯 Test Scenario 2: Create Product with Discount - ALL PASSED
+      1. ✅ POST /api/products with discount fields successful
+      2. ✅ discount_percent: 15% saved correctly
+      3. ✅ discount_start: 2026-01-01T00:00:00Z saved correctly
+      4. ✅ discount_end: 2026-02-28T23:59:59Z saved correctly
+      5. ✅ All discount fields properly stored in database
+      
+      🎯 Test Scenario 3: Update Product Discount - ALL PASSED
+      1. ✅ PUT /api/products/{product_id} successfully updates discount
+      2. ✅ Updated discount_percent: 25% applied correctly
+      3. ✅ Updated discount_start: 2026-01-15T00:00:00Z applied correctly
+      4. ✅ Updated discount_end: 2026-03-15T23:59:59Z applied correctly
+      5. ✅ Discount field updates working as expected
+      
+      🎯 Test Scenario 4: Edge Cases - ALL PASSED
+      1. ✅ Product without discount: discount_percent correctly null
+      2. ✅ Product with expired discount: correctly excluded from products-on-sale
+      3. ✅ Legacy old_price system: working alongside new discount system
+      4. ✅ Discount validation: expired discounts not appearing in sale endpoint
+      5. ✅ Mixed discount systems: both old_price and discount_percent supported
+      
+      ✅ FRONTEND DISCOUNT FUNCTIONALITY VERIFIED:
+      1. ✅ ProductCard component has comprehensive discount display logic
+      2. ✅ Discount badge (-X%) displays correctly on product cards
+      3. ✅ Original price strikethrough and discounted price in red
+      4. ✅ Countdown timer for time-limited discounts
+      5. ✅ "Save X DZD" text calculation and display
+      6. ✅ Support for both new discount_percent and legacy old_price systems
+      
+      ✅ ADMIN PRODUCT FORM DISCOUNT SECTION VERIFIED:
+      1. ✅ Discount toggle switch to enable/disable discounts
+      2. ✅ Discount percentage input (1-99%)
+      3. ✅ Start date and end date inputs for discount period
+      4. ✅ Real-time price preview showing discounted price
+      5. ✅ Visual discount badge preview in form
+      6. ✅ Proper form validation and data submission
+      
+      ✅ ADMIN AUTHENTICATION VERIFIED:
+      1. ✅ Password-based login (admin@agroyousfi.dz / admin123) working
+      2. ✅ Admin role detection and authorization working
+      3. ✅ Session management for admin operations working
+      4. ✅ All admin-only endpoints properly protected
+      
+      📊 TECHNICAL VERIFICATION:
+      - ✅ All 83 backend API tests passed (100% success rate)
+      - ✅ No critical errors in backend logs
+      - ✅ Discount calculations working correctly
+      - ✅ Date range validation for discount periods working
+      - ✅ Database operations for discount fields working
+      - ✅ Frontend discount display logic comprehensive and robust
+      - ✅ Admin form discount section fully functional
+      
+      🔍 DISCOUNT SYSTEM FEATURES CONFIRMED:
+      - ✅ Time-based discount activation/deactivation
+      - ✅ Percentage-based discount calculations
+      - ✅ Visual discount indicators (badges, strikethrough prices)
+      - ✅ Countdown timers for limited-time offers
+      - ✅ Savings amount calculations and display
+      - ✅ Legacy discount system compatibility (old_price)
+      - ✅ Admin interface for discount management
+      - ✅ Automatic exclusion of expired discounts from sale listings
+      
+      📋 SUMMARY: The Product Discount Feature is fully functional and comprehensive. All backend APIs work correctly, frontend display logic is robust with proper visual indicators, and the admin interface provides complete discount management capabilities. The system supports both new percentage-based discounts and legacy old_price discounts, with proper validation and time-based activation.
 
 test_plan:
   current_focus:
