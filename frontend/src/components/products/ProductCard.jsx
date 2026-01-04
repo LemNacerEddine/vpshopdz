@@ -181,19 +181,19 @@ export const ProductCard = ({ product }) => {
 
   return (
     <Link to={`/products/${product.product_id}`} data-testid={`product-card-${product.product_id}`}>
-      <Card className="product-card group h-full flex flex-col overflow-hidden">
-        {/* Image */}
-        <div className="relative aspect-square overflow-hidden bg-muted">
+      <Card className="product-card group h-full flex flex-col overflow-hidden hover:shadow-md transition-shadow">
+        {/* Image - Smaller aspect ratio */}
+        <div className="relative aspect-[4/3] overflow-hidden bg-muted">
           <img
             src={product.images?.[0] || 'https://via.placeholder.com/300'}
             alt={name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
           
-          {/* Discount Badge */}
+          {/* Discount Badge - Smaller */}
           {hasDiscount && (
             <div className={`absolute top-0 ${isRTL ? 'right-0' : 'left-0'}`}>
-              <div className="bg-red-500 text-white px-3 py-1.5 text-sm font-bold shadow-lg"
+              <div className="bg-red-500 text-white px-2 py-1 text-xs font-bold shadow-lg"
                    style={{ 
                      clipPath: isRTL 
                        ? 'polygon(0 0, 100% 0, 100% 100%, 20% 100%)' 
@@ -204,77 +204,77 @@ export const ProductCard = ({ product }) => {
             </div>
           )}
 
-          {/* Featured Badge */}
+          {/* Featured Badge - Smaller */}
           {product.featured && !hasDiscount && (
-            <div className={`absolute top-3 ${isRTL ? 'right-3' : 'left-3'}`}>
-              <Badge className="bg-accent text-accent-foreground">
+            <div className={`absolute top-2 ${isRTL ? 'right-2' : 'left-2'}`}>
+              <Badge className="bg-accent text-accent-foreground text-xs px-1.5 py-0.5">
                 {t('products.featured')}
               </Badge>
             </div>
           )}
 
-          {/* Time Left Badge */}
+          {/* Time Left Badge - Smaller */}
           {timeLeft && (
-            <div className={`absolute bottom-3 ${isRTL ? 'right-3' : 'left-3'}`}>
-              <Badge variant="secondary" className="bg-black/70 text-white border-0 flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                <span className="text-xs">{formatTimeLeft()}</span>
+            <div className={`absolute bottom-2 ${isRTL ? 'right-2' : 'left-2'}`}>
+              <Badge variant="secondary" className="bg-black/70 text-white border-0 flex items-center gap-0.5 px-1.5 py-0.5">
+                <Clock className="h-2.5 w-2.5" />
+                <span className="text-[10px]">{formatTimeLeft()}</span>
               </Badge>
             </div>
           )}
 
-          {/* Action Buttons Container */}
-          <div className={`absolute bottom-3 ${isRTL ? 'left-3' : 'right-3'} flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} gap-2 opacity-0 group-hover:opacity-100 transition-opacity`}>
+          {/* Action Buttons Container - Smaller */}
+          <div className={`absolute bottom-2 ${isRTL ? 'left-2' : 'right-2'} flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity`}>
             {/* Wishlist Button */}
             <Button
               size="icon"
               variant="secondary"
-              className={`rounded-full shadow-lg ${isInWishlist ? 'bg-red-100 text-red-500 hover:bg-red-200' : 'bg-white/90 hover:bg-white'}`}
+              className={`h-7 w-7 rounded-full shadow-lg ${isInWishlist ? 'bg-red-100 text-red-500 hover:bg-red-200' : 'bg-white/90 hover:bg-white'}`}
               onClick={handleToggleWishlist}
               disabled={wishlistLoading}
               data-testid={`wishlist-${product.product_id}`}
             >
-              <Heart className={`h-4 w-4 ${isInWishlist ? 'fill-red-500' : ''}`} />
+              <Heart className={`h-3.5 w-3.5 ${isInWishlist ? 'fill-red-500' : ''}`} />
             </Button>
             
             {/* Quick Add to Cart Button */}
             <Button
               size="icon"
-              className="rounded-full bg-primary hover:bg-primary/90 shadow-lg"
+              className="h-7 w-7 rounded-full bg-primary hover:bg-primary/90 shadow-lg"
               onClick={handleAddToCart}
               disabled={product.stock === 0}
               data-testid={`add-to-cart-${product.product_id}`}
             >
-              <ShoppingCart className="h-4 w-4" />
+              <ShoppingCart className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="p-4 flex flex-col flex-1">
-          <h3 className="font-semibold text-foreground line-clamp-2 mb-2 group-hover:text-primary transition-colors">
+        {/* Content - More compact */}
+        <div className="p-2.5 flex flex-col flex-1">
+          <h3 className="font-medium text-sm text-foreground line-clamp-2 mb-1 group-hover:text-primary transition-colors leading-tight">
             {name}
           </h3>
 
-          {/* Rating */}
+          {/* Rating - Smaller */}
           {product.rating > 0 && (
-            <div className="flex items-center gap-1 mb-2">
-              <Star className="h-4 w-4 fill-accent text-accent" />
-              <span className="text-sm font-medium">{product.rating}</span>
-              <span className="text-xs text-muted-foreground">
-                ({product.reviews_count} {t('products.reviews')})
+            <div className="flex items-center gap-0.5 mb-1">
+              <Star className="h-3 w-3 fill-accent text-accent" />
+              <span className="text-xs font-medium">{product.rating}</span>
+              <span className="text-[10px] text-muted-foreground">
+                ({product.reviews_count})
               </span>
             </div>
           )}
 
-          {/* Price */}
+          {/* Price - More compact */}
           <div className="mt-auto">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className={`text-lg font-bold ${hasDiscount ? 'text-red-500' : 'text-primary'}`}>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className={`text-sm font-bold ${hasDiscount ? 'text-red-500' : 'text-primary'}`}>
                 {formatPrice(displayPrice)}
               </span>
               {strikePrice && (
-                <span className="text-sm text-muted-foreground line-through">
+                <span className="text-xs text-muted-foreground line-through">
                   {formatPrice(strikePrice)}
                 </span>
               )}
