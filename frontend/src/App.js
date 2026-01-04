@@ -37,24 +37,20 @@ const AppRouter = () => {
       <Route path="/admin/*" element={<AdminRouter />} />
       
       {/* Public routes with Layout */}
-      <Route path="/*" element={
-        <Layout>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/products" element={<ProductsPage />} />
-            <Route path="/products/:productId" element={<ProductDetailPage key={location.pathname} />} />
-            <Route path="/categories" element={<CategoriesPage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/orders" element={<ProfilePage />} />
-          </Routes>
-        </Layout>
-      } />
+      <Route element={<Layout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/products" element={<ProductsPage />} />
+        <Route path="/products/:productId" element={<ProductDetailPage />} />
+        <Route path="/categories" element={<CategoriesPage />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/orders" element={<ProfilePage />} />
+      </Route>
     </Routes>
   );
 };
