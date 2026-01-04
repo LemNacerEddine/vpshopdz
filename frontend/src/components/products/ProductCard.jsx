@@ -214,16 +214,31 @@ export const ProductCard = ({ product }) => {
             </div>
           )}
 
-          {/* Quick Add Button */}
-          <Button
-            size="icon"
-            className={`absolute bottom-3 ${isRTL ? 'left-3' : 'right-3'} opacity-0 group-hover:opacity-100 transition-opacity rounded-full bg-primary hover:bg-primary/90 shadow-lg`}
-            onClick={handleAddToCart}
-            disabled={product.stock === 0}
-            data-testid={`add-to-cart-${product.product_id}`}
-          >
-            <ShoppingCart className="h-4 w-4" />
-          </Button>
+          {/* Action Buttons Container */}
+          <div className={`absolute bottom-3 ${isRTL ? 'left-3' : 'right-3'} flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} gap-2 opacity-0 group-hover:opacity-100 transition-opacity`}>
+            {/* Wishlist Button */}
+            <Button
+              size="icon"
+              variant="secondary"
+              className={`rounded-full shadow-lg ${isInWishlist ? 'bg-red-100 text-red-500 hover:bg-red-200' : 'bg-white/90 hover:bg-white'}`}
+              onClick={handleToggleWishlist}
+              disabled={wishlistLoading}
+              data-testid={`wishlist-${product.product_id}`}
+            >
+              <Heart className={`h-4 w-4 ${isInWishlist ? 'fill-red-500' : ''}`} />
+            </Button>
+            
+            {/* Quick Add to Cart Button */}
+            <Button
+              size="icon"
+              className="rounded-full bg-primary hover:bg-primary/90 shadow-lg"
+              onClick={handleAddToCart}
+              disabled={product.stock === 0}
+              data-testid={`add-to-cart-${product.product_id}`}
+            >
+              <ShoppingCart className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Content */}
