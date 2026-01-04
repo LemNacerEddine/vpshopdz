@@ -179,7 +179,15 @@ const ProductForm = () => {
       imageUrl: 'Image URL',
       video: 'Video URL (optional)',
       productSaved: 'Product saved successfully',
-      error: 'Error occurred'
+      error: 'Error occurred',
+      // Discount translations
+      discount: 'Discount & Offers',
+      enableDiscount: 'Enable Discount',
+      discountPercent: 'Discount Percentage (%)',
+      discountStart: 'Start Date',
+      discountEnd: 'End Date',
+      priceAfterDiscount: 'Price After Discount',
+      discountNote: 'Discount will be applied automatically during the period'
     }
   };
 
