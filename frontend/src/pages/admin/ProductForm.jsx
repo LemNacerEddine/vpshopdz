@@ -580,6 +580,84 @@ const ProductForm = () => {
             </CardContent>
           </Card>
 
+          {/* Discount & Offers */}
+          <Card className="border-orange-200 dark:border-orange-800">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-orange-600">
+                  <Tag className="h-5 w-5" />
+                  {text.discount}
+                </CardTitle>
+                <Switch
+                  checked={discountEnabled}
+                  onCheckedChange={setDiscountEnabled}
+                />
+              </div>
+            </CardHeader>
+            {discountEnabled && (
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>{text.discountPercent}</Label>
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      min="1"
+                      max="99"
+                      value={formData.discount_percent}
+                      onChange={(e) => handleChange('discount_percent', e.target.value)}
+                      className="pe-12"
+                      placeholder="20"
+                    />
+                    <span className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+                      %
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label className="text-xs">{text.discountStart}</Label>
+                    <Input
+                      type="date"
+                      value={formData.discount_start}
+                      onChange={(e) => handleChange('discount_start', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs">{text.discountEnd}</Label>
+                    <Input
+                      type="date"
+                      value={formData.discount_end}
+                      onChange={(e) => handleChange('discount_end', e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Price Preview */}
+                {priceAfterDiscount && formData.price && (
+                  <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                    <p className="text-xs text-muted-foreground mb-1">{text.priceAfterDiscount}</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-bold text-orange-600">
+                        {parseFloat(priceAfterDiscount).toLocaleString()} DZD
+                      </span>
+                      <span className="text-sm text-muted-foreground line-through">
+                        {parseFloat(formData.price).toLocaleString()} DZD
+                      </span>
+                      <span className="px-2 py-0.5 bg-orange-600 text-white text-xs font-bold rounded">
+                        -{formData.discount_percent}%
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <p className="text-xs text-muted-foreground">
+                  {text.discountNote}
+                </p>
+              </CardContent>
+            )}
+          </Card>
+
           {/* Inventory */}
           <Card>
             <CardHeader>
