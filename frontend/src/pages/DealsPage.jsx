@@ -97,7 +97,15 @@ const DealsPage = () => {
 
         {/* Products Grid */}
         {products.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          <div className={`grid gap-3 ${
+            products.length === 1 
+              ? 'grid-cols-1 max-w-xs mx-auto' 
+              : products.length === 2 
+                ? 'grid-cols-2 max-w-lg mx-auto'
+                : products.length === 3
+                  ? 'grid-cols-3 max-w-2xl mx-auto'
+                  : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
+          }`}>
             {products.map((product) => (
               <ProductCard key={product.product_id} product={product} />
             ))}
