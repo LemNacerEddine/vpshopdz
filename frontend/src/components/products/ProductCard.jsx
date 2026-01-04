@@ -15,7 +15,10 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 export const ProductCard = ({ product }) => {
   const { t, language, formatPrice, isRTL } = useLanguage();
   const { addToCart } = useCart();
+  const { user } = useAuth();
   const [timeLeft, setTimeLeft] = useState(null);
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   const name = product[`name_${language}`] || product.name_ar;
   
