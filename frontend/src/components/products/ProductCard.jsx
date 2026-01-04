@@ -100,7 +100,8 @@ export const ProductCard = ({ product }) => {
       }
     };
     checkWishlistStatus();
-  }, [user, product.product_id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.user_id, product.product_id]);
 
   const handleToggleWishlist = async (e) => {
     e.preventDefault();
