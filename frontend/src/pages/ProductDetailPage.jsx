@@ -363,7 +363,7 @@ export const ProductDetailPage = () => {
             {/* Price Section - Temu Style */}
             <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/20 dark:to-orange-950/20 rounded-xl p-4 border border-red-100 dark:border-red-900/30">
               {/* Discount Badge */}
-              {discountPercent > 0 && (
+              {hasDiscount && (
                 <div className="flex items-center gap-2 mb-2">
                   <Badge className="bg-red-600 text-white hover:bg-red-600 rounded-sm px-2 py-0.5 text-xs font-bold">
                     -{discountPercent}%
@@ -372,21 +372,29 @@ export const ProductDetailPage = () => {
                     <Clock className="h-3 w-3" />
                     <span>{text.limitedOffer}</span>
                   </div>
+                  {/* Show countdown for time-limited discounts */}
+                  {isNewDiscountActive && discountEnd && (
+                    <DiscountCountdown 
+                      endDate={discountEnd} 
+                      language={language}
+                      text={text}
+                    />
+                  )}
                 </div>
               )}
               
               {/* Price */}
               <div className="flex items-baseline gap-3">
                 <span className="text-3xl font-bold text-red-600">
-                  {formatPrice(product.price)}
+                  {formatPrice(displayPrice)}
                 </span>
-                {product.old_price && (
+                {hasDiscount && (
                   <>
                     <span className="text-lg text-muted-foreground line-through">
-                      {formatPrice(product.old_price)}
+                      {formatPrice(originalPrice)}
                     </span>
                     <Badge variant="secondary" className="text-green-600 bg-green-50 text-xs">
-                      {text.save} {formatPrice(product.old_price - product.price)}
+                      {text.save} {formatPrice(savingsAmount)}
                     </Badge>
                   </>
                 )}
