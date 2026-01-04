@@ -121,12 +121,16 @@ export const ProductDetailPage = () => {
   useEffect(() => {
     fetchProduct();
     fetchReviews();
+    addToBrowsingHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productId]);
+
+  useEffect(() => {
     if (user) {
       checkWishlistStatus();
     }
-    // Add to browsing history
-    addToBrowsingHistory();
-  }, [productId, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productId, user?.user_id]);
 
   const addToBrowsingHistory = async () => {
     try {
