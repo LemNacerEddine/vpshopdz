@@ -51,6 +51,13 @@ const AppRouter = () => {
         </Layout>
       } />
       
+      {/* Deals page */}
+      <Route path="/deals" element={
+        <Layout>
+          <DealsPage />
+        </Layout>
+      } />
+      
       {/* Other public routes */}
       <Route path="/" element={<Layout><HomePage /></Layout>} />
       <Route path="/categories" element={<Layout><CategoriesPage /></Layout>} />
