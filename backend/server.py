@@ -92,6 +92,10 @@ class ProductBase(BaseModel):
     video: Optional[str] = None  # Video URL for product demo
     featured: bool = False
     unit: str = "piece"  # piece, kg, pack
+    # Discount fields
+    discount_percent: Optional[int] = None  # Discount percentage (e.g., 20 for 20%)
+    discount_start: Optional[str] = None  # ISO date string
+    discount_end: Optional[str] = None  # ISO date string
 
 class ProductCreate(ProductBase):
     pass
