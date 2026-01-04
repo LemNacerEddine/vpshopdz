@@ -476,6 +476,254 @@ class AgroYousfiAPITester:
         
         print("\n📊 Admin Dashboard Scenarios Summary Complete")
 
+    def test_product_discount_feature(self):
+        """Test Product Discount Feature comprehensively"""
+        print("\n🏷️ Testing Product Discount Feature...")
+        
+        # Ensure we have admin authentication
+        if not self.admin_token:
+            self.test_admin_login()
+        
+        # Store original token and switch to admin
+        original_token = self.session_token
+        self.session_token = self.admin_token
+        
+        # Test Scenario 1: Backend API - Products On Sale Endpoint
+        print("\n📋 Test Scenario 1: Products On Sale Endpoint")
+        
+        # GET /api/products-on-sale - Should return products with active discounts
+        sale_products = self.run_test("1.1 GET /products-on-sale", "GET", "products-on-sale", 200)
+        
+        if sale_products is not None:
+            self.log_test("1.1 Products on sale response", True, f"Retrieved {len(sale_products)} products on sale")
+            
+            # Check if we have the expected product with 20% discount
+            wheat_product = None
+            for product in sale_products:
+                if product.get('name_ar') == 'بذور القمح الصلب':
+                    wheat_product = product
+                    break
+            
+            if wheat_product:
+                discount_percent = wheat_product.get('discount_percent')
+                discount_end = wheat_product.get('discount_end')
+                
+                if discount_percent == 20:
+                    self.log_test("1.2 Wheat product discount percentage", True, f"Discount: {discount_percent}%")
+                else:
+                    self.log_test("1.2 Wheat product discount percentage", False, f"Expected 20%, got {discount_percent}%")
+                
+                if discount_end and '2026-01-31' in discount_end:
+                    self.log_test("1.3 Wheat product discount end date", True, f"End date: {discount_end}")
+                else:
+                    self.log_test("1.3 Wheat product discount end date", False, f"Expected 2026-01-31, got {discount_end}")
+            else:
+                self.log_test("1.2 Find wheat product with discount", False, "Wheat product with discount not found")
+        
+        # Test Scenario 2: Backend API - Create Product with Discount
+        print("\n📋 Test Scenario 2: Create Product with Discount")
+        
+        # Get a category for the new product
+        categories = self.run_test("2.1 Get categories for new product", "GET", "categories", 200)
+        if not categories or len(categories) == 0:
+            self.log_test("2.1 Categories availability", False, "No categories available for product creation")
+            return
+        
+        category_id = categories[0]['category_id']
+        
+        # Create product with discount fields
+        new_product_data = {
+            "name_ar": "منتج تجريبي مع خصم",
+            "name_fr": "Produit Test avec Remise",
+            "name_en": "Test Product with Discount",
+            "description_ar": "منتج تجريبي لاختبار نظام الخصومات",
+            "description_fr": "Produit test pour le système de remises",
+            "description_en": "Test product for discount system",
+            "price": 1000.0,
+            "stock": 50,
+            "category_id": category_id,
+            "images": ["https://example.com/test-image.jpg"],
+            "featured": False,
+            "unit": "piece",
+            "discount_percent": 15,
+            "discount_start": "2026-01-01T00:00:00Z",
+            "discount_end": "2026-02-28T23:59:59Z"
+        }
+        
+        created_product = self.run_test("2.2 POST /products with discount", "POST", "products", 200, new_product_data)
+        
+        if created_product:
+            product_id = created_product.get('product_id')
+            
+            # Verify discount fields are saved correctly
+            if created_product.get('discount_percent') == 15:
+                self.log_test("2.3 Verify discount_percent saved", True, f"Discount: {created_product.get('discount_percent')}%")
+            else:
+                self.log_test("2.3 Verify discount_percent saved", False, f"Expected 15%, got {created_product.get('discount_percent')}%")
+            
+            if created_product.get('discount_start') == "2026-01-01T00:00:00Z":
+                self.log_test("2.4 Verify discount_start saved", True, f"Start: {created_product.get('discount_start')}")
+            else:
+                self.log_test("2.4 Verify discount_start saved", False, f"Expected 2026-01-01T00:00:00Z, got {created_product.get('discount_start')}")
+            
+            if created_product.get('discount_end') == "2026-02-28T23:59:59Z":
+                self.log_test("2.5 Verify discount_end saved", True, f"End: {created_product.get('discount_end')}")
+            else:
+                self.log_test("2.5 Verify discount_end saved", False, f"Expected 2026-02-28T23:59:59Z, got {created_product.get('discount_end')}")
+            
+            # Test Scenario 3: Backend API - Update Product Discount
+            print("\n📋 Test Scenario 3: Update Product Discount")
+            
+            # Update the product to modify discount
+            update_data = {
+                "name_ar": "منتج تجريبي مع خصم محدث",
+                "name_fr": "Produit Test avec Remise Mise à Jour",
+                "name_en": "Test Product with Updated Discount",
+                "description_ar": "منتج تجريبي لاختبار تحديث نظام الخصومات",
+                "description_fr": "Produit test pour mise à jour du système de remises",
+                "description_en": "Test product for discount system update",
+                "price": 1000.0,
+                "stock": 50,
+                "category_id": category_id,
+                "images": ["https://example.com/test-image.jpg"],
+                "featured": False,
+                "unit": "piece",
+                "discount_percent": 25,
+                "discount_start": "2026-01-15T00:00:00Z",
+                "discount_end": "2026-03-15T23:59:59Z"
+            }
+            
+            updated_product = self.run_test("3.1 PUT /products/{product_id} update discount", "PUT", f"products/{product_id}", 200, update_data)
+            
+            if updated_product:
+                # Verify updated discount fields
+                if updated_product.get('discount_percent') == 25:
+                    self.log_test("3.2 Verify updated discount_percent", True, f"Updated discount: {updated_product.get('discount_percent')}%")
+                else:
+                    self.log_test("3.2 Verify updated discount_percent", False, f"Expected 25%, got {updated_product.get('discount_percent')}%")
+                
+                if updated_product.get('discount_start') == "2026-01-15T00:00:00Z":
+                    self.log_test("3.3 Verify updated discount_start", True, f"Updated start: {updated_product.get('discount_start')}")
+                else:
+                    self.log_test("3.3 Verify updated discount_start", False, f"Expected 2026-01-15T00:00:00Z, got {updated_product.get('discount_start')}")
+                
+                if updated_product.get('discount_end') == "2026-03-15T23:59:59Z":
+                    self.log_test("3.4 Verify updated discount_end", True, f"Updated end: {updated_product.get('discount_end')}")
+                else:
+                    self.log_test("3.4 Verify updated discount_end", False, f"Expected 2026-03-15T23:59:59Z, got {updated_product.get('discount_end')}")
+            
+            # Test Scenario 4: Edge Cases
+            print("\n📋 Test Scenario 4: Edge Cases")
+            
+            # Test product without discount
+            no_discount_data = {
+                "name_ar": "منتج بدون خصم",
+                "name_fr": "Produit sans Remise",
+                "name_en": "Product without Discount",
+                "description_ar": "منتج تجريبي بدون خصم",
+                "description_fr": "Produit test sans remise",
+                "description_en": "Test product without discount",
+                "price": 500.0,
+                "stock": 30,
+                "category_id": category_id,
+                "images": ["https://example.com/no-discount.jpg"],
+                "featured": False,
+                "unit": "piece"
+                # No discount fields
+            }
+            
+            no_discount_product = self.run_test("4.1 Create product without discount", "POST", "products", 200, no_discount_data)
+            
+            if no_discount_product:
+                # Verify no discount fields
+                if no_discount_product.get('discount_percent') is None:
+                    self.log_test("4.2 Verify no discount_percent", True, "No discount percentage set")
+                else:
+                    self.log_test("4.2 Verify no discount_percent", False, f"Expected None, got {no_discount_product.get('discount_percent')}")
+            
+            # Test product with expired discount
+            expired_discount_data = {
+                "name_ar": "منتج بخصم منتهي الصلاحية",
+                "name_fr": "Produit avec Remise Expirée",
+                "name_en": "Product with Expired Discount",
+                "description_ar": "منتج تجريبي بخصم منتهي الصلاحية",
+                "description_fr": "Produit test avec remise expirée",
+                "description_en": "Test product with expired discount",
+                "price": 800.0,
+                "stock": 20,
+                "category_id": category_id,
+                "images": ["https://example.com/expired-discount.jpg"],
+                "featured": False,
+                "unit": "piece",
+                "discount_percent": 30,
+                "discount_start": "2023-01-01T00:00:00Z",
+                "discount_end": "2023-12-31T23:59:59Z"  # Expired
+            }
+            
+            expired_product = self.run_test("4.3 Create product with expired discount", "POST", "products", 200, expired_discount_data)
+            
+            if expired_product:
+                expired_product_id = expired_product.get('product_id')
+                
+                # Check if expired discount product appears in products-on-sale (it shouldn't)
+                current_sale_products = self.run_test("4.4 GET /products-on-sale after expired", "GET", "products-on-sale", 200)
+                
+                if current_sale_products is not None:
+                    expired_in_sale = any(p.get('product_id') == expired_product_id for p in current_sale_products)
+                    if not expired_in_sale:
+                        self.log_test("4.5 Expired discount not in sale", True, "Expired discount product correctly excluded from sale")
+                    else:
+                        self.log_test("4.5 Expired discount not in sale", False, "Expired discount product incorrectly included in sale")
+            
+            # Test legacy old_price vs new discount_percent system
+            legacy_product_data = {
+                "name_ar": "منتج بنظام السعر القديم",
+                "name_fr": "Produit avec Ancien Prix",
+                "name_en": "Product with Legacy Old Price",
+                "description_ar": "منتج تجريبي بنظام السعر القديم",
+                "description_fr": "Produit test avec ancien système de prix",
+                "description_en": "Test product with legacy old price system",
+                "price": 600.0,
+                "old_price": 800.0,  # Legacy discount system
+                "stock": 40,
+                "category_id": category_id,
+                "images": ["https://example.com/legacy-price.jpg"],
+                "featured": False,
+                "unit": "piece"
+                # No new discount fields
+            }
+            
+            legacy_product = self.run_test("4.6 Create product with legacy old_price", "POST", "products", 200, legacy_product_data)
+            
+            if legacy_product:
+                # Verify old_price is saved
+                if legacy_product.get('old_price') == 800.0:
+                    self.log_test("4.7 Verify old_price saved", True, f"Old price: {legacy_product.get('old_price')}")
+                else:
+                    self.log_test("4.7 Verify old_price saved", False, f"Expected 800.0, got {legacy_product.get('old_price')}")
+                
+                # Verify no new discount fields
+                if legacy_product.get('discount_percent') is None:
+                    self.log_test("4.8 Verify no discount_percent in legacy", True, "No discount percentage in legacy product")
+                else:
+                    self.log_test("4.8 Verify no discount_percent in legacy", False, f"Unexpected discount_percent: {legacy_product.get('discount_percent')}")
+            
+            # Clean up test products
+            print("\n🧹 Cleaning up test products...")
+            if product_id:
+                self.run_test("Cleanup: Delete test product 1", "DELETE", f"products/{product_id}", 200)
+            if no_discount_product and no_discount_product.get('product_id'):
+                self.run_test("Cleanup: Delete test product 2", "DELETE", f"products/{no_discount_product.get('product_id')}", 200)
+            if expired_product and expired_product.get('product_id'):
+                self.run_test("Cleanup: Delete test product 3", "DELETE", f"products/{expired_product.get('product_id')}", 200)
+            if legacy_product and legacy_product.get('product_id'):
+                self.run_test("Cleanup: Delete test product 4", "DELETE", f"products/{legacy_product.get('product_id')}", 200)
+        
+        # Restore original token
+        self.session_token = original_token
+        
+        print("\n🏷️ Product Discount Feature Testing Complete")
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting AgroYousfi API Tests...")
