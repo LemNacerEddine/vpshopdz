@@ -56,7 +56,7 @@ export const ProductCard = ({ product }) => {
     return { discountStart, discountEnd, isDiscountActive, hasDiscount, discountPercent, displayPrice, strikePrice };
   }, [product.discount_start, product.discount_end, product.discount_percent, product.price, product.old_price]);
 
-  const { discountEnd, isDiscountActive, hasDiscount, discountPercent, displayPrice, strikePrice } = discountData;
+  const { isDiscountActive, hasDiscount, discountPercent, displayPrice, strikePrice } = discountData;
 
   // Calculate time remaining for discount
   useEffect(() => {
