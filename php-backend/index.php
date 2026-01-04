@@ -116,6 +116,13 @@ try {
             if ($method === 'GET') $productController->onSale();
             break;
 
+        // ==================== WILAYAS ====================
+        case 'wilayas':
+            if ($method === 'GET') {
+                jsonResponse(getWilayas());
+            }
+            break;
+
         // ==================== CATEGORIES ====================
         case 'categories':
             if ($id === null) {
