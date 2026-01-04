@@ -25,7 +25,8 @@ import {
   Trash2,
   Plus,
   Video,
-  Loader2
+  Loader2,
+  Tag
 } from 'lucide-react';
 import { toast } from 'sonner';
 
