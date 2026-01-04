@@ -129,6 +129,15 @@ export const Navbar = () => {
             >
               {t('nav.products')}
             </Link>
+            {/* Deals Link - Highlighted */}
+            <Link
+              to="/deals"
+              className="flex items-center gap-1 px-3 py-2 text-sm text-red-600 hover:text-red-700 transition-colors font-bold rounded-lg hover:bg-red-50 whitespace-nowrap"
+              data-testid="nav-deals"
+            >
+              <Flame className="h-4 w-4" />
+              {language === 'ar' ? 'العروض' : language === 'fr' ? 'Offres' : 'Deals'}
+            </Link>
             
             {/* Categories Mega Menu */}
             <div 
