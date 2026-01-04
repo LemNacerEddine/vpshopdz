@@ -317,7 +317,11 @@ const ProductForm = () => {
         ...formData,
         price: parseFloat(formData.price) || 0,
         old_price: formData.old_price ? parseFloat(formData.old_price) : null,
-        stock: parseInt(formData.stock) || 0
+        stock: parseInt(formData.stock) || 0,
+        // Discount fields
+        discount_percent: discountEnabled && formData.discount_percent ? parseInt(formData.discount_percent) : null,
+        discount_start: discountEnabled && formData.discount_start ? formData.discount_start + 'T00:00:00Z' : null,
+        discount_end: discountEnabled && formData.discount_end ? formData.discount_end + 'T23:59:59Z' : null
       };
 
       if (isEdit) {
@@ -335,6 +339,11 @@ const ProductForm = () => {
       setSaving(false);
     }
   };
+
+  // Calculate price after discount
+  const priceAfterDiscount = formData.price && formData.discount_percent
+    ? (parseFloat(formData.price) * (1 - parseInt(formData.discount_percent) / 100)).toFixed(2)
+    : null;
 
   if (loading) {
     return (
