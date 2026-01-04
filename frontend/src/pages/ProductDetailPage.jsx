@@ -280,16 +280,23 @@ export const ProductDetailPage = () => {
   const description = product[`description_${language}`] || product.description_ar;
   
   // Check for new discount system (discount_percent with dates)
-  const now = new Date();
-  const discountStart = product.discount_start ? new Date(product.discount_start) : null;
-  const discountEnd = product.discount_end ? new Date(product.discount_end) : null;
-  
-  // Determine if new discount is currently active
-  const isNewDiscountActive = product.discount_percent && product.discount_percent > 0 && (
-    (!discountStart && !discountEnd) || // No date restriction
-    (discountStart && discountEnd && now >= discountStart && now <= discountEnd) || // Within range
-    (discountStart && !discountEnd && now >= discountStart) // Started but no end
-  );
+  // Memoize date calculations to prevent infinite re-renders
+  const discountDates = useMemo(() => {
+    const now = new Date();
+    const discountStart = product.discount_start ? new Date(product.discount_start) : null;
+    const discountEnd = product.discount_end ? new Date(product.discount_end) : null;
+    
+    // Determine if new discount is currently active
+    const isNewDiscountActive = product.discount_percent && product.discount_percent > 0 && (
+      (!discountStart && !discountEnd) || // No date restriction
+      (discountStart && discountEnd && now >= discountStart && now <= discountEnd) || // Within range
+      (discountStart && !discountEnd && now >= discountStart) // Started but no end
+    );
+    
+    return { discountStart, discountEnd, isNewDiscountActive };
+  }, [product.discount_start, product.discount_end, product.discount_percent]);
+
+  const { discountStart, discountEnd, isNewDiscountActive } = discountDates;
 
   // Calculate prices based on active discount system
   const hasLegacyDiscount = !isNewDiscountActive && product.old_price && product.old_price > product.price;
