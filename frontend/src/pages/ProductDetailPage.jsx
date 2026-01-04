@@ -104,7 +104,7 @@ export const ProductDetailPage = () => {
   const { productId } = useParams();
   const { t, language, isRTL, formatPrice } = useLanguage();
   const { addToCart } = useCart();
-  const { user } = useAuth();
+  const { user, userId } = useAuth();
   const navigate = useNavigate();
   
   const [product, setProduct] = useState(null);
