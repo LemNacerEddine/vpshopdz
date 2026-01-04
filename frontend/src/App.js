@@ -36,21 +36,31 @@ const AppRouter = () => {
       {/* Admin routes */}
       <Route path="/admin/*" element={<AdminRouter />} />
       
-      {/* Public routes with Layout */}
-      <Route element={<Layout />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/products" element={<ProductsPage />} />
-        <Route path="/products/:productId" element={<ProductDetailPage />} />
-        <Route path="/categories" element={<CategoriesPage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/orders" element={<ProfilePage />} />
-      </Route>
+      {/* Product detail - must be before products list */}
+      <Route path="/products/:productId" element={
+        <Layout>
+          <ProductDetailPage />
+        </Layout>
+      } />
+      
+      {/* Products list */}
+      <Route path="/products" element={
+        <Layout>
+          <ProductsPage />
+        </Layout>
+      } />
+      
+      {/* Other public routes */}
+      <Route path="/" element={<Layout><HomePage /></Layout>} />
+      <Route path="/categories" element={<Layout><CategoriesPage /></Layout>} />
+      <Route path="/cart" element={<Layout><CartPage /></Layout>} />
+      <Route path="/checkout" element={<Layout><CheckoutPage /></Layout>} />
+      <Route path="/login" element={<Layout><LoginPage /></Layout>} />
+      <Route path="/register" element={<Layout><RegisterPage /></Layout>} />
+      <Route path="/forgot-password" element={<Layout><ForgotPasswordPage /></Layout>} />
+      <Route path="/auth/callback" element={<Layout><AuthCallback /></Layout>} />
+      <Route path="/profile" element={<Layout><ProfilePage /></Layout>} />
+      <Route path="/orders" element={<Layout><ProfilePage /></Layout>} />
     </Routes>
   );
 };
