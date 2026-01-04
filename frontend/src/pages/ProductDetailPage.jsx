@@ -126,11 +126,11 @@ export const ProductDetailPage = () => {
   }, [productId]);
 
   useEffect(() => {
-    if (user) {
+    if (userId) {
       checkWishlistStatus();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productId, user?.user_id]);
+  }, [productId, userId]);
 
   const addToBrowsingHistory = async () => {
     try {
