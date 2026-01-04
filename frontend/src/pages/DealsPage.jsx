@@ -97,7 +97,7 @@ const DealsPage = () => {
 
         {/* Products Grid */}
         {products.length > 0 ? (
-          <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 ${products.length < 6 ? 'justify-items-center max-w-4xl mx-auto' : ''}`}>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
             {products.map((product) => (
               <ProductCard key={product.product_id} product={product} />
             ))}
