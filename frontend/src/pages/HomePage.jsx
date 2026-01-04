@@ -377,13 +377,13 @@ export const HomePage = () => {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+              {[...Array(6)].map((_, i) => (
+                <Skeleton key={i} className="aspect-[4/3] rounded-lg" />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
               {newArrivals.map((product) => (
                 <ProductCard key={product.product_id} product={product} />
               ))}
@@ -409,7 +409,7 @@ export const HomePage = () => {
                 </p>
               </div>
             </div>
-            <Link to="/products" className="hidden sm:block">
+            <Link to="/deals" className="hidden sm:block">
               <Button variant="outline" className="rounded-full">
                 {t('categories.viewAll')}
                 <ChevronIcon className="h-4 w-4 ms-1" />
@@ -418,13 +418,13 @@ export const HomePage = () => {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+              {[...Array(6)].map((_, i) => (
+                <Skeleton key={i} className="aspect-[4/3] rounded-lg" />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
               {featuredProducts.map((product) => (
                 <ProductCard key={product.product_id} product={product} />
               ))}
@@ -432,7 +432,7 @@ export const HomePage = () => {
           )}
 
           <div className="text-center mt-10 sm:hidden">
-            <Link to="/products">
+            <Link to="/deals">
               <Button className="rounded-full px-8">
                 {t('categories.viewAll')}
                 <ChevronIcon className="h-4 w-4 ms-1" />
