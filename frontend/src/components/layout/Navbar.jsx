@@ -29,7 +29,8 @@ import {
   Shield,
   Droplet,
   Home,
-  ChevronDown
+  ChevronDown,
+  Flame
 } from 'lucide-react';
 
 const LOGO_URL = "https://customer-assets.emergentagent.com/job_cb33075f-a467-40a3-8ccf-6a7d58e2dd7b/artifacts/9ov58a7g_548325177_122096850867034427_2184721735778021830_n.jpg";
