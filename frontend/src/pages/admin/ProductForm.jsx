@@ -228,8 +228,15 @@ const ProductForm = () => {
         images: product.images || [],
         video: product.video || '',
         featured: product.featured || false,
-        unit: product.unit || 'piece'
+        unit: product.unit || 'piece',
+        discount_percent: product.discount_percent?.toString() || '',
+        discount_start: product.discount_start ? product.discount_start.split('T')[0] : '',
+        discount_end: product.discount_end ? product.discount_end.split('T')[0] : ''
       });
+      // Enable discount toggle if product has discount
+      if (product.discount_percent && product.discount_percent > 0) {
+        setDiscountEnabled(true);
+      }
     } catch (error) {
       console.error('Error fetching product:', error);
       toast.error(text.error);
