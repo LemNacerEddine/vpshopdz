@@ -566,6 +566,17 @@ backend:
       - working: true
         agent: "testing"
         comment: "PRODUCTS/CATEGORIES API TESTING COMPLETED: ✅ GET /api/products retrieves 10 products successfully. ✅ GET /api/categories retrieves 6 categories successfully. ✅ Product search with Arabic and English queries working correctly. All public product endpoints working perfectly."
+  - task: "Product Discount Feature APIs"
+    implemented: true
+    working: true
+    needs_retesting: false
+    priority: "high"
+    stuck_count: 0
+    file: "/app/backend/server.py"
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "PRODUCT DISCOUNT FEATURE TESTING COMPLETED - ALL SCENARIOS SUCCESSFUL: ✅ GET /api/products-on-sale returns 1 product with 20% discount valid until 2026-01-31 (wheat product). ✅ POST /api/products with discount fields (discount_percent: 15, discount_start: 2026-01-01T00:00:00Z, discount_end: 2026-02-28T23:59:59Z) saves correctly. ✅ PUT /api/products/{product_id} successfully updates discount fields (25%, 2026-01-15 to 2026-03-15). ✅ Edge cases tested: products without discount, expired discounts correctly excluded from sale, legacy old_price system working alongside new discount system. ✅ Admin authentication with password (admin@agroyousfi.dz / admin123) working correctly. All discount functionality working as specified."
 
 frontend:
   - task: "Admin Dashboard"
