@@ -636,7 +636,7 @@ agent_communication:
 
 test_plan:
   current_focus:
-    - "Admin Product Form Discount Section Testing - COMPLETED"
+    - "AgroYousfi E-commerce Backend API Testing - COMPLETED"
   test_all: false
   test_priority: "high_first"
 
