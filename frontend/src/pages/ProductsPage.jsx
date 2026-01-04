@@ -200,9 +200,9 @@ export const ProductsPage = () => {
 
         {/* Products Grid */}
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {[...Array(12)].map((_, i) => (
-              <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+            {[...Array(18)].map((_, i) => (
+              <Skeleton key={i} className="aspect-[4/3] rounded-lg" />
             ))}
           </div>
         ) : products.length === 0 ? (
@@ -220,10 +220,10 @@ export const ProductsPage = () => {
           </div>
         ) : (
           <>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-muted-foreground mb-3">
               {products.length} {language === 'ar' ? 'منتج' : language === 'fr' ? 'produits' : 'products'}
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
               {products.map((product) => (
                 <ProductCard key={product.product_id} product={product} />
               ))}
