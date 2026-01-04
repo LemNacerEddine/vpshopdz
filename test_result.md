@@ -557,7 +557,7 @@ agent_communication:
 
 test_plan:
   current_focus:
-    - "Product Discount Feature Testing - COMPLETED"
+    - "Admin Product Form Discount Section Testing - COMPLETED"
   test_all: false
   test_priority: "high_first"
 
