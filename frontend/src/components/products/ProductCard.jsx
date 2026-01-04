@@ -87,6 +87,48 @@ export const ProductCard = ({ product }) => {
     return () => clearInterval(interval);
   }, [isDiscountActive, discountEnd]);
 
+  // Check wishlist status on mount
+  useEffect(() => {
+    const checkWishlistStatus = async () => {
+      if (!user) return;
+      try {
+        const response = await axios.get(`${API}/wishlist`, { withCredentials: true });
+        const inWishlist = response.data.some(item => item.product_id === product.product_id);
+        setIsInWishlist(inWishlist);
+      } catch (error) {
+        // Silently fail - user might not be logged in
+      }
+    };
+    checkWishlistStatus();
+  }, [user, product.product_id]);
+
+  const handleToggleWishlist = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      toast.error(language === 'ar' ? 'يجب تسجيل الدخول أولاً' : 'Please login first');
+      return;
+    }
+
+    try {
+      setWishlistLoading(true);
+      if (isInWishlist) {
+        await axios.delete(`${API}/wishlist/${product.product_id}`, { withCredentials: true });
+        setIsInWishlist(false);
+        toast.success(language === 'ar' ? 'تمت الإزالة من المفضلة' : 'Removed from wishlist');
+      } else {
+        await axios.post(`${API}/wishlist/${product.product_id}`, {}, { withCredentials: true });
+        setIsInWishlist(true);
+        toast.success(language === 'ar' ? 'تمت الإضافة للمفضلة' : 'Added to wishlist');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || (language === 'ar' ? 'حدث خطأ' : 'Error'));
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
+
   const handleAddToCart = async (e) => {
     e.preventDefault();
     e.stopPropagation();
