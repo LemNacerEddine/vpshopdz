@@ -87,6 +87,7 @@ const AppRouter = () => {
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <LanguageProvider>
         <AuthProvider>
           <CartProvider>
