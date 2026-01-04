@@ -159,6 +159,52 @@ const CategoriesPage = () => {
     fetchCategories();
   }, []);
 
+  const handleFileUpload = async (file) => {
+    if (!file) return;
+    
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+    if (!validTypes.includes(file.type)) {
+      toast.error(language === 'ar' ? 'نوع الملف غير مدعوم' : 'Unsupported file type');
+      return;
+    }
+    
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(language === 'ar' ? 'حجم الملف كبير جداً (الحد الأقصى 5MB)' : 'File too large (max 5MB)');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+      
+      const response = await axios.post(`${API}/upload/image`, formDataUpload, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        withCredentials: true
+      });
+      
+      setFormData(prev => ({ ...prev, image: response.data.url }));
+      toast.success(text.uploadSuccess);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error(text.uploadError);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file) handleFileUpload(file);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
   const fetchCategories = async () => {
     try {
       setLoading(true);
