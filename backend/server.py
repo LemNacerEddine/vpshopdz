@@ -985,6 +985,37 @@ async def get_product(product_id: str):
         product["created_at"] = datetime.fromisoformat(product["created_at"])
     return product
 
+@api_router.get("/products-on-sale")
+async def get_products_on_sale(limit: int = Query(default=20, le=50)):
+    """Get products currently on sale (with active discounts)"""
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Find products with discount_percent > 0 and within discount period
+    products = await db.products.find({
+        "discount_percent": {"$gt": 0},
+        "$or": [
+            # No date restrictions
+            {"discount_start": None, "discount_end": None},
+            {"discount_start": {"$exists": False}},
+            # Within date range
+            {
+                "discount_start": {"$lte": now},
+                "discount_end": {"$gte": now}
+            },
+            # Started but no end date
+            {
+                "discount_start": {"$lte": now},
+                "discount_end": None
+            }
+        ]
+    }, {"_id": 0}).limit(limit).to_list(limit)
+    
+    for prod in products:
+        if isinstance(prod.get("created_at"), str):
+            prod["created_at"] = datetime.fromisoformat(prod["created_at"])
+    
+    return products
+
 @api_router.post("/products", response_model=Product)
 async def create_product(data: ProductCreate, user: User = Depends(require_admin)):
     """Create product (admin only)"""
