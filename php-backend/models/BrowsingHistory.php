@@ -15,7 +15,7 @@ class BrowsingHistory {
         $this->conn = $db;
     }
 
-    // Get browsing history with full product details
+    // Get browsing history with full product details (matching Python structure)
     public function getHistory($userId = null, $browserId = null, $limit = 20) {
         $where = [];
         $params = [];
@@ -23,27 +23,38 @@ class BrowsingHistory {
         if ($userId) {
             $where[] = 'bh.user_id = :user_id';
             $params[':user_id'] = $userId;
-        } elseif ($browserId) {
+        }
+        
+        if ($browserId) {
             $where[] = 'bh.browser_id = :browser_id';
             $params[':browser_id'] = $browserId;
-        } else {
+        }
+        
+        if (empty($where)) {
             return [];
         }
 
-        // Get unique products from history
-        $query = "SELECT DISTINCT p.*, MAX(bh.viewed_at) as last_viewed
-                  FROM {$this->table} bh
+        // Get history with products - using subquery to get latest view per product
+        $query = "SELECT bh.*, p.product_id as p_product_id, p.name_ar, p.name_fr, p.name_en, 
+                         p.description_ar, p.description_fr, p.description_en,
+                         p.price, p.old_price, p.stock, p.category_id, p.featured, p.unit,
+                         p.discount_percent, p.discount_start, p.discount_end,
+                         p.rating, p.reviews_count, p.created_at as product_created_at
+                  FROM (
+                      SELECT product_id, user_id, browser_id, MAX(viewed_at) as viewed_at
+                      FROM {$this->table}
+                      WHERE " . implode(' OR ', $where) . "
+                      GROUP BY product_id
+                  ) bh
                   JOIN products p ON bh.product_id = p.product_id
-                  WHERE " . implode(' AND ', $where) . "
-                  GROUP BY p.product_id
-                  ORDER BY last_viewed DESC
+                  ORDER BY bh.viewed_at DESC
                   LIMIT " . (int)$limit;
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute($params);
         $rows = $stmt->fetchAll();
 
-        $products = [];
+        $items = [];
         foreach ($rows as $row) {
             // Get product images
             $imgQuery = "SELECT image_url FROM product_images WHERE product_id = :product_id ORDER BY sort_order";
@@ -64,33 +75,38 @@ class BrowsingHistory {
                 }
             }
 
-            $products[] = [
+            // Structure matching Python API response
+            $items[] = [
+                'user_id' => $row['user_id'],
                 'product_id' => $row['product_id'],
-                'name_ar' => $row['name_ar'],
-                'name_fr' => $row['name_fr'] ?? null,
-                'name_en' => $row['name_en'] ?? null,
-                'description_ar' => $row['description_ar'] ?? null,
-                'description_fr' => $row['description_fr'] ?? null,
-                'description_en' => $row['description_en'] ?? null,
-                'price' => $finalPrice,
-                'original_price' => $price,
-                'old_price' => !empty($row['old_price']) ? (float)$row['old_price'] : null,
-                'stock' => (int)($row['stock'] ?? 0),
-                'category_id' => $row['category_id'] ?? null,
-                'images' => $images,
-                'featured' => (bool)($row['featured'] ?? false),
-                'unit' => $row['unit'] ?? 'piece',
-                'discount_percent' => !empty($row['discount_percent']) ? (int)$row['discount_percent'] : null,
-                'discount_start' => $row['discount_start'] ?? null,
-                'discount_end' => $row['discount_end'] ?? null,
-                'rating' => !empty($row['rating']) ? (float)$row['rating'] : 0,
-                'reviews_count' => (int)($row['reviews_count'] ?? 0),
-                'created_at' => $row['created_at'] ?? null,
-                'viewed_at' => $row['last_viewed']
+                'browser_id' => $row['browser_id'],
+                'viewed_at' => $row['viewed_at'],
+                'product' => [
+                    'product_id' => $row['product_id'],
+                    'name_ar' => $row['name_ar'],
+                    'name_fr' => $row['name_fr'] ?? null,
+                    'name_en' => $row['name_en'] ?? null,
+                    'description_ar' => $row['description_ar'] ?? null,
+                    'description_fr' => $row['description_fr'] ?? null,
+                    'description_en' => $row['description_en'] ?? null,
+                    'price' => $finalPrice,
+                    'old_price' => !empty($row['old_price']) ? (float)$row['old_price'] : null,
+                    'stock' => (int)($row['stock'] ?? 0),
+                    'category_id' => $row['category_id'] ?? null,
+                    'images' => $images,
+                    'featured' => (bool)($row['featured'] ?? false),
+                    'unit' => $row['unit'] ?? 'piece',
+                    'discount_percent' => !empty($row['discount_percent']) ? (int)$row['discount_percent'] : null,
+                    'discount_start' => $row['discount_start'] ?? null,
+                    'discount_end' => $row['discount_end'] ?? null,
+                    'rating' => !empty($row['rating']) ? (float)$row['rating'] : 0,
+                    'reviews_count' => (int)($row['reviews_count'] ?? 0),
+                    'created_at' => $row['product_created_at'] ?? null
+                ]
             ];
         }
 
-        return $products;
+        return $items;
     }
 
     // Add to browsing history
