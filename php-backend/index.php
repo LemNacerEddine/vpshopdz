@@ -212,11 +212,19 @@ try {
         case 'cart':
             if ($id === null) {
                 if ($method === 'GET') $cartController->index();
-                if ($method === 'POST') $cartController->add();
-                if ($method === 'PUT') $cartController->update();
                 if ($method === 'DELETE') $cartController->clear();
-            } else {
-                if ($method === 'DELETE') $cartController->remove($id);
+            } elseif ($id === 'add') {
+                // POST /cart/add
+                if ($method === 'POST') $cartController->add();
+            } elseif ($id === 'update') {
+                // PUT /cart/update
+                if ($method === 'PUT') $cartController->update();
+            } elseif ($id === 'remove') {
+                // DELETE /cart/remove/{product_id}
+                if ($method === 'DELETE' && $action) $cartController->remove($action);
+            } elseif ($id === 'clear') {
+                // DELETE /cart/clear
+                if ($method === 'DELETE') $cartController->clear();
             }
             break;
 
@@ -232,7 +240,9 @@ try {
             break;
 
         // ==================== BROWSING HISTORY ====================
+        // Support both /history and /browsing-history for compatibility
         case 'history':
+        case 'browsing-history':
             if ($id === null) {
                 if ($method === 'GET') $historyController->index();
                 if ($method === 'DELETE') $historyController->clear();
