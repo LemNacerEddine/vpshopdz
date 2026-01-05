@@ -34,20 +34,20 @@ class BrowsingHistory {
             return [];
         }
 
-        // Get history with products - using subquery to get latest view per product
-        $query = "SELECT bh.*, p.product_id as p_product_id, p.name_ar, p.name_fr, p.name_en, 
+        // Simpler query - get latest entries grouped by product
+        $whereClause = implode(' OR ', $where);
+        
+        $query = "SELECT bh.user_id, bh.browser_id, bh.product_id, MAX(bh.viewed_at) as viewed_at,
+                         p.name_ar, p.name_fr, p.name_en, 
                          p.description_ar, p.description_fr, p.description_en,
                          p.price, p.old_price, p.stock, p.category_id, p.featured, p.unit,
                          p.discount_percent, p.discount_start, p.discount_end,
                          p.rating, p.reviews_count, p.created_at as product_created_at
-                  FROM (
-                      SELECT product_id, user_id, browser_id, MAX(viewed_at) as viewed_at
-                      FROM {$this->table}
-                      WHERE " . implode(' OR ', $where) . "
-                      GROUP BY product_id
-                  ) bh
+                  FROM {$this->table} bh
                   JOIN products p ON bh.product_id = p.product_id
-                  ORDER BY bh.viewed_at DESC
+                  WHERE ({$whereClause})
+                  GROUP BY bh.product_id
+                  ORDER BY viewed_at DESC
                   LIMIT " . (int)$limit;
 
         $stmt = $this->conn->prepare($query);
