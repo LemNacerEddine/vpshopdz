@@ -27,12 +27,26 @@ class Cart {
             $where[] = 'c.browser_id = :browser_id';
             $params[':browser_id'] = $browserId;
         } else {
-            return ['items' => [], 'total' => 0];
+            return ['cart_id' => null, 'items' => []];
         }
 
-        $query = "SELECT ci.*, p.name_ar, p.name_fr, p.name_en, p.price, p.stock,
+        // Get cart ID first
+        $cartQuery = "SELECT id FROM {$this->table} WHERE " . 
+            ($userId ? "user_id = :user_id" : "browser_id = :browser_id") . " LIMIT 1";
+        $cartStmt = $this->conn->prepare($cartQuery);
+        $cartStmt->execute($params);
+        $cartRow = $cartStmt->fetch();
+        
+        if (!$cartRow) {
+            return ['cart_id' => null, 'items' => []];
+        }
+
+        $query = "SELECT ci.product_id, ci.quantity, 
+                         p.product_id, p.name_ar, p.name_fr, p.name_en, 
+                         p.description_ar, p.description_fr, p.description_en,
+                         p.price, p.old_price, p.stock, p.category_id, p.featured, p.unit,
                          p.discount_percent, p.discount_start, p.discount_end,
-                         (SELECT image_url FROM product_images WHERE product_id = p.product_id ORDER BY sort_order LIMIT 1) as image
+                         p.rating, p.reviews_count, p.created_at
                   FROM cart_items ci
                   JOIN carts c ON ci.cart_id = c.id
                   JOIN products p ON ci.product_id = p.product_id
@@ -40,28 +54,68 @@ class Cart {
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute($params);
-        $items = $stmt->fetchAll();
+        $rows = $stmt->fetchAll();
 
-        $total = 0;
-        foreach ($items as &$item) {
-            // Calculate price with discount
-            $price = $item['price'];
-            if ($item['discount_percent'] > 0) {
+        $items = [];
+        foreach ($rows as $row) {
+            // Get product images
+            $imgQuery = "SELECT image_url FROM product_images WHERE product_id = :product_id ORDER BY sort_order";
+            $imgStmt = $this->conn->prepare($imgQuery);
+            $imgStmt->execute([':product_id' => $row['product_id']]);
+            $images = $imgStmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            // If no images in product_images table, check if product has images field
+            if (empty($images)) {
+                // Try to get from products table if there's an images column
+                $images = [];
+            }
+
+            // Calculate final price with discount
+            $price = (float)$row['price'];
+            $finalPrice = $price;
+            if ($row['discount_percent'] > 0) {
                 $now = new DateTime();
-                $start = $item['discount_start'] ? new DateTime($item['discount_start']) : null;
-                $end = $item['discount_end'] ? new DateTime($item['discount_end']) : null;
+                $start = $row['discount_start'] ? new DateTime($row['discount_start']) : null;
+                $end = $row['discount_end'] ? new DateTime($row['discount_end']) : null;
                 
                 if ((!$start || $now >= $start) && (!$end || $now <= $end)) {
-                    $price = $price * (1 - $item['discount_percent'] / 100);
+                    $finalPrice = $price * (1 - $row['discount_percent'] / 100);
                 }
             }
-            $item['final_price'] = $price;
-            $item['subtotal'] = $price * $item['quantity'];
-            $total += $item['subtotal'];
-            unset($item['id']);
+
+            $items[] = [
+                'product_id' => $row['product_id'],
+                'quantity' => (int)$row['quantity'],
+                'product' => [
+                    'product_id' => $row['product_id'],
+                    'name_ar' => $row['name_ar'],
+                    'name_fr' => $row['name_fr'],
+                    'name_en' => $row['name_en'],
+                    'description_ar' => $row['description_ar'],
+                    'description_fr' => $row['description_fr'],
+                    'description_en' => $row['description_en'],
+                    'price' => $finalPrice,
+                    'original_price' => $price,
+                    'old_price' => $row['old_price'] ? (float)$row['old_price'] : null,
+                    'stock' => (int)$row['stock'],
+                    'category_id' => $row['category_id'],
+                    'images' => $images,
+                    'featured' => (bool)$row['featured'],
+                    'unit' => $row['unit'],
+                    'discount_percent' => $row['discount_percent'] ? (int)$row['discount_percent'] : null,
+                    'discount_start' => $row['discount_start'],
+                    'discount_end' => $row['discount_end'],
+                    'rating' => $row['rating'] ? (float)$row['rating'] : 0,
+                    'reviews_count' => (int)$row['reviews_count'],
+                    'created_at' => $row['created_at']
+                ]
+            ];
         }
 
-        return ['items' => $items, 'total' => $total];
+        // Generate cart_id string
+        $cartId = 'cart_' . substr(md5($cartRow['id']), 0, 8);
+
+        return ['cart_id' => $cartId, 'items' => $items];
     }
 
     // Get or create cart
@@ -103,7 +157,7 @@ class Cart {
     // Add item to cart
     public function addItem($userId, $browserId, $productId, $quantity = 1) {
         $cartId = $this->getOrCreateCart($userId, $browserId);
-        if (!$cartId) return false;
+        if (!$cartId) return ['message' => 'لم يتم العثور على السلة', 'items' => []];
 
         // Check if item exists
         $query = "SELECT id, quantity FROM cart_items WHERE cart_id = :cart_id AND product_id = :product_id";
@@ -123,7 +177,7 @@ class Cart {
             $stmt->execute([':cart_id' => $cartId, ':product_id' => $productId, ':quantity' => $quantity]);
         }
 
-        return $this->getCart($userId, $browserId);
+        return ['message' => 'تمت إضافة المنتج للسلة'];
     }
 
     // Update item quantity
@@ -151,7 +205,7 @@ class Cart {
         $stmt = $this->conn->prepare($query);
         $stmt->execute([':cart_id' => $cartId, ':product_id' => $productId]);
 
-        return $this->getCart($userId, $browserId);
+        return ['message' => 'تم حذف المنتج من السلة'];
     }
 
     // Clear cart
@@ -163,7 +217,7 @@ class Cart {
         $stmt = $this->conn->prepare($query);
         $stmt->execute([':cart_id' => $cartId]);
 
-        return ['items' => [], 'total' => 0];
+        return ['cart_id' => null, 'items' => []];
     }
 
     // Merge guest cart to user cart
