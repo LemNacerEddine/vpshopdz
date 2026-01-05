@@ -15,9 +15,13 @@ class Wishlist {
         $this->conn = $db;
     }
 
-    // Get user's wishlist with full product details
+    // Get user's wishlist with full product details (matching Python structure)
     public function getByUser($userId) {
-        $query = "SELECT p.*, w.created_at as added_at
+        $query = "SELECT w.*, p.product_id as p_product_id, p.name_ar, p.name_fr, p.name_en, 
+                         p.description_ar, p.description_fr, p.description_en,
+                         p.price, p.old_price, p.stock, p.category_id, p.featured, p.unit,
+                         p.discount_percent, p.discount_start, p.discount_end,
+                         p.rating, p.reviews_count, p.created_at as product_created_at
                   FROM {$this->table} w
                   JOIN products p ON w.product_id = p.product_id
                   WHERE w.user_id = :user_id
@@ -27,7 +31,7 @@ class Wishlist {
         $stmt->execute([':user_id' => $userId]);
         $rows = $stmt->fetchAll();
 
-        $products = [];
+        $items = [];
         foreach ($rows as $row) {
             // Get product images
             $imgQuery = "SELECT image_url FROM product_images WHERE product_id = :product_id ORDER BY sort_order";
@@ -48,33 +52,37 @@ class Wishlist {
                 }
             }
 
-            $products[] = [
+            // Structure matching Python API response
+            $items[] = [
+                'user_id' => $row['user_id'],
                 'product_id' => $row['product_id'],
-                'name_ar' => $row['name_ar'],
-                'name_fr' => $row['name_fr'] ?? null,
-                'name_en' => $row['name_en'] ?? null,
-                'description_ar' => $row['description_ar'] ?? null,
-                'description_fr' => $row['description_fr'] ?? null,
-                'description_en' => $row['description_en'] ?? null,
-                'price' => $finalPrice,
-                'original_price' => $price,
-                'old_price' => !empty($row['old_price']) ? (float)$row['old_price'] : null,
-                'stock' => (int)($row['stock'] ?? 0),
-                'category_id' => $row['category_id'] ?? null,
-                'images' => $images,
-                'featured' => (bool)($row['featured'] ?? false),
-                'unit' => $row['unit'] ?? 'piece',
-                'discount_percent' => !empty($row['discount_percent']) ? (int)$row['discount_percent'] : null,
-                'discount_start' => $row['discount_start'] ?? null,
-                'discount_end' => $row['discount_end'] ?? null,
-                'rating' => !empty($row['rating']) ? (float)$row['rating'] : 0,
-                'reviews_count' => (int)($row['reviews_count'] ?? 0),
-                'created_at' => $row['created_at'] ?? null,
-                'added_at' => $row['added_at']
+                'created_at' => $row['created_at'],
+                'product' => [
+                    'product_id' => $row['product_id'],
+                    'name_ar' => $row['name_ar'],
+                    'name_fr' => $row['name_fr'] ?? null,
+                    'name_en' => $row['name_en'] ?? null,
+                    'description_ar' => $row['description_ar'] ?? null,
+                    'description_fr' => $row['description_fr'] ?? null,
+                    'description_en' => $row['description_en'] ?? null,
+                    'price' => $finalPrice,
+                    'old_price' => !empty($row['old_price']) ? (float)$row['old_price'] : null,
+                    'stock' => (int)($row['stock'] ?? 0),
+                    'category_id' => $row['category_id'] ?? null,
+                    'images' => $images,
+                    'featured' => (bool)($row['featured'] ?? false),
+                    'unit' => $row['unit'] ?? 'piece',
+                    'discount_percent' => !empty($row['discount_percent']) ? (int)$row['discount_percent'] : null,
+                    'discount_start' => $row['discount_start'] ?? null,
+                    'discount_end' => $row['discount_end'] ?? null,
+                    'rating' => !empty($row['rating']) ? (float)$row['rating'] : 0,
+                    'reviews_count' => (int)($row['reviews_count'] ?? 0),
+                    'created_at' => $row['product_created_at'] ?? null
+                ]
             ];
         }
 
-        return $products;
+        return $items;
     }
 
     // Add to wishlist
