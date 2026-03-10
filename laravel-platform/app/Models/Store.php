@@ -127,6 +127,11 @@ class Store extends Model
         return $this->hasMany(StoreAnalytics::class);
     }
 
+    public function shippingSettings(): HasMany
+    {
+        return $this->hasMany(StoreShippingSetting::class);
+    }
+
     // ═══════════════════════════════════════════════════════════════
     // SCOPES
     // ═══════════════════════════════════════════════════════════════
