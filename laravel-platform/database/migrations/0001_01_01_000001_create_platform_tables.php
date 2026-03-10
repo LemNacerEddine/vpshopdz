@@ -150,12 +150,12 @@ return new class extends Migration
             $table->decimal('price_yearly', 10, 2)->nullable();
             $table->string('currency', 10)->default('DZD');
             
-            // الحدود
+            // الحدود (null = غير محدود)
             $table->unsignedInteger('max_products')->nullable();
             $table->unsignedInteger('max_orders_per_month')->nullable();
-            $table->unsignedInteger('max_staff')->default(1);
+            $table->unsignedInteger('max_staff')->nullable()->default(1);
             $table->unsignedInteger('max_categories')->nullable();
-            $table->unsignedInteger('max_images_per_product')->default(5);
+            $table->unsignedInteger('max_images_per_product')->nullable()->default(5);
             
             // الميزات
             $table->boolean('custom_domain')->default(false);
@@ -188,8 +188,8 @@ return new class extends Migration
             $table->enum('status', ['active', 'cancelled', 'expired', 'past_due'])->default('active');
             $table->enum('billing_cycle', ['monthly', 'yearly'])->default('monthly');
             
-            $table->timestamp('starts_at');
-            $table->timestamp('ends_at');
+            $table->timestamp('starts_at')->nullable();
+            $table->timestamp('ends_at')->nullable();
             $table->timestamp('cancelled_at')->nullable();
             
             // الاستخدام
