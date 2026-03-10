@@ -5,65 +5,74 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductImage;
-use Illuminate\Http\Request;
+use App\Models\Store;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
     /**
-     * قائمة المنتجات
+     * Get products for a store (public)
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request, string $storeId): JsonResponse
     {
-        $storeId = $request->route('storeId') ?? $request->user()?->store_id;
+        $store = Store::where('id', $storeId)
+            ->orWhere('slug', $storeId)
+            ->first();
 
-        if (!$storeId) {
-            return response()->json(['success' => false, 'message' => 'المتجر غير محدد'], 400);
+        if (!$store) {
+            return response()->json([
+                'success' => false,
+                'message' => 'المتجر غير موجود',
+            ], 404);
         }
 
-        $query = Product::with(['category', 'images'])
-            ->forStore($storeId)
-            ->active();
+        $query = Product::where('store_id', $store->id)
+            ->where('status', 'active')
+            ->with(['category', 'images']);
 
-        // Filters
+        // Filter by category
         if ($request->has('category_id')) {
             $query->where('category_id', $request->category_id);
         }
 
+        // Search
         if ($request->has('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('name_ar', 'like', "%{$search}%")
-                  ->orWhere('sku', 'like', "%{$search}%");
+                  ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
+        // Filter by price
+        if ($request->has('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+        if ($request->has('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        // Filter featured
         if ($request->has('featured')) {
-            $query->featured();
+            $query->where('is_featured', true);
         }
 
+        // Filter on sale
         if ($request->has('on_sale')) {
-            $query->onSale();
-        }
-
-        if ($request->has('in_stock')) {
-            $query->inStock();
+            $query->where('discount_percent', '>', 0);
         }
 
         // Sorting
         $sortBy = $request->get('sort_by', 'created_at');
-        $sortOrder = $request->get('sort_order', 'desc');
-        
-        $allowedSorts = ['created_at', 'price', 'name', 'sold_count', 'rating'];
-        if (in_array($sortBy, $allowedSorts)) {
-            $query->orderBy($sortBy, $sortOrder);
-        }
+        $sortDir = $request->get('sort_dir', 'desc');
+        $query->orderBy($sortBy, $sortDir);
 
         // Pagination
-        $perPage = min($request->get('per_page', 20), 100);
+        $perPage = min($request->get('per_page', 12), 50);
         $products = $query->paginate($perPage);
 
         return response()->json([
@@ -74,59 +83,178 @@ class ProductController extends Controller
                 'last_page' => $products->lastPage(),
                 'per_page' => $products->perPage(),
                 'total' => $products->total(),
-            ]
+            ],
         ]);
     }
 
     /**
-     * عرض منتج
+     * Get featured products
      */
-    public function show(Request $request, string $id): JsonResponse
+    public function featured(Request $request, string $storeId): JsonResponse
     {
-        $storeId = $request->route('storeId') ?? $request->user()?->store_id;
+        $store = Store::where('id', $storeId)->orWhere('slug', $storeId)->first();
 
-        $product = Product::with(['category', 'images', 'variants', 'reviews' => function ($q) {
-            $q->where('is_approved', true)->latest()->take(10);
-        }])
-        ->forStore($storeId)
-        ->findOrFail($id);
+        if (!$store) {
+            return response()->json(['success' => false, 'message' => 'المتجر غير موجود'], 404);
+        }
+
+        $products = Product::where('store_id', $store->id)
+            ->where('status', 'active')
+            ->where('is_featured', true)
+            ->with(['category', 'images'])
+            ->limit(8)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $products,
+        ]);
+    }
+
+    /**
+     * Get products on sale
+     */
+    public function onSale(Request $request, string $storeId): JsonResponse
+    {
+        $store = Store::where('id', $storeId)->orWhere('slug', $storeId)->first();
+
+        if (!$store) {
+            return response()->json(['success' => false, 'message' => 'المتجر غير موجود'], 404);
+        }
+
+        $products = Product::where('store_id', $store->id)
+            ->where('status', 'active')
+            ->where('discount_percent', '>', 0)
+            ->with(['category', 'images'])
+            ->orderBy('discount_percent', 'desc')
+            ->limit(8)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $products,
+        ]);
+    }
+
+    /**
+     * Get single product
+     */
+    public function show(string $storeId, string $id): JsonResponse
+    {
+        $store = Store::where('id', $storeId)->orWhere('slug', $storeId)->first();
+
+        if (!$store) {
+            return response()->json(['success' => false, 'message' => 'المتجر غير موجود'], 404);
+        }
+
+        $product = Product::where('store_id', $store->id)
+            ->where(function ($q) use ($id) {
+                $q->where('id', $id)->orWhere('slug', $id);
+            })
+            ->with(['category', 'images', 'variants'])
+            ->first();
+
+        if (!$product) {
+            return response()->json(['success' => false, 'message' => 'المنتج غير موجود'], 404);
+        }
 
         // Increment views
         $product->increment('views_count');
 
         return response()->json([
             'success' => true,
-            'data' => $product
+            'data' => $product,
+        ]);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // DASHBOARD METHODS (Protected)
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * Get products for dashboard
+     */
+    public function dashboardIndex(Request $request): JsonResponse
+    {
+        $store = $request->user()->store;
+
+        if (!$store) {
+            return response()->json(['success' => false, 'message' => 'لا يوجد متجر'], 404);
+        }
+
+        $query = Product::where('store_id', $store->id)
+            ->with(['category', 'images']);
+
+        // Filter by status
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Search
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('name_ar', 'like', "%{$search}%")
+                  ->orWhere('sku', 'like', "%{$search}%");
+            });
+        }
+
+        $products = $query->orderBy('created_at', 'desc')->paginate(20);
+
+        return response()->json([
+            'success' => true,
+            'data' => $products->items(),
+            'meta' => [
+                'current_page' => $products->currentPage(),
+                'last_page' => $products->lastPage(),
+                'total' => $products->total(),
+            ],
         ]);
     }
 
     /**
-     * إنشاء منتج جديد
+     * Store new product
      */
     public function store(Request $request): JsonResponse
     {
-        $storeId = $request->user()->store_id;
+        $store = $request->user()->store;
+
+        if (!$store) {
+            return response()->json(['success' => false, 'message' => 'لا يوجد متجر'], 404);
+        }
+
+        // Check product limit
+        if (!$store->canCreateProduct()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لقد وصلت للحد الأقصى من المنتجات في باقتك الحالية',
+            ], 403);
+        }
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'name_ar' => 'nullable|string|max:255',
             'description' => 'nullable|string',
+            'description_ar' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'compare_at_price' => 'nullable|numeric|min:0',
-            'category_id' => 'nullable|uuid|exists:categories,id',
+            'cost_price' => 'nullable|numeric|min:0',
+            'category_id' => 'nullable|exists:categories,id',
             'sku' => 'nullable|string|max:100',
-            'stock_quantity' => 'required|integer|min:0',
-            'images' => 'nullable|array',
-            'images.*' => 'string|max:500',
-            'discount_percent' => 'nullable|integer|min:0|max:100',
-            'is_featured' => 'nullable|boolean',
-            'status' => 'nullable|in:active,draft',
+            'stock_quantity' => 'integer|min:0',
+            'track_inventory' => 'boolean',
+            'status' => 'in:active,draft,archived',
+            'is_featured' => 'boolean',
+            'discount_percent' => 'integer|min:0|max:100',
+            'images' => 'array',
+            'images.*' => 'url',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -134,14 +262,13 @@ class ProductController extends Controller
         $slug = Str::slug($request->name);
         $originalSlug = $slug;
         $counter = 1;
-        
-        while (Product::where('store_id', $storeId)->where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $counter;
-            $counter++;
+        while (Product::where('store_id', $store->id)->where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $counter++;
         }
 
         $product = Product::create([
-            'store_id' => $storeId,
+            'store_id' => $store->id,
+            'category_id' => $request->category_id,
             'name' => $request->name,
             'name_ar' => $request->name_ar ?? $request->name,
             'slug' => $slug,
@@ -149,12 +276,13 @@ class ProductController extends Controller
             'description_ar' => $request->description_ar,
             'price' => $request->price,
             'compare_at_price' => $request->compare_at_price,
-            'category_id' => $request->category_id,
+            'cost_price' => $request->cost_price,
             'sku' => $request->sku,
-            'stock_quantity' => $request->stock_quantity,
-            'discount_percent' => $request->discount_percent ?? 0,
-            'is_featured' => $request->is_featured ?? false,
+            'stock_quantity' => $request->stock_quantity ?? 0,
+            'track_inventory' => $request->track_inventory ?? true,
             'status' => $request->status ?? 'active',
+            'is_featured' => $request->is_featured ?? false,
+            'discount_percent' => $request->discount_percent ?? 0,
         ]);
 
         // Add images
@@ -170,50 +298,61 @@ class ProductController extends Controller
         }
 
         // Update store products count
-        $product->store->increment('products_count');
+        $store->increment('products_count');
+
+        $product->load(['category', 'images']);
 
         return response()->json([
             'success' => true,
-            'message' => 'تم إنشاء المنتج بنجاح',
-            'data' => $product->load('images', 'category')
+            'message' => 'تم إضافة المنتج بنجاح',
+            'data' => $product,
         ], 201);
     }
 
     /**
-     * تحديث منتج
+     * Update product
      */
     public function update(Request $request, string $id): JsonResponse
     {
-        $storeId = $request->user()->store_id;
+        $store = $request->user()->store;
 
-        $product = Product::forStore($storeId)->findOrFail($id);
+        $product = Product::where('store_id', $store->id)->where('id', $id)->first();
+
+        if (!$product) {
+            return response()->json(['success' => false, 'message' => 'المنتج غير موجود'], 404);
+        }
 
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255',
+            'name_ar' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'description_ar' => 'nullable|string',
             'price' => 'sometimes|numeric|min:0',
-            'stock_quantity' => 'sometimes|integer|min:0',
-            'images' => 'nullable|array',
+            'compare_at_price' => 'nullable|numeric|min:0',
+            'cost_price' => 'nullable|numeric|min:0',
+            'category_id' => 'nullable|exists:categories,id',
+            'sku' => 'nullable|string|max:100',
+            'stock_quantity' => 'integer|min:0',
+            'track_inventory' => 'boolean',
+            'status' => 'in:active,draft,archived',
+            'is_featured' => 'boolean',
+            'discount_percent' => 'integer|min:0|max:100',
+            'images' => 'array',
+            'images.*' => 'url',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
-        $product->update($request->only([
-            'name', 'name_ar', 'name_fr', 'description', 'description_ar',
-            'price', 'compare_at_price', 'category_id', 'sku',
-            'stock_quantity', 'track_inventory', 'discount_percent',
-            'discount_starts_at', 'discount_ends_at',
-            'is_featured', 'status', 'meta_title', 'meta_description'
-        ]));
+        $product->update($request->except(['images']));
 
         // Update images if provided
         if ($request->has('images')) {
             $product->images()->delete();
-            
             foreach ($request->images as $index => $imageUrl) {
                 ProductImage::create([
                     'product_id' => $product->id,
@@ -224,73 +363,90 @@ class ProductController extends Controller
             }
         }
 
+        $product->load(['category', 'images']);
+
         return response()->json([
             'success' => true,
-            'message' => 'تم تحديث المنتج',
-            'data' => $product->fresh(['images', 'category'])
+            'message' => 'تم تحديث المنتج بنجاح',
+            'data' => $product,
         ]);
     }
 
     /**
-     * حذف منتج
+     * Delete product
      */
     public function destroy(Request $request, string $id): JsonResponse
     {
-        $storeId = $request->user()->store_id;
+        $store = $request->user()->store;
 
-        $product = Product::forStore($storeId)->findOrFail($id);
-        
+        $product = Product::where('store_id', $store->id)->where('id', $id)->first();
+
+        if (!$product) {
+            return response()->json(['success' => false, 'message' => 'المنتج غير موجود'], 404);
+        }
+
         $product->delete();
-
-        // Update store products count
-        $product->store->decrement('products_count');
+        $store->decrement('products_count');
 
         return response()->json([
             'success' => true,
-            'message' => 'تم حذف المنتج'
+            'message' => 'تم حذف المنتج بنجاح',
         ]);
     }
 
     /**
-     * المنتجات المميزة
+     * Duplicate product
      */
-    public function featured(Request $request): JsonResponse
+    public function duplicate(Request $request, string $id): JsonResponse
     {
-        $storeId = $request->route('storeId');
+        $store = $request->user()->store;
 
-        $products = Product::with(['images'])
-            ->forStore($storeId)
-            ->active()
-            ->featured()
-            ->limit(8)
-            ->get();
+        $product = Product::where('store_id', $store->id)->where('id', $id)->with('images')->first();
+
+        if (!$product) {
+            return response()->json(['success' => false, 'message' => 'المنتج غير موجود'], 404);
+        }
+
+        // Check limit
+        if (!$store->canCreateProduct()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لقد وصلت للحد الأقصى من المنتجات',
+            ], 403);
+        }
+
+        // Generate new slug
+        $slug = $product->slug . '-copy';
+        $counter = 1;
+        while (Product::where('store_id', $store->id)->where('slug', $slug)->exists()) {
+            $slug = $product->slug . '-copy-' . $counter++;
+        }
+
+        $newProduct = $product->replicate();
+        $newProduct->slug = $slug;
+        $newProduct->name = $product->name . ' (نسخة)';
+        $newProduct->status = 'draft';
+        $newProduct->views_count = 0;
+        $newProduct->sold_count = 0;
+        $newProduct->save();
+
+        // Copy images
+        foreach ($product->images as $image) {
+            ProductImage::create([
+                'product_id' => $newProduct->id,
+                'url' => $image->url,
+                'sort_order' => $image->sort_order,
+                'is_primary' => $image->is_primary,
+            ]);
+        }
+
+        $store->increment('products_count');
+        $newProduct->load(['category', 'images']);
 
         return response()->json([
             'success' => true,
-            'data' => $products
-        ]);
-    }
-
-    /**
-     * المنتجات ذات التخفيضات
-     */
-    public function onSale(Request $request): JsonResponse
-    {
-        $storeId = $request->route('storeId');
-
-        $products = Product::with(['images'])
-            ->forStore($storeId)
-            ->active()
-            ->onSale()
-            ->orderByDesc('discount_percent')
-            ->paginate(20);
-
-        return response()->json([
-            'success' => true,
-            'data' => $products->items(),
-            'meta' => [
-                'total' => $products->total(),
-            ]
-        ]);
+            'message' => 'تم نسخ المنتج بنجاح',
+            'data' => $newProduct,
+        ], 201);
     }
 }
