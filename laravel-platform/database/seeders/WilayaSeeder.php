@@ -37,7 +37,7 @@ class WilayaSeeder extends Seeder
             ['id' => 25, 'name_ar' => 'قسنطينة', 'name_fr' => 'Constantine'],
             ['id' => 26, 'name_ar' => 'المدية', 'name_fr' => 'Médéa'],
             ['id' => 27, 'name_ar' => 'مستغانم', 'name_fr' => 'Mostaganem'],
-            ['id' => 28, 'name_ar' => 'المسيلة', 'name_fr' => "M'Sila"],
+            ['id' => 28, 'name_ar' => 'المسيلة', 'name_fr' => 'M'Sila'],
             ['id' => 29, 'name_ar' => 'معسكر', 'name_fr' => 'Mascara'],
             ['id' => 30, 'name_ar' => 'ورقلة', 'name_fr' => 'Ouargla'],
             ['id' => 31, 'name_ar' => 'وهران', 'name_fr' => 'Oran'],
@@ -64,9 +64,9 @@ class WilayaSeeder extends Seeder
             ['id' => 52, 'name_ar' => 'بني عباس', 'name_fr' => 'Béni Abbès'],
             ['id' => 53, 'name_ar' => 'عين صالح', 'name_fr' => 'In Salah'],
             ['id' => 54, 'name_ar' => 'عين قزام', 'name_fr' => 'In Guezzam'],
-            ['id' => 55, 'name_ar' => 'توقرت', 'name_fr' => 'Touggourt'],
+            ['id' => 55, 'name_ar' => 'تقرت', 'name_fr' => 'Touggourt'],
             ['id' => 56, 'name_ar' => 'جانت', 'name_fr' => 'Djanet'],
-            ['id' => 57, 'name_ar' => 'المغير', 'name_fr' => "El M'Ghair"],
+            ['id' => 57, 'name_ar' => 'المغير', 'name_fr' => 'El M'Ghair'],
             ['id' => 58, 'name_ar' => 'المنيعة', 'name_fr' => 'El Meniaa'],
         ];
 
