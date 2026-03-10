@@ -38,7 +38,18 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 // Dashboard Routes (Authenticated)
 Route::middleware('auth')->prefix('dashboard')->name('dashboard')->group(function () {
     Route::get('/', [DashboardController::class, 'index']);
+    
+    // Products
     Route::get('/products', [DashboardController::class, 'products'])->name('.products');
+    Route::post('/products', [DashboardController::class, 'storeProduct'])->name('.products.store');
+    Route::put('/products/{product}', [DashboardController::class, 'updateProduct'])->name('.products.update');
+    Route::delete('/products/{product}', [DashboardController::class, 'destroyProduct'])->name('.products.destroy');
+    
+    // Orders
     Route::get('/orders', [DashboardController::class, 'orders'])->name('.orders');
+    Route::put('/orders/{order}', [DashboardController::class, 'updateOrder'])->name('.orders.update');
+    
+    // Settings
     Route::get('/settings', [DashboardController::class, 'settings'])->name('.settings');
+    Route::put('/settings', [DashboardController::class, 'updateSettings'])->name('.settings.update');
 });
