@@ -10,7 +10,7 @@ from datetime import datetime
 
 class CartFlowTester:
     def __init__(self):
-        self.api_url = "https://php-migration-15.preview.emergentagent.com"
+        self.api_url = "https://vpshopdz.preview.emergentagent.com"
         self.session = requests.Session()
         self.tests_run = 0
         self.tests_passed = 0
