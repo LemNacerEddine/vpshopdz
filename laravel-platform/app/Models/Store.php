@@ -195,6 +195,16 @@ class Store extends Model
         return $this->products_count < $plan->max_products;
     }
 
+    public function canCreateOrder(): bool
+    {
+        if (!$this->subscription) return true; // Trial
+        
+        $plan = $this->subscription->plan;
+        if (!$plan->max_orders_per_month) return true;
+        
+        return $this->subscription->orders_this_month < $plan->max_orders_per_month;
+    }
+
     public function incrementOrdersCount(): void
     {
         $this->increment('orders_count');
