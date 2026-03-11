@@ -66,4 +66,51 @@ class SubscriptionPlan extends Model
     {
         return $query->where('is_active', true)->orderBy('sort_order');
     }
+
+    // ═══════════════════════════════════════════════════════════════
+    // RELATIONSHIPS
+    // ═══════════════════════════════════════════════════════════════
+
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class, 'plan_id');
+    }
+
+    public function stores()
+    {
+        return $this->hasMany(Store::class, 'plan_id');
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // HELPERS
+    // ═══════════════════════════════════════════════════════════════
+
+    public function hasFeature(string $feature): bool
+    {
+        // Check boolean columns first
+        $booleanFeatures = [
+            'custom_domain', 'remove_branding', 'advanced_analytics',
+            'api_access', 'priority_support', 'facebook_pixel',
+            'whatsapp_integration', 'abandoned_cart',
+        ];
+
+        if (in_array($feature, $booleanFeatures)) {
+            return (bool) $this->{$feature};
+        }
+
+        // Check features array
+        $features = $this->features ?? [];
+        return in_array($feature, $features);
+    }
+
+    public function getYearlySavingAttribute(): float
+    {
+        if (!$this->price_yearly || !$this->price_monthly) return 0;
+        return ($this->price_monthly * 12) - $this->price_yearly;
+    }
+
+    public function isFree(): bool
+    {
+        return $this->price_monthly == 0;
+    }
 }

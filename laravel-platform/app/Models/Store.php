@@ -132,6 +132,73 @@ class Store extends Model
         return $this->hasMany(StoreShippingSetting::class);
     }
 
+    // ─── New Relationships ───────────────────────────────────────
+
+    public function activeTheme(): HasOne
+    {
+        return $this->hasOne(StoreTheme::class)->where('is_active', true);
+    }
+
+    public function themes(): HasMany
+    {
+        return $this->hasMany(StoreTheme::class);
+    }
+
+    public function pixels(): HasMany
+    {
+        return $this->hasMany(StorePixel::class);
+    }
+
+    public function activePixels(): HasMany
+    {
+        return $this->hasMany(StorePixel::class)->where('is_active', true);
+    }
+
+    public function facebookAds(): HasMany
+    {
+        return $this->hasMany(FacebookAd::class);
+    }
+
+    public function pages(): HasMany
+    {
+        return $this->hasMany(StorePage::class);
+    }
+
+    public function notificationTemplates(): HasMany
+    {
+        return $this->hasMany(NotificationTemplate::class);
+    }
+
+    public function integrations(): HasMany
+    {
+        return $this->hasMany(StoreIntegration::class);
+    }
+
+    public function domains(): HasMany
+    {
+        return $this->hasMany(StoreDomain::class);
+    }
+
+    public function primaryDomain(): HasOne
+    {
+        return $this->hasOne(StoreDomain::class)->where('is_primary', true);
+    }
+
+    public function abandonedCarts(): HasMany
+    {
+        return $this->hasMany(AbandonedCart::class);
+    }
+
+    public function staffInvitations(): HasMany
+    {
+        return $this->hasMany(StaffInvitation::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
     // ═══════════════════════════════════════════════════════════════
     // SCOPES
     // ═══════════════════════════════════════════════════════════════
@@ -151,6 +218,12 @@ class Store extends Model
         return $query->where('status', 'suspended');
     }
 
+    public function scopeByDomain($query, string $domain)
+    {
+        return $query->where('subdomain', $domain)
+                     ->orWhere('custom_domain', $domain);
+    }
+
     // ═══════════════════════════════════════════════════════════════
     // HELPERS
     // ═══════════════════════════════════════════════════════════════
@@ -168,6 +241,13 @@ class Store extends Model
     public function isTrialExpired(): bool
     {
         return $this->isTrial() && $this->trial_ends_at && $this->trial_ends_at->isPast();
+    }
+
+    public function isAccessible(): bool
+    {
+        if ($this->isActive()) return true;
+        if ($this->isTrial() && !$this->isTrialExpired()) return true;
+        return false;
     }
 
     public function getUrl(): string
@@ -205,6 +285,15 @@ class Store extends Model
         return $this->subscription->orders_this_month < $plan->max_orders_per_month;
     }
 
+    public function canUseFeature(string $feature): bool
+    {
+        if (!$this->subscription || !$this->subscription->plan) {
+            return false;
+        }
+
+        return (bool) $this->subscription->plan->{$feature};
+    }
+
     public function incrementOrdersCount(): void
     {
         $this->increment('orders_count');
@@ -212,5 +301,63 @@ class Store extends Model
         if ($this->subscription) {
             $this->subscription->increment('orders_this_month');
         }
+    }
+
+    public function incrementProductsCount(): void
+    {
+        $this->increment('products_count');
+    }
+
+    public function decrementProductsCount(): void
+    {
+        $this->decrement('products_count');
+    }
+
+    /**
+     * Get the integration for a specific type
+     */
+    public function getIntegration(string $type): ?StoreIntegration
+    {
+        return $this->integrations()->where('type', $type)->where('is_active', true)->first();
+    }
+
+    /**
+     * Get active pixel scripts for storefront
+     */
+    public function getPixelScripts(): string
+    {
+        return $this->activePixels
+            ->map(fn($pixel) => $pixel->generateScript())
+            ->filter()
+            ->implode("\n");
+    }
+
+    /**
+     * Get the store's active theme with customizations
+     */
+    public function getThemeConfig(): array
+    {
+        $storeTheme = $this->activeTheme;
+
+        if (!$storeTheme) {
+            return [
+                'colors' => ['primary' => '#10b981', 'secondary' => '#3b82f6'],
+                'fonts' => ['heading' => 'Cairo', 'body' => 'Cairo'],
+                'layout' => ['style' => 'modern'],
+            ];
+        }
+
+        return [
+            'theme_id' => $storeTheme->theme_id,
+            'theme_name' => $storeTheme->theme->name ?? 'Default',
+            'colors' => $storeTheme->getMergedColors(),
+            'fonts' => $storeTheme->getMergedFonts(),
+            'layout' => $storeTheme->getMergedLayout(),
+            'sections' => $storeTheme->getMergedSections(),
+            'header' => $storeTheme->header_settings ?? [],
+            'footer' => $storeTheme->footer_settings ?? [],
+            'homepage' => $storeTheme->homepage_settings ?? [],
+            'custom_css' => $storeTheme->custom_css ?? [],
+        ];
     }
 }

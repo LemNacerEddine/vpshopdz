@@ -14,11 +14,17 @@ class DatabaseSeeder extends Seeder
         $this->call([
             // Platform Data
             SubscriptionPlanSeeder::class,
-            
+
+            // Themes
+            ThemeSeeder::class,
+
             // Shipping Data (Algeria)
             WilayaSeeder::class,
             CommuneSeeder::class,
             ShippingCompanySeeder::class,
+
+            // Admin User
+            AdminSeeder::class,
         ]);
     }
 }

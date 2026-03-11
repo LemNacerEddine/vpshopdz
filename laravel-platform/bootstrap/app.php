@@ -18,6 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
+            'resolve.store' => \App\Http\Middleware\ResolveStore::class,
+            'check.subscription' => \App\Http\Middleware\CheckSubscription::class,
+            'check.limit' => \App\Http\Middleware\CheckStoreLimit::class,
+            'track.visitor' => \App\Http\Middleware\TrackVisitor::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
