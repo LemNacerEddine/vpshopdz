@@ -25,6 +25,9 @@ class DatabaseSeeder extends Seeder
 
             // Admin User
             AdminSeeder::class,
+
+            // Demo Data (for testing)
+            DemoSeeder::class,
         ]);
     }
 }

@@ -192,7 +192,7 @@
                                         </svg>
                                     </button>
                                     @if($order->status === 'pending')
-                                        <form method="POST" action="{{ route('dashboard.orders.update', $order) }}" class="inline">
+                                        <form method="POST" action="/api/stores/{{ $store->id }}/orders/{{ $order->id }}/status" class="inline" x-on:submit.prevent="updateOrderStatus($event, '{{ $order->id }}')" >
                                             @csrf
                                             @method('PUT')
                                             <input type="hidden" name="status" value="confirmed">
@@ -204,7 +204,7 @@
                                         </form>
                                     @endif
                                     @if(in_array($order->status, ['pending', 'confirmed']))
-                                        <form method="POST" action="{{ route('dashboard.orders.update', $order) }}" class="inline">
+                                        <form method="POST" action="/api/stores/{{ $store->id }}/orders/{{ $order->id }}/status" class="inline" x-on:submit.prevent="updateOrderStatus($event, '{{ $order->id }}')" >
                                             @csrf
                                             @method('PUT')
                                             <input type="hidden" name="status" value="cancelled">

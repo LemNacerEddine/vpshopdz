@@ -11,7 +11,6 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        // Check if admin already exists
         $exists = DB::table('users')->where('email', 'admin@vpshopdz.com')->exists();
 
         if (!$exists) {
@@ -21,9 +20,7 @@ class AdminSeeder extends Seeder
                 'email' => 'admin@vpshopdz.com',
                 'password' => Hash::make('VPShopDZ@2025'),
                 'phone' => '0550000000',
-                'role' => 'admin',
-                'is_active' => true,
-                'is_banned' => false,
+                'role' => 'super_admin',
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),

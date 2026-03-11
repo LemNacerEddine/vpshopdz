@@ -33,7 +33,10 @@ return new class extends Migration
                 'sports',
                 'home',
                 'minimal',
-                'luxury'
+                'luxury',
+                'services',
+                'gaming',
+                'sahara'
             ])->default('general');
 
             // الإعدادات الافتراضية
