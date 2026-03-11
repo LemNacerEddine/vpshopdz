@@ -271,6 +271,7 @@ return new class extends Migration
             $table->string('domain')->unique();
             $table->enum('type', ['subdomain', 'custom'])->default('subdomain');
             $table->boolean('is_primary')->default(false);
+            $table->boolean('is_verified')->default(false);
 
             $table->enum('ssl_status', ['pending', 'active', 'failed', 'expired'])->default('pending');
             $table->timestamp('ssl_expires_at')->nullable();

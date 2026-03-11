@@ -130,8 +130,19 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 });
 
 // ═══════════════════════════════════════════════════════════════
-// STOREFRONT (Subdomain / Custom Domain → React)
+// STOREFRONT (Subdomain / Custom Domain / Slug → React)
 // ═══════════════════════════════════════════════════════════════
 
+// Direct slug route: /store/{slug} (for local development & testing)
+Route::get('/store/{slug}', [StorefrontController::class, 'bySlug'])
+    ->middleware('track.visitor')
+    ->name('storefront.slug');
+
+// Storefront sub-pages via slug: /store/{slug}/{path?}
+Route::get('/store/{slug}/{path}', [StorefrontController::class, 'bySlug'])
+    ->middleware('track.visitor')
+    ->where('path', '.*');
+
+// Fallback for subdomain / custom domain routing
 Route::fallback([StorefrontController::class, 'index'])
     ->middleware('track.visitor');

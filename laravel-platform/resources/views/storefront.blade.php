@@ -109,62 +109,75 @@
     @endforeach
 
     {{-- Store data for React --}}
-    <script>
-        window.__STORE_DATA__ = @json([
+    @php
+        $storeData = [
             'id' => $store->id,
             'name' => $store->name,
             'slug' => $store->slug,
             'logo' => $store->logo,
             'favicon' => $store->favicon ?? null,
             'description' => $store->description,
-            'default_language' => $store->default_language ?? $store->language ?? 'ar',
+            'default_language' => $store->language ?? 'ar',
             'currency' => $store->currency ?? 'DZD',
             'theme' => [
-                'slug' => $store->activeTheme?->theme?->slug ?? ($theme->slug ?? 'dawn'),
+                'slug' => $theme?->slug ?? 'dawn',
                 'colors' => $themeColors,
                 'fonts' => $themeSettings['fonts'] ?? [],
                 'layout' => $themeSettings['layout'] ?? [],
             ],
-            'settings' => $store->settings ?? [],
+            'settings' => is_string($store->settings) ? json_decode($store->settings, true) : ($store->settings ?? []),
             'social_links' => [
                 'facebook' => $store->facebook_url ?? null,
                 'instagram' => $store->instagram_url ?? null,
-                'whatsapp' => $store->whatsapp_number ?? null,
+                'whatsapp' => $store->whatsapp ?? null,
                 'tiktok' => $store->tiktok_url ?? null,
-                'twitter' => $store->twitter_url ?? null,
             ],
             'contact' => [
                 'phone' => $store->phone ?? null,
                 'email' => $store->email ?? null,
                 'address' => $store->address ?? null,
             ],
-        ]);
+        ];
+    @endphp
+    <script>
+        window.__STORE_DATA__ = {!! json_encode($storeData, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!};
         window.__API_BASE__ = '{{ url("/api/v1/store/" . $store->slug) }}';
     </script>
 
     {{-- React Storefront Assets --}}
-    @if(app()->environment('local'))
-        @viteReactRefresh
-        @vite(['resources/storefront/main.tsx'])
-    @else
-        @php
-            $manifestPath = public_path('storefront/.vite/manifest.json');
-            $manifest = file_exists($manifestPath)
-                ? json_decode(file_get_contents($manifestPath), true)
-                : null;
-            $entry = $manifest['main.tsx'] ?? null;
-        @endphp
-        @if($entry)
-            @if(isset($entry['css']))
-                @foreach($entry['css'] as $css)
-                    <link rel="stylesheet" href="{{ asset('storefront/' . $css) }}">
-                @endforeach
-            @endif
-            <script type="module" src="{{ asset('storefront/' . $entry['file']) }}"></script>
-        @else
-            @viteReactRefresh
-            @vite(['resources/storefront/main.tsx'])
+    @php
+        $manifestPath = public_path('storefront/.vite/manifest.json');
+        $manifest = file_exists($manifestPath)
+            ? json_decode(file_get_contents($manifestPath), true)
+            : null;
+        // Find the entry point - could be 'main.tsx' or 'index.html'
+        $entry = null;
+        if ($manifest) {
+            // Look for isEntry: true
+            foreach ($manifest as $key => $item) {
+                if (isset($item['isEntry']) && $item['isEntry']) {
+                    $entry = $item;
+                    break;
+                }
+            }
+            // Fallback to common keys
+            if (!$entry) {
+                $entry = $manifest['main.tsx'] ?? $manifest['index.html'] ?? null;
+            }
+        }
+    @endphp
+    @if($entry)
+        {{-- Load pre-built storefront assets --}}
+        @if(isset($entry['css']))
+            @foreach($entry['css'] as $css)
+                <link rel="stylesheet" href="{{ asset('storefront/' . $css) }}">
+            @endforeach
         @endif
+        <script type="module" src="{{ asset('storefront/' . $entry['file']) }}"></script>
+    @else
+        {{-- Fallback: try Vite dev server --}}
+        <script type="module" src="http://localhost:5174/@vite/client"></script>
+        <script type="module" src="http://localhost:5174/main.tsx"></script>
     @endif
 </head>
 <body>
