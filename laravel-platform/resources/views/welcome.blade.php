@@ -198,11 +198,11 @@
                     <!-- Stats -->
                     <div class="flex flex-wrap justify-center lg:justify-start gap-8 mb-10">
                         <div class="text-center">
-                            <p class="text-4xl font-black text-white">+10,000</p>
+                            <p class="text-4xl font-black text-white">+850</p>
                             <p class="text-white/60 text-sm">تاجر نشط</p>
                         </div>
                         <div class="text-center">
-                            <p class="text-4xl font-black text-white">+500,000</p>
+                            <p class="text-4xl font-black text-white">+12,000</p>
                             <p class="text-white/60 text-sm">طلب شهرياً</p>
                         </div>
                         <div class="text-center">
@@ -696,8 +696,8 @@
                             </svg>
                         </div>
                         <div class="text-right">
-                            <p class="text-2xl font-black text-white">7 أيام تجربة مجانية</p>
-                            <p class="text-white/80">+ 20 طلب مجاني • بدون بطاقة ائتمان</p>
+                            <p class="text-2xl font-black text-white">🎁 شهر كامل مجاناً!</p>
+                            <p class="text-white/80">+ 50 طلب مجاني • بدون بطاقة ائتمان • إلغاء في أي وقت</p>
                         </div>
                     </div>
                     <a href="{{ route('register') }}" class="bg-white text-amber-600 px-8 py-4 rounded-xl font-bold hover:bg-amber-50 transition-all shadow-lg" data-testid="trial-cta">
@@ -799,7 +799,7 @@
                         </svg>
                     </button>
                     <div x-show="faqOpen === 1" x-collapse class="px-6 pb-5">
-                        <p class="text-gray-600">نعم! نقدم <strong>7 أيام تجربة مجانية</strong> مع <strong>20 طلب مجاني</strong> بدون الحاجة لبطاقة ائتمان. جرّب كل ميزات المنصة قبل الاشتراك.</p>
+                        <p class="text-gray-600">نعم! نقدم <strong>شهر كامل تجربة مجانية</strong> مع <strong>50 طلب مجاني</strong> بدون الحاجة لبطاقة ائتمان. جرّب كل ميزات المنصة قبل الاشتراك.</p>
                     </div>
                 </div>
                 
