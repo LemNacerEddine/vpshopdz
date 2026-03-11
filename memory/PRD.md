@@ -86,6 +86,20 @@
 
 ## 🚀 Upcoming Tasks (P1-P3)
 
+### P0: Pixel Integrations System (HIGH PRIORITY)
+- [ ] Create `store_pixels` table for storing pixel configurations
+- [ ] Support 5 pixel types: Meta Pixel, TikTok Pixel, GA4, Google Ads, Snapchat Pixel
+- [ ] Pixel limits per subscription plan:
+  - Basic: 1 Pixel
+  - Standard: 3 Pixels  
+  - Pro: 5 Pixels
+  - Enterprise: Unlimited
+- [ ] Dashboard UI for managing pixels (add/edit/delete/toggle)
+- [ ] Count only active (enabled) pixels against plan limit
+- [ ] Block adding new pixels when limit reached
+- [ ] Inject pixel scripts into storefront pages
+- [ ] Track pixel events: PageView, AddToCart, Purchase
+
 ### P1: Storefront UI
 - [ ] Public storefront for each tenant
 - [ ] Product listing and detail pages
