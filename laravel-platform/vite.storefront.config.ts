@@ -6,6 +6,9 @@ export default defineConfig({
   plugins: [react()],
   root: path.resolve(__dirname, 'resources/storefront'),
   base: '/storefront/',
+  css: {
+    postcss: path.resolve(__dirname, 'resources/storefront/postcss.config.js'),
+  },
   build: {
     outDir: path.resolve(__dirname, 'public/storefront'),
     emptyOutDir: true,

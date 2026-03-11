@@ -10,9 +10,17 @@ const rootElement = document.getElementById('root') || document.getElementById('
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
 
+  // Detect basename: if running under /store/{slug}, use that as basename
+  // For subdomain/custom domain, basename is '/'
+  const pathParts = window.location.pathname.split('/');
+  const storeIndex = pathParts.indexOf('store');
+  const basename = storeIndex !== -1 && pathParts[storeIndex + 1]
+    ? `/store/${pathParts[storeIndex + 1]}`
+    : '/';
+
   root.render(
     <React.StrictMode>
-      <BrowserRouter>
+      <BrowserRouter basename={basename}>
         <App />
       </BrowserRouter>
     </React.StrictMode>

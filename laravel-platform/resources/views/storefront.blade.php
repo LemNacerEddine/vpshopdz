@@ -166,14 +166,19 @@
             }
         }
     @endphp
+    {{-- Tailwind CSS (built separately via CLI) --}}
+    @if(file_exists(public_path('storefront/storefront.css')))
+        <link rel="stylesheet" href="{{ secure_asset('storefront/storefront.css') }}?v={{ filemtime(public_path('storefront/storefront.css')) }}">
+    @endif
+
     @if($entry)
         {{-- Load pre-built storefront assets --}}
         @if(isset($entry['css']))
             @foreach($entry['css'] as $css)
-                <link rel="stylesheet" href="{{ asset('storefront/' . $css) }}">
+                <link rel="stylesheet" href="{{ secure_asset('storefront/' . $css) }}">
             @endforeach
         @endif
-        <script type="module" src="{{ asset('storefront/' . $entry['file']) }}"></script>
+        <script type="module" src="{{ secure_asset('storefront/' . $entry['file']) }}"></script>
     @else
         {{-- Fallback: try Vite dev server --}}
         <script type="module" src="http://localhost:5174/@vite/client"></script>
