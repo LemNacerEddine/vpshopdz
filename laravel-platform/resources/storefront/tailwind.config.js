@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
+    './resources/storefront/**/*.{ts,tsx,html}',
     './**/*.{ts,tsx,html}',
   ],
   theme: {

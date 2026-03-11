@@ -1,0 +1,236 @@
+{
+  "_ProductCard-CtGEK-_v.js": {
+    "file": "assets/ProductCard-CtGEK-_v.js",
+    "name": "ProductCard",
+    "imports": [
+      "index.html",
+      "_clock-1bt3xxVf.js"
+    ]
+  },
+  "_arrow-right-DwHY2vOR.js": {
+    "file": "assets/arrow-right-DwHY2vOR.js",
+    "name": "arrow-right",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_clock-1bt3xxVf.js": {
+    "file": "assets/clock-1bt3xxVf.js",
+    "name": "clock",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_house-Bl5Ax7nQ.js": {
+    "file": "assets/house-Bl5Ax7nQ.js",
+    "name": "house",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_loader-circle-C-dxuOkU.js": {
+    "file": "assets/loader-circle-C-dxuOkU.js",
+    "name": "loader-circle",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_package-DQAEsj8a.js": {
+    "file": "assets/package-DQAEsj8a.js",
+    "name": "package",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_plus-BcemlFsW.js": {
+    "file": "assets/plus-BcemlFsW.js",
+    "name": "plus",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_shield-CfuXPtcH.js": {
+    "file": "assets/shield-CfuXPtcH.js",
+    "name": "shield",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_shopping-bag-BJkTbhRR.js": {
+    "file": "assets/shopping-bag-BJkTbhRR.js",
+    "name": "shopping-bag",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_sliders-horizontal-BTI6z30v.js": {
+    "file": "assets/sliders-horizontal-BTI6z30v.js",
+    "name": "sliders-horizontal",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_truck-D6ogCTS1.js": {
+    "file": "assets/truck-D6ogCTS1.js",
+    "name": "truck",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "index.html": {
+    "file": "assets/index-DSCN0a_g.js",
+    "name": "index",
+    "src": "index.html",
+    "isEntry": true,
+    "dynamicImports": [
+      "pages/HomePage.tsx",
+      "pages/ProductsPage.tsx",
+      "pages/ProductDetailPage.tsx",
+      "pages/CartPage.tsx",
+      "pages/CheckoutPage.tsx",
+      "pages/CategoryPage.tsx",
+      "pages/SearchPage.tsx",
+      "pages/CustomPage.tsx",
+      "pages/OrderTrackingPage.tsx",
+      "pages/WishlistPage.tsx",
+      "pages/NotFoundPage.tsx"
+    ],
+    "css": [
+      "assets/index-C3EyBdmR.css"
+    ]
+  },
+  "pages/CartPage.tsx": {
+    "file": "assets/CartPage-BFzi-OEg.js",
+    "name": "CartPage",
+    "src": "pages/CartPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_shopping-bag-BJkTbhRR.js",
+      "_arrow-right-DwHY2vOR.js",
+      "_plus-BcemlFsW.js"
+    ]
+  },
+  "pages/CategoryPage.tsx": {
+    "file": "assets/CategoryPage-BQZm9D3A.js",
+    "name": "CategoryPage",
+    "src": "pages/CategoryPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_ProductCard-CtGEK-_v.js",
+      "_clock-1bt3xxVf.js"
+    ]
+  },
+  "pages/CheckoutPage.tsx": {
+    "file": "assets/CheckoutPage-BT5CX9Sh.js",
+    "name": "CheckoutPage",
+    "src": "pages/CheckoutPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_package-DQAEsj8a.js",
+      "_house-Bl5Ax7nQ.js",
+      "_loader-circle-C-dxuOkU.js",
+      "_truck-D6ogCTS1.js"
+    ]
+  },
+  "pages/CustomPage.tsx": {
+    "file": "assets/CustomPage-BOSG1lh3.js",
+    "name": "CustomPage",
+    "src": "pages/CustomPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html"
+    ]
+  },
+  "pages/HomePage.tsx": {
+    "file": "assets/HomePage-DT3RgawG.js",
+    "name": "HomePage",
+    "src": "pages/HomePage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_arrow-right-DwHY2vOR.js",
+      "_ProductCard-CtGEK-_v.js",
+      "_shield-CfuXPtcH.js",
+      "_truck-D6ogCTS1.js",
+      "_clock-1bt3xxVf.js"
+    ]
+  },
+  "pages/NotFoundPage.tsx": {
+    "file": "assets/NotFoundPage-r_ZlE3DT.js",
+    "name": "NotFoundPage",
+    "src": "pages/NotFoundPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_house-Bl5Ax7nQ.js",
+      "_arrow-right-DwHY2vOR.js"
+    ]
+  },
+  "pages/OrderTrackingPage.tsx": {
+    "file": "assets/OrderTrackingPage-D7IFv-qm.js",
+    "name": "OrderTrackingPage",
+    "src": "pages/OrderTrackingPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_clock-1bt3xxVf.js",
+      "_package-DQAEsj8a.js",
+      "_truck-D6ogCTS1.js",
+      "_loader-circle-C-dxuOkU.js"
+    ]
+  },
+  "pages/ProductDetailPage.tsx": {
+    "file": "assets/ProductDetailPage-DebaWiEc.js",
+    "name": "ProductDetailPage",
+    "src": "pages/ProductDetailPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_ProductCard-CtGEK-_v.js",
+      "_plus-BcemlFsW.js",
+      "_truck-D6ogCTS1.js",
+      "_shield-CfuXPtcH.js",
+      "_clock-1bt3xxVf.js"
+    ]
+  },
+  "pages/ProductsPage.tsx": {
+    "file": "assets/ProductsPage-CUxmGOr4.js",
+    "name": "ProductsPage",
+    "src": "pages/ProductsPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_ProductCard-CtGEK-_v.js",
+      "_sliders-horizontal-BTI6z30v.js",
+      "_clock-1bt3xxVf.js"
+    ]
+  },
+  "pages/SearchPage.tsx": {
+    "file": "assets/SearchPage-hDfv63oi.js",
+    "name": "SearchPage",
+    "src": "pages/SearchPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_ProductCard-CtGEK-_v.js",
+      "_sliders-horizontal-BTI6z30v.js",
+      "_loader-circle-C-dxuOkU.js",
+      "_clock-1bt3xxVf.js"
+    ]
+  },
+  "pages/WishlistPage.tsx": {
+    "file": "assets/WishlistPage-BMBPcXru.js",
+    "name": "WishlistPage",
+    "src": "pages/WishlistPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_ProductCard-CtGEK-_v.js",
+      "_shopping-bag-BJkTbhRR.js",
+      "_clock-1bt3xxVf.js"
+    ]
+  }
+}
