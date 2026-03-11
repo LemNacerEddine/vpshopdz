@@ -891,7 +891,7 @@
                     </svg>
                 </a>
             </div>
-            <p class="text-white/60 mt-6 text-sm">7 أيام مجاناً • بدون بطاقة ائتمان • إلغاء في أي وقت</p>
+            <p class="text-white/60 mt-6 text-sm">شهر كامل مجاناً • بدون بطاقة ائتمان • إلغاء في أي وقت</p>
         </div>
     </section>
 
