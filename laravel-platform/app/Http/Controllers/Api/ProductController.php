@@ -65,7 +65,10 @@ class ProductController extends Controller
 
         // Filter on sale / deals
         if ($request->has('on_sale') || $request->has('deals')) {
-            $query->where('discount_percent', '>', 0);
+            $query->where(function ($q) {
+                $q->where('discount_percent', '>', 0)
+                  ->orWhereNotNull('compare_at_price');
+            });
         }
 
         // Sorting - support both 'sort' (storefront) and 'sort_by'/'sort_dir' (dashboard)
