@@ -348,6 +348,67 @@ class OrderController extends Controller
         ]);
     }
 
+    /**
+     * Track order by order number via GET request
+     * @route GET /api/v1/store/{store}/orders/{tracking}
+     */
+    public function trackByNumber(Request $request, string $storeId, string $tracking): JsonResponse
+    {
+        $store = Store::where('id', $storeId)->orWhere('slug', $storeId)->first();
+        if (!$store) {
+            return response()->json(['success' => false, 'message' => 'المتجر غير موجود'], 404);
+        }
+
+        $order = Order::where('store_id', $store->id)
+            ->where(function ($q) use ($tracking) {
+                $q->where('order_number', $tracking)
+                  ->orWhere('id', $tracking);
+            })
+            ->with(['items', 'statusHistory'])
+            ->first();
+
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'الطلب غير موجود'], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $order->id,
+                'order_id' => $order->order_number,
+                'order_number' => $order->order_number,
+                'status' => $order->status,
+                'status_label' => $this->getStatusLabel($order->status),
+                'customer_name' => $order->customer_name ?? $order->shipping_name,
+                'customer_phone' => $order->customer_phone ?? $order->shipping_phone,
+                'shipping_address' => $order->shipping_address,
+                'shipping_wilaya' => $order->shipping_wilaya,
+                'delivery_type' => $order->delivery_type,
+                'tracking_number' => $order->tracking_number,
+                'subtotal' => $order->subtotal ?? $order->total,
+                'total_amount' => $order->total,
+                'shipping_cost' => $order->shipping_price ?? 0,
+                'items' => $order->items->map(fn($item) => [
+                    'name' => $item->product_name_ar ?? $item->product_name,
+                    'product_name' => $item->product_name_ar ?? $item->product_name,
+                    'quantity' => $item->quantity,
+                    'price' => $item->price,
+                    'total' => $item->total,
+                    'image' => $item->product_image ?? null,
+                ]),
+                'history' => $order->statusHistory->map(fn($h) => [
+                    'from' => $h->from_status,
+                    'to' => $h->to_status,
+                    'to_label' => $this->getStatusLabel($h->to_status),
+                    'notes' => $h->notes,
+                    'date' => $h->created_at->format('Y-m-d H:i'),
+                ]),
+                'created_at' => $order->created_at->format('Y-m-d H:i'),
+                'delivered_at' => $order->delivered_at?->format('Y-m-d H:i'),
+            ],
+        ]);
+    }
+
     // ═══════════════════════════════════════════════════════════════
     // DASHBOARD METHODS
     // ═══════════════════════════════════════════════════════════════
@@ -787,4 +848,57 @@ class OrderController extends Controller
             default => $status,
         };
     }
+
+    /**
+     * Update order notes
+     */
+    public function updateNotes(Request $request, string $id): JsonResponse
+    {
+        $store = $request->user()->store;
+        $order = \App\Models\Order::where('store_id', $store->id)->where('id', $id)->first();
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'الطلب غير موجود'], 404);
+        }
+        $order->update(['notes' => $request->input('notes', '')]);
+        return response()->json(['success' => true, 'data' => $order]);
+    }
+
+    /**
+     * Duplicate order
+     */
+    public function duplicate(Request $request, string $id): JsonResponse
+    {
+        $store = $request->user()->store;
+        $order = \App\Models\Order::where('store_id', $store->id)->where('id', $id)->with('items')->first();
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'الطلب غير موجود'], 404);
+        }
+        $newOrder = $order->replicate();
+        $newOrder->tracking_number = 'ORD-' . strtoupper(uniqid());
+        $newOrder->status = 'pending';
+        $newOrder->created_at = now();
+        $newOrder->save();
+        foreach ($order->items as $item) {
+            $newItem = $item->replicate();
+            $newItem->order_id = $newOrder->id;
+            $newItem->save();
+        }
+        return response()->json(['success' => true, 'data' => $newOrder->load('items')], 201);
+    }
+
+    /**
+     * Delete order
+     */
+    public function destroy(Request $request, string $id): JsonResponse
+    {
+        $store = $request->user()->store;
+        $order = \App\Models\Order::where('store_id', $store->id)->where('id', $id)->first();
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'الطلب غير موجود'], 404);
+        }
+        $order->items()->delete();
+        $order->delete();
+        return response()->json(['success' => true, 'message' => 'تم حذف الطلب']);
+    }
+
 }

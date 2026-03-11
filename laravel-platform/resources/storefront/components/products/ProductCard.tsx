@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useCart } from '../../contexts/CartContext';
+import { useStore } from '../../contexts/StoreContext';
+import { api } from '../../lib/api';
 import { getImageUrl, getProductName, calculateDiscount } from '../../lib/utils';
 import { ShoppingCart, Heart, Clock, Star, Eye } from 'lucide-react';
 import { toast } from 'sonner';
@@ -16,8 +18,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, style }) => {
   const { colors, layout } = useTheme();
   const { t, language, isRTL, formatPrice } = useLanguage();
   const { addToCart } = useCart();
+  const { apiBase } = useStore();
   const [isHovered, setIsHovered] = useState(false);
   const [timeLeft, setTimeLeft] = useState<any>(null);
+  const [inWishlist, setInWishlist] = useState(false);
 
   const cardStyle = style || layout.productCardStyle || 'default';
   const name = getProductName(product, language);
@@ -69,6 +73,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, style }) => {
     e.stopPropagation();
     const success = await addToCart(product.id || product.product_id, 1);
     if (success) toast.success(t('products.addToCart'), { description: name });
+  };
+
+  const handleToggleWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const newState = !inWishlist;
+    setInWishlist(newState);
+    try {
+      const res = await api.post(`${apiBase}/wishlist/toggle`, {
+        product_id: product.id || product.product_id,
+      });
+      setInWishlist(res.data?.added ?? newState);
+      toast.success(res.data?.message || (newState ? 'تمت الإضافة للأمنيات' : 'تم الحذف من الأمنيات'));
+    } catch {
+      // keep optimistic update
+    }
   };
 
   // Horizontal card style
@@ -154,8 +174,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, style }) => {
 
           {/* Action buttons */}
           <div className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'} flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity`}>
-            <button className="h-8 w-8 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors">
-              <Heart className="h-4 w-4 text-gray-700" />
+            <button
+              onClick={handleToggleWishlist}
+              className="h-8 w-8 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors"
+            >
+              <Heart className={`h-4 w-4 ${inWishlist ? 'fill-red-500 text-red-500' : 'text-gray-700'}`} />
             </button>
             <button className="h-8 w-8 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors">
               <Eye className="h-4 w-4 text-gray-700" />
@@ -276,8 +299,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, style }) => {
 
           {/* Action Buttons */}
           <div className={`absolute bottom-2 ${isRTL ? 'left-2' : 'right-2'} flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity`}>
-            <button className="h-7 w-7 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-lg transition-colors">
-              <Heart className="h-3.5 w-3.5 text-gray-600" />
+            <button
+              onClick={handleToggleWishlist}
+              className="h-7 w-7 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-lg transition-colors"
+            >
+              <Heart className={`h-3.5 w-3.5 ${inWishlist ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
             </button>
             <button
               onClick={handleAddToCart}

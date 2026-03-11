@@ -2,11 +2,31 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { useStore } from './StoreContext';
 import { api } from '../lib/api';
 
-interface CartItem {
+export interface CartItem {
   product_id: string;
+  variant_id?: string | null;
+  name?: string;
+  name_ar?: string;
+  price?: number;
+  original_price?: number;
+  discount_percent?: number;
+  image?: string | null;
   quantity: number;
-  variant_id?: string;
-  product?: any;
+  total?: number;
+  slug?: string;
+  stock?: number;
+  product?: {
+    id: string;
+    name: string;
+    name_ar?: string;
+    price: number;
+    final_price?: number;
+    discount_percent?: number;
+    images?: { url: string; is_primary: boolean }[];
+    slug?: string;
+    stock_quantity?: number;
+    track_inventory?: boolean;
+  };
 }
 
 interface CartContextType {
@@ -18,6 +38,7 @@ interface CartContextType {
   updateQuantity: (productId: string, quantity: number) => Promise<void>;
   removeFromCart: (productId: string) => Promise<void>;
   clearCart: () => Promise<void>;
+  syncCart: () => Promise<void>;
   browserId: string;
 }
 
@@ -46,55 +67,74 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [items, setItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
   const browserId = useMemo(() => getBrowserId(store.slug), [store.slug]);
-
   const CART_KEY = `vpshopdz_cart_${store.slug}`;
+
+  const saveLocal = (newItems: CartItem[]) => {
+    try { localStorage.setItem(CART_KEY, JSON.stringify(newItems)); } catch { /* storage full */ }
+  };
+
+  const loadFromLocal = (): CartItem[] => {
+    try {
+      const saved = localStorage.getItem(CART_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  };
+
+  const updateFromResponse = (data: any) => {
+    const newItems: CartItem[] = data?.items || data?.data?.items || [];
+    setItems(newItems);
+    saveLocal(newItems);
+  };
 
   // Load cart on mount
   useEffect(() => {
-    loadCart();
-  }, []);
-
-  const loadCart = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get(`${apiBase}/cart`, { params: { browser_id: browserId } });
-      if (response.data?.items) {
-        setItems(response.data.items);
-      }
-    } catch {
-      // Fallback to localStorage
-      const saved = localStorage.getItem(CART_KEY);
-      if (saved) {
-        try {
-          setItems(JSON.parse(saved));
-        } catch {
-          setItems([]);
+    const loadCart = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get(`${apiBase}/cart`);
+        const cartData = response.data?.data || response.data;
+        if (cartData?.items !== undefined) {
+          updateFromResponse(cartData);
+        } else {
+          const local = loadFromLocal();
+          if (local.length > 0) {
+            // Sync local cart to server
+            const syncRes = await api.post(`${apiBase}/cart/sync`, {
+              items: local.map(i => ({ product_id: i.product_id, quantity: i.quantity, variant_id: i.variant_id })),
+            }).catch(() => null);
+            if (syncRes) {
+              updateFromResponse(syncRes.data?.data || syncRes.data);
+            } else {
+              setItems(local);
+            }
+          }
         }
+      } catch {
+        setItems(loadFromLocal());
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+    loadCart();
+  }, [apiBase]);
 
-  const saveLocal = (newItems: CartItem[]) => {
-    localStorage.setItem(CART_KEY, JSON.stringify(newItems));
-  };
+  const syncCart = useCallback(async () => {
+    try {
+      const response = await api.get(`${apiBase}/cart`);
+      updateFromResponse(response.data?.data || response.data);
+    } catch { /* ignore */ }
+  }, [apiBase]);
 
   const addToCart = useCallback(async (productId: string, quantity = 1, variantId?: string): Promise<boolean> => {
     try {
       setLoading(true);
-      const response = await api.post(`${apiBase}/cart/add`, {
+      // POST /api/v1/store/{store}/cart/items
+      const response = await api.post(`${apiBase}/cart/items`, {
         product_id: productId,
         quantity,
-        variant_id: variantId,
-        browser_id: browserId,
+        variant_id: variantId || null,
       });
-      if (response.data?.items) {
-        setItems(response.data.items);
-        saveLocal(response.data.items);
-      } else {
-        await loadCart();
-      }
+      updateFromResponse(response.data?.data || response.data);
       return true;
     } catch {
       // Local fallback
@@ -105,7 +145,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           idx === existing ? { ...item, quantity: item.quantity + quantity } : item
         );
       } else {
-        newItems = [...items, { product_id: productId, quantity, variant_id: variantId }];
+        newItems = [...items, { product_id: productId, quantity, variant_id: variantId || null }];
       }
       setItems(newItems);
       saveLocal(newItems);
@@ -113,17 +153,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  }, [items, apiBase, browserId]);
+  }, [items, apiBase]);
 
   const updateQuantity = useCallback(async (productId: string, quantity: number) => {
     try {
       setLoading(true);
-      await api.put(`${apiBase}/cart/update`, {
-        product_id: productId,
-        quantity,
-        browser_id: browserId,
-      });
-      await loadCart();
+      if (quantity <= 0) {
+        // DELETE /api/v1/store/{store}/cart/items/{itemId}
+        const response = await api.delete(`${apiBase}/cart/items/${productId}`);
+        updateFromResponse(response.data?.data || response.data);
+      } else {
+        // PUT /api/v1/store/{store}/cart/items/{itemId}
+        const response = await api.put(`${apiBase}/cart/items/${productId}`, { quantity });
+        updateFromResponse(response.data?.data || response.data);
+      }
     } catch {
       const newItems = quantity > 0
         ? items.map(i => i.product_id === productId ? { ...i, quantity } : i)
@@ -133,15 +176,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  }, [items, apiBase, browserId]);
+  }, [items, apiBase]);
 
   const removeFromCart = useCallback(async (productId: string) => {
     try {
       setLoading(true);
-      await api.delete(`${apiBase}/cart/remove/${productId}`, {
-        params: { browser_id: browserId },
-      });
-      await loadCart();
+      // DELETE /api/v1/store/{store}/cart/items/{itemId}
+      const response = await api.delete(`${apiBase}/cart/items/${productId}`);
+      updateFromResponse(response.data?.data || response.data);
     } catch {
       const newItems = items.filter(i => i.product_id !== productId);
       setItems(newItems);
@@ -149,23 +191,29 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  }, [items, apiBase, browserId]);
+  }, [items, apiBase]);
 
   const clearCart = useCallback(async () => {
     try {
       setLoading(true);
-      await api.delete(`${apiBase}/cart/clear`, {
-        data: { browser_id: browserId },
-      });
+      // DELETE /api/v1/store/{store}/cart
+      await api.delete(`${apiBase}/cart`);
     } catch { /* ignore */ }
     setItems([]);
     localStorage.removeItem(CART_KEY);
     setLoading(false);
-  }, [apiBase, browserId]);
+  }, [apiBase, CART_KEY]);
 
-  const cartCount = useMemo(() => items.reduce((sum, i) => sum + i.quantity, 0), [items]);
-  const cartTotal = useMemo(() =>
-    items.reduce((sum, i) => sum + (i.product?.price || 0) * i.quantity, 0),
+  const cartCount = useMemo(
+    () => items.reduce((sum, i) => sum + (i.quantity || 0), 0),
+    [items]
+  );
+
+  const cartTotal = useMemo(
+    () => items.reduce((sum, i) => {
+      const price = i.price ?? i.product?.final_price ?? i.product?.price ?? 0;
+      return sum + price * (i.quantity || 0);
+    }, 0),
     [items]
   );
 
@@ -178,6 +226,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updateQuantity,
     removeFromCart,
     clearCart,
+    syncCart,
     browserId,
   };
 

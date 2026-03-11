@@ -666,4 +666,276 @@ class ShippingController extends Controller
             default => $type,
         };
     }
+
+    /**
+     * Get public shipping companies for storefront
+     */
+    public function publicCompanies(string $storeId): JsonResponse
+    {
+        $store = Store::where('id', $storeId)->orWhere('slug', $storeId)->first();
+        if (!$store) {
+            return response()->json(['success' => false, 'message' => 'المتجر غير موجود'], 404);
+        }
+        // Get store-specific shipping settings
+        $storeSettings = StoreShippingSetting::where('store_id', $store->id)
+            ->where('is_active', true)
+            ->with('company')
+            ->get();
+        if ($storeSettings->isNotEmpty()) {
+            $companies = $storeSettings->map(function ($setting) {
+                return [
+                    'id' => $setting->company->id,
+                    'name' => $setting->company->name,
+                    'logo' => $setting->company->logo ?? null,
+                    'delivery_types' => $setting->company->delivery_types ?? ['home', 'office'],
+                ];
+            })->filter()->values();
+        } else {
+            $companies = ShippingCompany::where('is_active', true)
+                ->orderBy('sort_order')
+                ->get()
+                ->map(function ($c) {
+                    return [
+                        'id' => $c->id,
+                        'name' => $c->name,
+                        'logo' => $c->logo ?? null,
+                        'delivery_types' => $c->delivery_types ?? ['home', 'office'],
+                    ];
+                });
+        }
+        return response()->json(['success' => true, 'data' => $companies]);
+    }
+
+    /**
+     * Get shipping settings for dashboard
+     */
+    public function dashboardGetSettings(Request $request): JsonResponse
+    {
+        $store = $request->user()->store;
+        if (!$store) {
+            return response()->json(['success' => false, 'message' => 'لا يوجد متجر'], 404);
+        }
+        $settings = StoreShippingSetting::where('store_id', $store->id)
+            ->with('company')
+            ->get();
+        return response()->json(['success' => true, 'data' => $settings]);
+    }
+
+    /**
+     * Update shipping settings for dashboard
+     */
+    public function dashboardUpdateSettings(Request $request): JsonResponse
+    {
+        $store = $request->user()->store;
+        if (!$store) {
+            return response()->json(['success' => false, 'message' => 'لا يوجد متجر'], 404);
+        }
+        $companies = $request->get('companies', []);
+        // Delete existing settings
+        StoreShippingSetting::where('store_id', $store->id)->delete();
+        // Create new settings
+        foreach ($companies as $companyData) {
+            StoreShippingSetting::create([
+                'store_id' => $store->id,
+                'company_id' => $companyData['company_id'],
+                'is_active' => $companyData['is_active'] ?? true,
+            ]);
+        }
+        return response()->json(['success' => true, 'message' => 'تم تحديث إعدادات الشحن']);
+    }
+
+    /**
+     * Toggle shipping company for store
+     */
+    public function toggleCompany(Request $request, string $id): JsonResponse
+    {
+        $store = $request->user()->store;
+        $setting = StoreShippingSetting::where('store_id', $store->id)->where('company_id', $id)->first();
+        if (!$setting) {
+            $setting = StoreShippingSetting::create([
+                'store_id' => $store->id,
+                'company_id' => $id,
+                'is_active' => true,
+            ]);
+        } else {
+            $setting->update(['is_active' => $setting->is_active]);
+        }
+        return response()->json(['success' => true, 'data' => $setting]);
+    }
+
+    /**
+     * Get shipping rates for dashboard
+     */
+    public function dashboardRates(Request $request): JsonResponse
+    {
+        $store = $request->user()->store;
+        $rates = ShippingRate::where(function ($q) use ($store) {
+                // Get rates for companies active in this store
+                $companyIds = StoreShippingSetting::where('store_id', $store->id)
+                    ->where('is_active', true)
+                    ->pluck('company_id');
+                if ($companyIds->isNotEmpty()) {
+                    $q->whereIn('company_id', $companyIds);
+                }
+            })
+            ->with(['wilaya', 'commune', 'company'])
+            ->orderBy('wilaya_id')
+            ->paginate(50);
+        return response()->json(['success' => true, 'data' => $rates]);
+    }
+
+    /**
+     * Create shipping rate
+     */
+    public function createRate(Request $request): JsonResponse
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'company_id' => 'required|exists:shipping_companies,id',
+            'wilaya_id' => 'required|exists:wilayas,id',
+            'delivery_type' => 'required|in:home,office,pickup',
+            'price' => 'required|numeric|min:0',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+        $rate = ShippingRate::create($request->all());
+        return response()->json(['success' => true, 'data' => $rate], 201);
+    }
+
+    /**
+     * Update shipping rate
+     */
+    public function updateRate(Request $request, string $id): JsonResponse
+    {
+        $rate = ShippingRate::find($id);
+        if (!$rate) {
+            return response()->json(['success' => false, 'message' => 'السعر غير موجود'], 404);
+        }
+        $rate->update($request->only(['price', 'min_days', 'max_days', 'is_active']));
+        return response()->json(['success' => true, 'data' => $rate]);
+    }
+
+    /**
+     * Delete shipping rate
+     */
+    public function deleteRate(Request $request, string $id): JsonResponse
+    {
+        $rate = ShippingRate::find($id);
+        if (!$rate) {
+            return response()->json(['success' => false, 'message' => 'السعر غير موجود'], 404);
+        }
+        $rate->delete();
+        return response()->json(['success' => true, 'message' => 'تم حذف السعر']);
+    }
+
+    /**
+     * Bulk create rates
+     */
+    public function bulkCreateRates(Request $request): JsonResponse
+    {
+        $rates = $request->get('rates', []);
+        $created = 0;
+        foreach ($rates as $rateData) {
+            ShippingRate::updateOrCreate(
+                [
+                    'company_id' => $rateData['company_id'],
+                    'wilaya_id' => $rateData['wilaya_id'],
+                    'delivery_type' => $rateData['delivery_type'],
+                ],
+                $rateData
+            );
+            $created++;
+        }
+        return response()->json(['success' => true, 'message' => "تم إنشاء {$created} سعر"]);
+    }
+
+    /**
+     * Import rates
+     */
+    public function importRates(Request $request): JsonResponse
+    {
+        return $this->bulkCreateRates($request);
+    }
+
+    /**
+     * Get shipping rules
+     */
+    public function rules(Request $request): JsonResponse
+    {
+        $store = $request->user()->store;
+        $rules = \App\Models\ShippingRule::where('store_id', $store->id)->get();
+        return response()->json(['success' => true, 'data' => $rules]);
+    }
+
+    /**
+     * Create shipping rule
+     */
+    public function createRule(Request $request): JsonResponse
+    {
+        $store = $request->user()->store;
+        $rule = \App\Models\ShippingRule::create(array_merge($request->all(), ['store_id' => $store->id]));
+        return response()->json(['success' => true, 'data' => $rule], 201);
+    }
+
+    /**
+     * Update shipping rule
+     */
+    public function dashboardUpdateRule(Request $request, string $id): JsonResponse
+    {
+        $store = $request->user()->store;
+        $rule = \App\Models\ShippingRule::where('store_id', $store->id)->where('id', $id)->first();
+        if (!$rule) return response()->json(['success' => false, 'message' => 'القاعدة غير موجودة'], 404);
+        $rule->update($request->all());
+        return response()->json(['success' => true, 'data' => $rule]);
+    }
+
+    /**
+     * Delete shipping rule
+     */
+    public function deleteRule(Request $request, string $id): JsonResponse
+    {
+        $store = $request->user()->store;
+        $rule = \App\Models\ShippingRule::where('store_id', $store->id)->where('id', $id)->first();
+        if (!$rule) return response()->json(['success' => false, 'message' => 'القاعدة غير موجودة'], 404);
+        $rule->delete();
+        return response()->json(['success' => true, 'message' => 'تم الحذف']);
+    }
+
+    /**
+     * Create shipping company
+     */
+    public function createCompany(Request $request): JsonResponse
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+        $company = ShippingCompany::create($request->all());
+        return response()->json(['success' => true, 'data' => $company], 201);
+    }
+
+    /**
+     * Update shipping company
+     */
+    public function updateCompany(Request $request, string $id): JsonResponse
+    {
+        $company = ShippingCompany::find($id);
+        if (!$company) return response()->json(['success' => false, 'message' => 'شركة الشحن غير موجودة'], 404);
+        $company->update($request->all());
+        return response()->json(['success' => true, 'data' => $company]);
+    }
+
+    /**
+     * Delete shipping company
+     */
+    public function deleteCompany(Request $request, string $id): JsonResponse
+    {
+        $company = ShippingCompany::find($id);
+        if (!$company) return response()->json(['success' => false, 'message' => 'شركة الشحن غير موجودة'], 404);
+        $company->delete();
+        return response()->json(['success' => true, 'message' => 'تم الحذف']);
+    }
+
 }

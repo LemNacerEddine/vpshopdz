@@ -23,7 +23,8 @@ const CategoryPage: React.FC = () => {
         setLoading(true);
         const [catRes, prodRes] = await Promise.all([
           api.get(`${apiBase}/categories/${categoryId}`).catch(() => ({ data: null })),
-          api.get(`${apiBase}/products`, { params: { category_id: categoryId, limit: 40 } }),
+          api.get(`${apiBase}/categories/${categoryId}/products`, { params: { limit: 40 } })
+            .catch(() => api.get(`${apiBase}/products`, { params: { category_id: categoryId, limit: 40 } })),
         ]);
         setCategory(catRes.data?.data || catRes.data);
         setProducts(prodRes.data?.data || prodRes.data || []);

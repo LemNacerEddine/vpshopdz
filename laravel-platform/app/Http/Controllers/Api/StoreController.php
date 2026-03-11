@@ -51,6 +51,110 @@ class StoreController extends Controller
         ]);
     }
 
+
+    /**
+     * Get store public settings (for storefront)
+     */
+    public function publicSettings(string $storeId): JsonResponse
+    {
+        $store = Store::where('id', $storeId)
+            ->orWhere('slug', $storeId)
+            ->first();
+        if (!$store) {
+            return response()->json(['success' => false, 'message' => 'المتجر غير موجود'], 404);
+        }
+        $settings = is_string($store->settings) ? json_decode($store->settings, true) : ($store->settings ?? []);
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'settings' => $settings,
+                'currency' => $store->currency ?? 'DZD',
+                'language' => $store->language ?? 'ar',
+                'whatsapp' => $store->whatsapp ?? null,
+                'phone' => $store->phone ?? null,
+                'email' => $store->email ?? null,
+                'address' => $store->address ?? null,
+                'facebook_url' => $store->facebook_url ?? null,
+                'instagram_url' => $store->instagram_url ?? null,
+                'tiktok_url' => $store->tiktok_url ?? null,
+            ],
+        ]);
+    }
+
+    /**
+     * Create store for authenticated user
+     */
+    public function create(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        if ($user->store) {
+            return response()->json(['success' => false, 'message' => 'لديك متجر بالفعل'], 422);
+        }
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:100|unique:stores,slug',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+        $store = Store::create([
+            'user_id' => $user->id,
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'currency' => $request->get('currency', 'DZD'),
+            'language' => $request->get('language', 'ar'),
+            'status' => 'active',
+        ]);
+        $user->update(['store_id' => $store->id]);
+        return response()->json(['success' => true, 'data' => $store], 201);
+    }
+
+    /**
+     * Update store
+     */
+    public function update(Request $request): JsonResponse
+    {
+        $store = $request->user()->store;
+        if (!$store) {
+            return response()->json(['success' => false, 'message' => 'لا يوجد متجر'], 404);
+        }
+        $store->update($request->only([
+            'name', 'description', 'logo', 'cover_image', 'phone', 'email',
+            'whatsapp', 'facebook_url', 'instagram_url', 'tiktok_url', 'address',
+            'currency', 'language',
+        ]));
+        return response()->json(['success' => true, 'data' => $store]);
+    }
+
+    /**
+     * Get store settings
+     */
+    public function settings(Request $request): JsonResponse
+    {
+        $store = $request->user()->store;
+        if (!$store) {
+            return response()->json(['success' => false, 'message' => 'لا يوجد متجر'], 404);
+        }
+        $settings = is_string($store->settings) ? json_decode($store->settings, true) : ($store->settings ?? []);
+        return response()->json(['success' => true, 'data' => $settings]);
+    }
+
+    /**
+     * Get customers for store
+     */
+    public function customers(Request $request): JsonResponse
+    {
+        $store = $request->user()->store;
+        if (!$store) {
+            return response()->json(['success' => false, 'message' => 'لا يوجد متجر'], 404);
+        }
+        $customers = \App\Models\Customer::where('store_id', $store->id)
+            ->withCount('orders')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+        return response()->json(['success' => true, 'data' => $customers]);
+    }
+
     // ═══════════════════════════════════════════════════════════════
     // DASHBOARD METHODS
     // ═══════════════════════════════════════════════════════════════
@@ -150,9 +254,9 @@ class StoreController extends Controller
     }
 
     /**
-     * Get store settings
+     * Get full store settings for dashboard
      */
-    public function settings(Request $request): JsonResponse
+    public function dashboardSettings(Request $request): JsonResponse
     {
         $store = $request->user()->store;
 
@@ -294,7 +398,7 @@ class StoreController extends Controller
     /**
      * Get customers
      */
-    public function customers(Request $request): JsonResponse
+    public function dashboardCustomers(Request $request): JsonResponse
     {
         $store = $request->user()->store;
 

@@ -33,18 +33,14 @@ const ProductDetailPage: React.FC = () => {
       try {
         setLoading(true);
         const res = await api.get(`${apiBase}/products/${productId}`);
-        setProduct(res.data?.data || res.data);
+        const productData = res.data?.data || res.data;
+        setProduct(productData);
         setSelectedImage(0);
         setQuantity(1);
-
-        // Fetch related products
-        const catId = res.data?.data?.category_id || res.data?.category_id;
-        if (catId) {
-          const relRes = await api.get(`${apiBase}/products`, {
-            params: { category_id: catId, limit: 4, exclude: productId }
-          }).catch(() => ({ data: { data: [] } }));
-          setRelatedProducts(relRes.data?.data || relRes.data || []);
-        }
+        // Fetch related products using dedicated endpoint
+        const relRes = await api.get(`${apiBase}/products/${productId}/related`)
+          .catch(() => ({ data: { data: [] } }));
+        setRelatedProducts(relRes.data?.data || relRes.data || []);
       } catch (error) {
         console.error('Error fetching product:', error);
       } finally {

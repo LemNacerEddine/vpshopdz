@@ -76,14 +76,32 @@ const CheckoutPage: React.FC = () => {
         setLoadingShipping(true);
         const totalWeight = items.reduce((sum: number, item: any) => sum + (item.product?.weight || 0.5) * item.quantity, 0);
         const res = await api.post(`${apiBase}/shipping/calculate`, {
-          wilaya_code: formData.wilaya,
+          wilaya_id: formData.wilaya,
           commune_id: formData.commune || null,
           delivery_type: shippingType,
-          total_weight: totalWeight,
-          order_total: cartTotal,
+          items: items.map((item: any) => ({
+            product_id: item.product_id,
+            quantity: item.quantity,
+            weight: item.product?.weight || 0.5,
+          })),
         });
-        setShippingOptions(res.data?.options || res.data || []);
-        setSelectedShipping(null);
+        // API returns single shipping option, convert to array
+        const shippingData = res.data?.data || res.data;
+        if (shippingData?.shipping_price !== undefined) {
+          const option = {
+            company_id: shippingData.company?.id,
+            company_name: shippingData.company?.name || t('checkout.shippingOptions'),
+            price: shippingData.shipping_price,
+            is_free: shippingData.is_free,
+            delivery_type: shippingData.delivery_type,
+            estimated_days: shippingData.estimated_days,
+          };
+          setShippingOptions([option]);
+          setSelectedShipping(option);
+        } else {
+          setShippingOptions(Array.isArray(shippingData) ? shippingData : []);
+          setSelectedShipping(null);
+        }
       } catch {
         setShippingOptions([]);
       } finally {
@@ -133,20 +151,26 @@ const CheckoutPage: React.FC = () => {
     try {
       setLoading(true);
       const res = await api.post(`${apiBase}/orders`, {
-        ...formData,
+        customer_name: formData.customer_name,
+        customer_phone: formData.customer_phone,
+        customer_email: formData.customer_email || null,
+        wilaya_id: formData.wilaya,
+        commune_id: formData.commune || null,
+        address: formData.shipping_address,
+        delivery_type: shippingType || 'home',
+        shipping_company_id: selectedShipping?.company_id || null,
+        shipping_price: shippingCost,
+        notes: formData.notes || null,
         items: items.map((item: any) => ({
           product_id: item.product_id,
           quantity: item.quantity,
-          variant_id: item.variant_id,
+          variant_id: item.variant_id || null,
         })),
-        shipping_company_id: selectedShipping?.company_id,
-        shipping_type: shippingType,
-        shipping_cost: shippingCost,
         coupon_code: couponApplied ? couponCode : null,
-        browser_id: browserId,
+        source: 'storefront',
       });
 
-      setOrderId(res.data?.order_id || res.data?.data?.order_id || '');
+      setOrderId(res.data?.data?.order_number || res.data?.data?.order_id || res.data?.order_number || '');
       setOrderSuccess(true);
       clearCart();
     } catch (error: any) {
@@ -281,11 +305,10 @@ const CheckoutPage: React.FC = () => {
                         required
                         className="h-10 w-full rounded-lg border px-3 text-sm focus:outline-none"
                         style={{ backgroundColor: colors.muted, borderColor: colors.border, color: colors.foreground }}
-                      >
-                        <option value="">{t('checkout.selectWilaya')}</option>
+                      >                        <option value="">{t('checkout.selectWilaya')}</option>
                         {wilayas.map((w: any) => (
-                          <option key={w.code || w.id} value={w.code || w.id}>
-                            {w.code ? `${w.code} - ` : ''}{w[`name_${language}`] || w.name_ar || w.name}
+                          <option key={w.id} value={w.id}>
+                            {w.id < 10 ? `0${w.id}` : w.id} - {w[`name_${language}`] || w.name_ar || w.name_fr || w.name}
                           </option>
                         ))}
                       </select>
@@ -388,9 +411,14 @@ const CheckoutPage: React.FC = () => {
                                 <Truck className="h-4 w-4" style={{ color: colors.primary }} />
                                 <div className={`text-${isRTL ? 'right' : 'left'}`}>
                                   <p className="font-medium" style={{ color: colors.foreground }}>{opt.company_name || opt.name}</p>
-                                  {opt.delivery_days && (
+                                  {(opt.delivery_days || opt.estimated_days) && (
                                     <p className="text-xs" style={{ color: colors.mutedForeground }}>
-                                      {opt.delivery_days} {t('checkout.deliveryDays')}
+                                      {opt.delivery_days
+                                        ? `${opt.delivery_days} ${t('checkout.deliveryDays')}`
+                                        : opt.estimated_days?.min === opt.estimated_days?.max
+                                          ? `${opt.estimated_days.min} ${t('checkout.deliveryDays')}`
+                                          : `${opt.estimated_days?.min}-${opt.estimated_days?.max} ${t('checkout.deliveryDays')}`
+                                      }
                                     </p>
                                   )}
                                 </div>

@@ -34,7 +34,7 @@ const OrderTrackingPage: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      const res = await api.get(`${apiBase}/orders/track/${id}`);
+      const res = await api.get(`${apiBase}/orders/${id}`);
       setOrder(res.data?.data || res.data);
     } catch {
       setError(isRTL ? 'لم يتم العثور على الطلب' : 'Order not found');
