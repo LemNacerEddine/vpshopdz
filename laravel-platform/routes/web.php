@@ -21,18 +21,15 @@ use App\Http\Controllers\StorefrontController;
 // MAIN PLATFORM DOMAIN
 // ═══════════════════════════════════════════════════════════════
 
-// Welcome / Landing page
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-// Pricing Page
 Route::get('/pricing', function () {
     $plans = \App\Models\SubscriptionPlan::active()->get();
     return view('pricing', compact('plans'));
 })->name('pricing');
 
-// Health check
 Route::get('/health', function () {
     return response()->json([
         'status' => 'ok',
@@ -52,7 +49,6 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
 });
 
-// Logout
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 // ═══════════════════════════════════════════════════════════════
@@ -60,96 +56,47 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 // ═══════════════════════════════════════════════════════════════
 
 Route::middleware('auth')->prefix('dashboard')->name('dashboard')->group(function () {
+    // Home
     Route::get('/', [DashboardController::class, 'index']);
 
-    // Products
+    // Products & Categories
     Route::get('/products', [DashboardController::class, 'products'])->name('.products');
-    Route::post('/products', [DashboardController::class, 'storeProduct'])->name('.products.store');
-    Route::put('/products/{product}', [DashboardController::class, 'updateProduct'])->name('.products.update');
-    Route::delete('/products/{product}', [DashboardController::class, 'destroyProduct'])->name('.products.destroy');
+    Route::get('/categories', [DashboardController::class, 'categories'])->name('.categories');
 
-    // Orders
+    // Orders & Customers
     Route::get('/orders', [DashboardController::class, 'orders'])->name('.orders');
-    Route::put('/orders/{order}', [DashboardController::class, 'updateOrder'])->name('.orders.update');
+    Route::get('/customers', [DashboardController::class, 'customers'])->name('.customers');
 
-    // Customers
-    Route::get('/customers', function () {
-        return view('dashboard.customers');
-    })->name('.customers');
+    // Shipping & Coupons
+    Route::get('/shipping', [DashboardController::class, 'shipping'])->name('.shipping');
+    Route::get('/coupons', [DashboardController::class, 'coupons'])->name('.coupons');
 
-    // Shipping
-    Route::get('/shipping', function () {
-        return view('dashboard.shipping');
-    })->name('.shipping');
+    // Reviews & Abandoned Carts
+    Route::get('/reviews', [DashboardController::class, 'reviews'])->name('.reviews');
+    Route::get('/abandoned-carts', [DashboardController::class, 'abandonedCarts'])->name('.abandoned-carts');
 
-    // Coupons
-    Route::get('/coupons', function () {
-        return view('dashboard.coupons');
-    })->name('.coupons');
+    // Themes & Domains & Pages
+    Route::get('/themes', [DashboardController::class, 'themes'])->name('.themes');
+    Route::get('/domains', [DashboardController::class, 'domains'])->name('.domains');
+    Route::get('/pages', [DashboardController::class, 'pages'])->name('.pages');
 
-    // Reviews
-    Route::get('/reviews', function () {
-        return view('dashboard.reviews');
-    })->name('.reviews');
-
-    // Pages
-    Route::get('/pages', function () {
-        return view('dashboard.pages');
-    })->name('.pages');
-
-    // Abandoned Carts
-    Route::get('/abandoned-carts', function () {
-        return view('dashboard.abandoned-carts');
-    })->name('.abandoned-carts');
+    // Analytics & Marketing
+    Route::get('/analytics', [DashboardController::class, 'analytics'])->name('.analytics');
+    Route::get('/pixels', [DashboardController::class, 'pixels'])->name('.pixels');
+    Route::get('/facebook-ads', [DashboardController::class, 'facebookAds'])->name('.facebook-ads');
 
     // Notifications
-    Route::get('/notifications', function () {
-        return view('dashboard.notifications');
-    })->name('.notifications');
+    Route::get('/notifications', [DashboardController::class, 'notifications'])->name('.notifications');
 
-    // Pixels & Tracking
-    Route::get('/pixels', function () {
-        return view('dashboard.pixels');
-    })->name('.pixels');
+    // Subscription & Billing
+    Route::get('/subscription', [DashboardController::class, 'subscription'])->name('.subscription');
 
-    // Facebook Ads
-    Route::get('/facebook-ads', function () {
-        return view('dashboard.facebook-ads');
-    })->name('.facebook-ads');
-
-    // Themes
-    Route::get('/themes', function () {
-        return view('dashboard.themes');
-    })->name('.themes');
-
-    // Domains
-    Route::get('/domains', function () {
-        return view('dashboard.domains');
-    })->name('.domains');
-
-    // Subscription
-    Route::get('/subscription', function () {
-        return view('dashboard.subscription');
-    })->name('.subscription');
-
-    // Analytics
-    Route::get('/analytics', function () {
-        return view('dashboard.analytics');
-    })->name('.analytics');
-
-    // Media Library
-    Route::get('/media', function () {
-        return view('dashboard.media');
-    })->name('.media');
-
-    // Staff
-    Route::get('/staff', function () {
-        return view('dashboard.staff');
-    })->name('.staff');
+    // Staff & Media
+    Route::get('/staff', [DashboardController::class, 'staff'])->name('.staff');
+    Route::get('/media', [DashboardController::class, 'media'])->name('.media');
 
     // Settings
     Route::get('/settings', [DashboardController::class, 'settings'])->name('.settings');
-    Route::put('/settings', [DashboardController::class, 'updateSettings'])->name('.settings.update');
 });
 
 // ═══════════════════════════════════════════════════════════════
@@ -186,7 +133,5 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 // STOREFRONT (Subdomain / Custom Domain → React)
 // ═══════════════════════════════════════════════════════════════
 
-// This catch-all route handles subdomain and custom domain resolution
-// It should be the LAST route defined
 Route::fallback([StorefrontController::class, 'index'])
     ->middleware('track.visitor');

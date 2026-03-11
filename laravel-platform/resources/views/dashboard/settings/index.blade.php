@@ -1,0 +1,189 @@
+@extends('layouts.dashboard')
+@section('title', 'إعدادات المتجر')
+
+@section('content')
+<div x-data="settingsManager()" x-init="loadSettings()">
+    <div class="mb-6">
+        <h2 class="text-xl font-bold text-gray-800">إعدادات المتجر</h2>
+        <p class="text-sm text-gray-500 mt-1">تخصيص إعدادات متجرك الأساسية</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6 overflow-x-auto">
+        <button @click="tab = 'general'" :class="tab === 'general' ? 'bg-white shadow-sm text-primary-700' : 'text-gray-600'" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">عام</button>
+        <button @click="tab = 'contact'" :class="tab === 'contact' ? 'bg-white shadow-sm text-primary-700' : 'text-gray-600'" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">التواصل</button>
+        <button @click="tab = 'checkout'" :class="tab === 'checkout' ? 'bg-white shadow-sm text-primary-700' : 'text-gray-600'" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">الطلب والدفع</button>
+        <button @click="tab = 'seo'" :class="tab === 'seo' ? 'bg-white shadow-sm text-primary-700' : 'text-gray-600'" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">SEO</button>
+        <button @click="tab = 'social'" :class="tab === 'social' ? 'bg-white shadow-sm text-primary-700' : 'text-gray-600'" class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">التواصل الاجتماعي</button>
+    </div>
+
+    <form @submit.prevent="saveSettings()">
+        <!-- General -->
+        <div x-show="tab === 'general'" class="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
+            <div class="grid md:grid-cols-2 gap-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">اسم المتجر بالعربية *</label>
+                    <input type="text" x-model="settings.name_ar" required class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">اسم المتجر بالفرنسية</label>
+                    <input type="text" x-model="settings.name_fr" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">وصف المتجر</label>
+                <textarea x-model="settings.description" rows="3" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none resize-none"></textarea>
+            </div>
+            <div class="grid md:grid-cols-2 gap-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">العملة</label>
+                    <select x-model="settings.currency" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+                        <option value="DZD">دينار جزائري (د.ج)</option>
+                        <option value="EUR">يورو (€)</option>
+                        <option value="USD">دولار ($)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">اللغة الافتراضية</label>
+                    <select x-model="settings.default_language" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+                        <option value="ar">العربية</option>
+                        <option value="fr">الفرنسية</option>
+                        <option value="en">الإنجليزية</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">شعار المتجر</label>
+                <div class="flex items-center gap-4">
+                    <div class="w-20 h-20 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
+                        <img x-show="settings.logo" :src="settings.logo" class="w-full h-full object-contain">
+                        <svg x-show="!settings.logo" class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <label class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 font-medium text-sm cursor-pointer">
+                        تغيير الشعار
+                        <input type="file" accept="image/*" @change="uploadLogo($event)" class="hidden">
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact -->
+        <div x-show="tab === 'contact'" class="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
+            <div class="grid md:grid-cols-2 gap-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني</label>
+                    <input type="email" x-model="settings.email" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none" dir="ltr">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>
+                    <input type="text" x-model="settings.phone" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none" dir="ltr">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">العنوان</label>
+                <input type="text" x-model="settings.address" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">رقم WhatsApp (للزر العائم)</label>
+                <input type="text" x-model="settings.whatsapp" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none" dir="ltr" placeholder="213XXXXXXXXX">
+            </div>
+        </div>
+
+        <!-- Checkout -->
+        <div x-show="tab === 'checkout'" class="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">طرق الدفع</label>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100">
+                        <input type="checkbox" x-model="settings.cod_enabled" class="w-4 h-4 text-primary-600 rounded">
+                        <span class="text-sm text-gray-700">الدفع عند الاستلام (COD)</span>
+                    </label>
+                    <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100">
+                        <input type="checkbox" x-model="settings.cib_enabled" class="w-4 h-4 text-primary-600 rounded">
+                        <span class="text-sm text-gray-700">بطاقة CIB</span>
+                    </label>
+                    <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100">
+                        <input type="checkbox" x-model="settings.edahabia_enabled" class="w-4 h-4 text-primary-600 rounded">
+                        <span class="text-sm text-gray-700">بطاقة الذهبية (Edahabia)</span>
+                    </label>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">الحد الأدنى للطلب (د.ج)</label>
+                <input type="number" x-model="settings.min_order_amount" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none" placeholder="0">
+            </div>
+            <div class="flex items-center gap-3">
+                <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" x-model="settings.guest_checkout" class="sr-only peer"><div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div></label>
+                <span class="text-sm font-medium text-gray-700">السماح بالطلب بدون تسجيل</span>
+            </div>
+        </div>
+
+        <!-- SEO -->
+        <div x-show="tab === 'seo'" class="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">عنوان الصفحة (Meta Title)</label>
+                <input type="text" x-model="settings.meta_title" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">وصف الصفحة (Meta Description)</label>
+                <textarea x-model="settings.meta_description" rows="3" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none resize-none"></textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">كلمات مفتاحية</label>
+                <input type="text" x-model="settings.meta_keywords" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none" placeholder="كلمة1, كلمة2, كلمة3">
+            </div>
+        </div>
+
+        <!-- Social -->
+        <div x-show="tab === 'social'" class="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Facebook</label>
+                <input type="url" x-model="settings.facebook" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none" dir="ltr" placeholder="https://facebook.com/...">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Instagram</label>
+                <input type="url" x-model="settings.instagram" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none" dir="ltr" placeholder="https://instagram.com/...">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">TikTok</label>
+                <input type="url" x-model="settings.tiktok" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none" dir="ltr" placeholder="https://tiktok.com/@...">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">YouTube</label>
+                <input type="url" x-model="settings.youtube" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none" dir="ltr" placeholder="https://youtube.com/...">
+            </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="mt-6 flex justify-end">
+            <button type="submit" :disabled="saving" class="px-8 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-medium shadow-lg shadow-primary-500/30 disabled:opacity-50 flex items-center gap-2">
+                <svg x-show="saving" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                حفظ الإعدادات
+            </button>
+        </div>
+    </form>
+</div>
+
+@push('scripts')
+<script>
+function settingsManager() {
+    return {
+        tab: 'general', saving: false,
+        settings: { name_ar: '', name_fr: '', description: '', currency: 'DZD', default_language: 'ar', logo: '', email: '', phone: '', address: '', whatsapp: '', cod_enabled: true, cib_enabled: false, edahabia_enabled: false, min_order_amount: 0, guest_checkout: true, meta_title: '', meta_description: '', meta_keywords: '', facebook: '', instagram: '', tiktok: '', youtube: '' },
+        async loadSettings() { try { const r = await fetch('/api/store/settings', { headers: { 'Accept': 'application/json' } }); const d = await r.json(); this.settings = {...this.settings, ...d}; } catch(e) {} },
+        async saveSettings() {
+            this.saving = true;
+            await fetch('/api/store/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }, body: JSON.stringify(this.settings) });
+            this.saving = false;
+        },
+        async uploadLogo(event) {
+            const file = event.target.files[0]; if (!file) return;
+            const fd = new FormData(); fd.append('logo', file);
+            const r = await fetch('/api/store/settings/logo', { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }, body: fd });
+            const d = await r.json(); if (d.url) this.settings.logo = d.url;
+        }
+    }
+}
+</script>
+@endpush
+@endsection

@@ -39,7 +39,7 @@
                         </div>
                         <span class="text-xs text-green-500 font-bold bg-green-50 px-2 py-1 rounded-lg">+12%</span>
                     </div>
-                    <p class="text-3xl font-black text-gray-800">{{ $stats['orders_today'] ?? 0 }}</p>
+                    <p class="text-3xl font-black text-gray-800">{{ $stats['today_orders'] ?? 0 }}</p>
                     <p class="text-sm text-gray-500">طلبات اليوم</p>
                 </div>
                 
@@ -52,7 +52,7 @@
                         </div>
                         <span class="text-xs text-green-500 font-bold bg-green-50 px-2 py-1 rounded-lg">+8%</span>
                     </div>
-                    <p class="text-3xl font-black text-gray-800">{{ number_format($stats['revenue_today'] ?? 0) }}</p>
+                    <p class="text-3xl font-black text-gray-800">{{ number_format($stats['today_revenue'] ?? 0) }}</p>
                     <p class="text-sm text-gray-500">مبيعات اليوم (د.ج)</p>
                 </div>
                 
@@ -118,8 +118,8 @@
                             </div>
                         </div>
                         <div class="text-left">
-                            <p class="text-2xl font-black text-gray-800">{{ $orderStats['pending'] ?? 0 }}</p>
-                            <p class="text-sm text-gray-400">{{ number_format($orderStats['pending_value'] ?? 0) }} د.ج</p>
+                            <p class="text-2xl font-black text-gray-800">{{ $stats['pending'] ?? 0 }}</p>
+                            <p class="text-sm text-gray-400">{{ number_format($stats['pending_value'] ?? 0) }} د.ج</p>
                         </div>
                     </a>
                     
@@ -139,8 +139,8 @@
                             </span>
                         </div>
                         <div class="text-left">
-                            <p class="text-2xl font-black text-gray-800">{{ $orderStats['no_answer_1'] ?? 0 }}</p>
-                            <p class="text-sm text-gray-400">{{ number_format($orderStats['no_answer_1_value'] ?? 0) }} د.ج</p>
+                            <p class="text-2xl font-black text-gray-800">{{ $stats['no_answer_1'] ?? 0 }}</p>
+                            <p class="text-sm text-gray-400">{{ number_format($stats['no_answer_1_value'] ?? 0) }} د.ج</p>
                         </div>
                     </a>
                     
@@ -160,8 +160,8 @@
                             </span>
                         </div>
                         <div class="text-left">
-                            <p class="text-2xl font-black text-gray-800">{{ $orderStats['confirmed'] ?? 0 }}</p>
-                            <p class="text-sm text-gray-400">{{ number_format($orderStats['confirmed_value'] ?? 0) }} د.ج</p>
+                            <p class="text-2xl font-black text-gray-800">{{ $stats['confirmed'] ?? 0 }}</p>
+                            <p class="text-sm text-gray-400">{{ number_format($stats['confirmed_value'] ?? 0) }} د.ج</p>
                         </div>
                     </a>
                     
@@ -181,8 +181,8 @@
                             </span>
                         </div>
                         <div class="text-left">
-                            <p class="text-2xl font-black text-gray-800">{{ $orderStats['ready'] ?? 0 }}</p>
-                            <p class="text-sm text-gray-400">{{ number_format($orderStats['ready_value'] ?? 0) }} د.ج</p>
+                            <p class="text-2xl font-black text-gray-800">{{ $stats['ready'] ?? 0 }}</p>
+                            <p class="text-sm text-gray-400">{{ number_format($stats['ready_value'] ?? 0) }} د.ج</p>
                         </div>
                     </a>
                     
@@ -203,8 +203,8 @@
                             </span>
                         </div>
                         <div class="text-left">
-                            <p class="text-2xl font-black text-gray-800">{{ $orderStats['shipped'] ?? 0 }}</p>
-                            <p class="text-sm text-gray-400">{{ number_format($orderStats['shipped_value'] ?? 0) }} د.ج</p>
+                            <p class="text-2xl font-black text-gray-800">{{ $stats['shipped'] ?? 0 }}</p>
+                            <p class="text-sm text-gray-400">{{ number_format($stats['shipped_value'] ?? 0) }} د.ج</p>
                         </div>
                     </a>
                     
@@ -224,8 +224,8 @@
                             </span>
                         </div>
                         <div class="text-left">
-                            <p class="text-2xl font-black text-gray-800">{{ $orderStats['delivered'] ?? 0 }}</p>
-                            <p class="text-sm text-gray-400">{{ number_format($orderStats['delivered_value'] ?? 0) }} د.ج</p>
+                            <p class="text-2xl font-black text-gray-800">{{ $stats['delivered'] ?? 0 }}</p>
+                            <p class="text-sm text-gray-400">{{ number_format($stats['delivered_value'] ?? 0) }} د.ج</p>
                         </div>
                     </a>
                     
@@ -245,8 +245,8 @@
                             </span>
                         </div>
                         <div class="text-left">
-                            <p class="text-2xl font-black text-gray-800">{{ $orderStats['cancelled'] ?? 0 }}</p>
-                            <p class="text-sm text-gray-400">{{ number_format($orderStats['cancelled_value'] ?? 0) }} د.ج</p>
+                            <p class="text-2xl font-black text-gray-800">{{ $stats['cancelled'] ?? 0 }}</p>
+                            <p class="text-sm text-gray-400">{{ number_format($stats['cancelled_value'] ?? 0) }} د.ج</p>
                         </div>
                     </a>
                     
@@ -266,8 +266,8 @@
                             </span>
                         </div>
                         <div class="text-left">
-                            <p class="text-2xl font-black text-gray-800">{{ $orderStats['returned'] ?? 0 }}</p>
-                            <p class="text-sm text-gray-400">{{ number_format($orderStats['returned_value'] ?? 0) }} د.ج</p>
+                            <p class="text-2xl font-black text-gray-800">{{ $stats['returned'] ?? 0 }}</p>
+                            <p class="text-sm text-gray-400">{{ number_format($stats['returned_value'] ?? 0) }} د.ج</p>
                         </div>
                     </a>
                 </div>
