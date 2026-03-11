@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 class StorefrontController extends Controller
 {
     /**
-     * Resolve store from subdomain or custom domain and serve storefront
+     * Resolve store from subdomain or custom domain and serve React storefront
      */
     public function index(Request $request)
     {
@@ -18,22 +18,28 @@ class StorefrontController extends Controller
 
         $store = null;
 
-        // Check if it's a subdomain
+        // Check if it's a subdomain (e.g., mystore.vpshopdz.com)
         if (str_ends_with($host, '.' . $platformDomain)) {
             $subdomain = str_replace('.' . $platformDomain, '', $host);
+
+            // Skip www
+            if ($subdomain === 'www') {
+                return redirect()->to(config('app.url'));
+            }
+
             $store = Store::where('slug', $subdomain)
-                ->where('status', 'active')
+                ->where('is_active', true)
                 ->first();
         }
         // Check if it's a custom domain
-        else if ($host !== $platformDomain && $host !== 'www.' . $platformDomain) {
+        elseif ($host !== $platformDomain && $host !== 'www.' . $platformDomain) {
             $domain = StoreDomain::where('domain', $host)
                 ->where('is_verified', true)
                 ->first();
 
             if ($domain) {
                 $store = Store::where('id', $domain->store_id)
-                    ->where('status', 'active')
+                    ->where('is_active', true)
                     ->first();
             }
         }
@@ -42,32 +48,27 @@ class StorefrontController extends Controller
             abort(404, 'المتجر غير موجود');
         }
 
-        // Get active theme
-        $activeTheme = $store->activeTheme();
-        $themeSettings = $store->activeThemeSettings();
+        // Check subscription status
+        $subscription = $store->activeSubscription();
+        if (!$subscription && $store->user?->role !== 'admin') {
+            abort(403, 'الاشتراك غير فعال');
+        }
 
-        // Pass store data to React storefront
+        // Get active theme
+        $storeTheme = $store->activeTheme;
+        $theme = $storeTheme?->theme;
+
+        $themeSettings = [
+            'colors' => $storeTheme?->custom_colors ?? ($theme?->default_colors ?? []),
+            'fonts' => $storeTheme?->custom_fonts ?? ($theme?->default_fonts ?? []),
+            'layout' => $storeTheme?->custom_layout ?? ($theme?->default_layout ?? []),
+        ];
+
+        // Pass store data to React storefront via Blade template
         return view('storefront', [
             'store' => $store,
-            'theme' => $activeTheme,
+            'theme' => $theme,
             'themeSettings' => $themeSettings,
-            'storeJson' => json_encode([
-                'id' => $store->id,
-                'name' => $store->name,
-                'slug' => $store->slug,
-                'logo' => $store->logo,
-                'description' => $store->description,
-                'currency' => $store->currency,
-                'language' => $store->language,
-                'settings' => $store->settings,
-                'theme' => $activeTheme ? [
-                    'slug' => $activeTheme->slug,
-                    'colors' => $themeSettings['colors'] ?? $activeTheme->default_colors,
-                    'fonts' => $themeSettings['fonts'] ?? $activeTheme->default_fonts,
-                    'layout' => $themeSettings['layout'] ?? $activeTheme->default_layout,
-                    'sections' => $activeTheme->sections,
-                ] : null,
-            ]),
         ]);
     }
 }

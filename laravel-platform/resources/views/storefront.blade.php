@@ -1,29 +1,53 @@
 <!DOCTYPE html>
-<html lang="{{ $store->language ?? 'ar' }}" dir="{{ ($store->language ?? 'ar') === 'ar' ? 'rtl' : 'ltr' }}">
+<html lang="{{ $store->default_language ?? $store->language ?? 'ar' }}" dir="{{ ($store->default_language ?? $store->language ?? 'ar') === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{{ $store->description }}">
+    <meta name="theme-color" content="{{ $store->theme_color ?? '#2563eb' }}">
+    <meta name="description" content="{{ $store->description ?? '' }}">
+
+    {{-- SEO Meta --}}
+    <meta property="og:title" content="{{ $store->name }}">
+    <meta property="og:description" content="{{ $store->description ?? '' }}">
+    <meta property="og:type" content="website">
+    @if($store->logo)
+    <meta property="og:image" content="{{ asset('storage/' . $store->logo) }}">
+    @endif
 
     <title>{{ $store->name }}</title>
 
-    @if($store->logo)
+    {{-- Favicon --}}
+    @if($store->favicon)
+        <link rel="icon" href="{{ asset('storage/' . $store->favicon) }}">
+    @elseif($store->logo)
         <link rel="icon" href="{{ $store->logo }}" type="image/png">
     @endif
 
+    {{-- Fonts --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+
     {{-- Theme Colors as CSS Variables --}}
     @php
-        $colors = $themeSettings['colors'] ?? ($theme ? $theme->default_colors : []);
+        $themeColors = $themeSettings['colors'] ?? ($theme ? $theme->default_colors : []);
     @endphp
     <style>
         :root {
-            --color-primary: {{ $colors['primary'] ?? '#2563eb' }};
-            --color-secondary: {{ $colors['secondary'] ?? '#64748b' }};
-            --color-accent: {{ $colors['accent'] ?? '#f59e0b' }};
-            --color-background: {{ $colors['background'] ?? '#ffffff' }};
-            --color-text: {{ $colors['text'] ?? '#1e293b' }};
-            --color-header-bg: {{ $colors['header_bg'] ?? '#ffffff' }};
-            --color-footer-bg: {{ $colors['footer_bg'] ?? '#1e293b' }};
+            --color-primary: {{ $themeColors['primary'] ?? '#2563eb' }};
+            --color-secondary: {{ $themeColors['secondary'] ?? '#64748b' }};
+            --color-accent: {{ $themeColors['accent'] ?? '#f59e0b' }};
+            --color-background: {{ $themeColors['background'] ?? '#ffffff' }};
+            --color-foreground: {{ $themeColors['foreground'] ?? $themeColors['text'] ?? '#1e293b' }};
+            --color-card: {{ $themeColors['card'] ?? '#ffffff' }};
+            --color-muted: {{ $themeColors['muted'] ?? '#f1f5f9' }};
+            --color-border: {{ $themeColors['border'] ?? '#e2e8f0' }};
+            --color-header-bg: {{ $themeColors['headerBg'] ?? $themeColors['header_bg'] ?? '#ffffff' }};
+            --color-header-text: {{ $themeColors['headerText'] ?? '#1e293b' }};
+            --color-footer-bg: {{ $themeColors['footerBg'] ?? $themeColors['footer_bg'] ?? '#1e293b' }};
+            --color-footer-text: {{ $themeColors['footerText'] ?? '#f8fafc' }};
+            --button-radius: {{ $themeColors['buttonRadius'] ?? '0.5rem' }};
+            --card-radius: {{ $themeColors['cardRadius'] ?? '0.75rem' }};
         }
     </style>
 
@@ -62,7 +86,7 @@
                     for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);
                     ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e};
                     ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";
-                    ttq._i=ttq._i||{};ttq._i[e]=[];ttq._i[e]._u=i;ttq._t=ttq._t||{};ttq._t[e+\"_\"+n]=1;
+                    ttq._i=ttq._i||{};ttq._i[e]=[];ttq._i[e]._u=i;ttq._t=ttq._t||{};ttq._t[e+"_"+n]=1;
                     var o=document.createElement("script");o.type="text/javascript";o.async=!0;o.src=i+"?sdkid="+e+"&lib="+t;
                     var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
                     ttq.load('{{ $pixel->pixel_id }}');
@@ -84,17 +108,74 @@
         @endif
     @endforeach
 
-    {{-- React Storefront will be loaded here --}}
-    @viteReactRefresh
-    @vite(['resources/storefront/main.tsx'])
-</head>
-<body>
-    <div id="storefront-root"></div>
-
     {{-- Store data for React --}}
     <script>
-        window.__STORE_DATA__ = {!! $storeJson !!};
+        window.__STORE_DATA__ = @json([
+            'id' => $store->id,
+            'name' => $store->name,
+            'slug' => $store->slug,
+            'logo' => $store->logo,
+            'favicon' => $store->favicon ?? null,
+            'description' => $store->description,
+            'default_language' => $store->default_language ?? $store->language ?? 'ar',
+            'currency' => $store->currency ?? 'DZD',
+            'theme' => [
+                'slug' => $store->activeTheme?->theme?->slug ?? ($theme->slug ?? 'dawn'),
+                'colors' => $themeColors,
+                'fonts' => $themeSettings['fonts'] ?? [],
+                'layout' => $themeSettings['layout'] ?? [],
+            ],
+            'settings' => $store->settings ?? [],
+            'social_links' => [
+                'facebook' => $store->facebook_url ?? null,
+                'instagram' => $store->instagram_url ?? null,
+                'whatsapp' => $store->whatsapp_number ?? null,
+                'tiktok' => $store->tiktok_url ?? null,
+                'twitter' => $store->twitter_url ?? null,
+            ],
+            'contact' => [
+                'phone' => $store->phone ?? null,
+                'email' => $store->email ?? null,
+                'address' => $store->address ?? null,
+            ],
+        ]);
         window.__API_BASE__ = '{{ url("/api/v1/store/" . $store->slug) }}';
     </script>
+
+    {{-- React Storefront Assets --}}
+    @if(app()->environment('local'))
+        @viteReactRefresh
+        @vite(['resources/storefront/main.tsx'])
+    @else
+        @php
+            $manifestPath = public_path('storefront/.vite/manifest.json');
+            $manifest = file_exists($manifestPath)
+                ? json_decode(file_get_contents($manifestPath), true)
+                : null;
+            $entry = $manifest['main.tsx'] ?? null;
+        @endphp
+        @if($entry)
+            @if(isset($entry['css']))
+                @foreach($entry['css'] as $css)
+                    <link rel="stylesheet" href="{{ asset('storefront/' . $css) }}">
+                @endforeach
+            @endif
+            <script type="module" src="{{ asset('storefront/' . $entry['file']) }}"></script>
+        @else
+            @viteReactRefresh
+            @vite(['resources/storefront/main.tsx'])
+        @endif
+    @endif
+</head>
+<body>
+    <div id="root"></div>
+    <div id="storefront-root"></div>
+
+    <noscript>
+        <div style="text-align:center;padding:50px;font-family:Tajawal,sans-serif;">
+            <h1>{{ $store->name }}</h1>
+            <p>يرجى تفعيل JavaScript لعرض المتجر</p>
+        </div>
+    </noscript>
 </body>
 </html>
