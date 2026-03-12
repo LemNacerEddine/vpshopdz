@@ -326,7 +326,7 @@
                     <div class="space-y-3">
                         <template x-for="item in (order ? order.items : [])" :key="item.id">
                             <div class="flex items-center gap-4 bg-gray-50 rounded-xl p-3">
-                                <img :src="item.product_image || item.image || '/images/placeholder.png'" class="w-14 h-14 object-cover rounded-xl border border-gray-200 flex-shrink-0" @error="$el.src='/images/placeholder.png'">
+                                <img :src="item.product_image || item.image || '/images/placeholder.png'" class="w-14 h-14 object-cover rounded-xl border border-gray-200 flex-shrink-0" @@error="$el.src='/images/placeholder.png'">
                                 <div class="flex-1 min-w-0">
                                     <p class="font-bold text-gray-800 truncate" x-text="item.product_name || item.name"></p>
                                     <p class="text-sm text-gray-500">

@@ -290,7 +290,7 @@
                         <div x-show="form.images.length > 0" class="flex flex-wrap gap-3">
                             <template x-for="(img, i) in form.images" :key="i">
                                 <div class="relative group">
-                                    <img :src="img" class="w-20 h-20 object-cover rounded-xl border border-gray-200" @error="$el.src='/images/placeholder.png'">
+                                    <img :src="img" class="w-20 h-20 object-cover rounded-xl border border-gray-200" @@error="$el.src='/images/placeholder.png'">
                                     <span x-show="i === 0" class="absolute -top-1.5 -right-1.5 bg-primary-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">رئيسية</span>
                                     <button type="button" @click="form.images.splice(i, 1); updateImagesText()"
                                         class="absolute -top-1.5 -left-1.5 hidden group-hover:flex w-5 h-5 bg-red-500 text-white rounded-full items-center justify-center text-xs font-bold">×</button>
