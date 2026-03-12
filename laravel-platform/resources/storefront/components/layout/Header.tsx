@@ -6,9 +6,10 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useCart } from '../../contexts/CartContext';
 import { api } from '../../lib/api';
 import { getImageUrl, getCategoryName } from '../../lib/utils';
+import { useCustomerAuth } from '../../contexts/CustomerAuthContext';
 import {
   Search, ShoppingCart, Menu, X, Globe, ChevronDown,
-  Heart, User, Flame, Phone
+  Heart, User, Flame, Phone, LogIn, LogOut
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -20,6 +21,7 @@ export const Header: React.FC<HeaderProps> = ({ style = 'default' }) => {
   const { colors } = useTheme();
   const { t, language, setLanguage, isRTL } = useLanguage();
   const { cartCount } = useCart();
+  const { customer, isAuthenticated, logout } = useCustomerAuth();
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -260,6 +262,30 @@ export const Header: React.FC<HeaderProps> = ({ style = 'default' }) => {
         <Heart className="h-5 w-5" />
       </Link>
 
+      {/* Customer Auth */}
+      {isAuthenticated ? (
+        <div className="relative group">
+          <button className="h-9 flex items-center gap-1.5 px-2 rounded-lg transition-colors hover:opacity-80" style={{ color: colors.headerText }}>
+            <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: colors.primary }}>
+              {customer?.name?.charAt(0) || '?'}
+            </div>
+          </button>
+          <div className="absolute top-full mt-1 z-50 min-w-[160px] py-1 rounded-xl shadow-xl border hidden group-hover:block"
+            style={{ backgroundColor: colors.card, borderColor: colors.border, [isRTL ? 'right' : 'left']: 0 }}>
+            <Link to="/profile" className="flex items-center gap-2 px-4 py-2 text-sm hover:opacity-80" style={{ color: colors.cardForeground }}>
+              <User className="h-4 w-4" /> حسابي
+            </Link>
+            <button onClick={() => logout(apiBase)} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+              <LogOut className="h-4 w-4" /> تسجيل الخروج
+            </button>
+          </div>
+        </div>
+      ) : (
+        <Link to="/login" className="h-9 w-9 flex items-center justify-center rounded-lg transition-colors hover:opacity-80" style={{ color: colors.headerText }}>
+          <User className="h-5 w-5" />
+        </Link>
+      )}
+
       {/* Cart */}
       <Link
         to="/cart"
@@ -454,8 +480,26 @@ export const Header: React.FC<HeaderProps> = ({ style = 'default' }) => {
               )}
             </nav>
 
+            {/* Mobile Customer Auth */}
+            <div className="px-4 pt-4 pb-2 border-t" style={{ borderColor: colors.border }}>
+              {isAuthenticated ? (
+                <>
+                  <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium" style={{ color: colors.foreground }}>
+                    <User className="h-4 w-4" /> {customer?.name || 'حسابي'}
+                  </Link>
+                  <button onClick={() => { logout(apiBase); setMobileMenuOpen(false); }} className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-600">
+                    <LogOut className="h-4 w-4" /> تسجيل الخروج
+                  </button>
+                </>
+              ) : (
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium" style={{ color: colors.primary }}>
+                  <LogIn className="h-4 w-4" /> تسجيل الدخول / إنشاء حساب
+                </Link>
+              )}
+            </div>
+
             {/* Mobile Language */}
-            <div className="p-4 mt-4 border-t" style={{ borderColor: colors.border }}>
+            <div className="p-4 border-t" style={{ borderColor: colors.border }}>
               <div className="flex gap-2">
                 {languages.map((lang) => (
                   <button

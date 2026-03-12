@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\WishlistController;
+use App\Http\Controllers\Api\CustomerAuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -113,6 +114,19 @@ Route::prefix('v1')->group(function () {
 
         // Pixels
         Route::get('/pixels', [PixelController::class, 'storePixels']);
+
+        // Customer Auth (Storefront)
+        Route::prefix('customer')->group(function () {
+            Route::post('/register', [CustomerAuthController::class, 'register']);
+            Route::post('/login', [CustomerAuthController::class, 'login']);
+            Route::middleware('auth:customer')->group(function () {
+                Route::post('/logout', [CustomerAuthController::class, 'logout']);
+                Route::get('/profile', [CustomerAuthController::class, 'profile']);
+                Route::put('/profile', [CustomerAuthController::class, 'updateProfile']);
+                Route::put('/password', [CustomerAuthController::class, 'changePassword']);
+                Route::get('/orders', [CustomerAuthController::class, 'myOrders']);
+            });
+        });
     });
 
     // ═══════════════════════════════════════════════════════════════

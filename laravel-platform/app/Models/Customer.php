@@ -2,31 +2,25 @@
 
 namespace App\Models;
 
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
-class Customer extends Model
+class Customer extends Authenticatable
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasUuids, HasApiTokens, Notifiable;
 
     protected $fillable = [
-        'store_id',
-        'name',
-        'email',
-        'phone',
-        'phone2',
-        'wilaya',
-        'commune',
-        'address',
-        'orders_count',
-        'total_spent',
-        'last_order_at',
-        'notes',
-        'tags',
+        'store_id', 'name', 'email', 'phone', 'phone2', 'password',
+        'wilaya', 'commune', 'address', 'orders_count', 'total_spent',
+        'last_order_at', 'notes', 'tags',
     ];
+
+    protected $hidden = ['password', 'remember_token'];
 
     protected $casts = [
         'orders_count' => 'integer',

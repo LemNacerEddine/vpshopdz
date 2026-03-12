@@ -4,6 +4,7 @@ import { StoreProvider } from './contexts/StoreContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { CartProvider } from './contexts/CartContext';
+import { CustomerAuthProvider } from './contexts/CustomerAuthContext';
 import { Layout } from './components/layout/Layout';
 import ErrorBoundary from './components/ErrorBoundary';
 import { Toaster } from 'sonner';
@@ -20,6 +21,9 @@ const CustomPage = lazy(() => import('./pages/CustomPage'));
 const OrderTrackingPage = lazy(() => import('./pages/OrderTrackingPage'));
 const WishlistPage = lazy(() => import('./pages/WishlistPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 
 // Loading fallback
 const PageLoader: React.FC = () => (
@@ -46,39 +50,45 @@ const App: React.FC = () => {
       <ErrorBoundary>
         <ThemeProvider>
           <LanguageProvider>
-            <CartProvider>
-              <ScrollToTop />
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
-                  <Route element={<Layout />}>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/products" element={<ProductsPage />} />
-                    <Route path="/products/:productId" element={<ProductDetailPage />} />
-                    <Route path="/product/:productId" element={<ProductDetailPage />} />
-                    <Route path="/category/:categoryId" element={<CategoryPage />} />
-                    <Route path="/categories/:categoryId" element={<CategoryPage />} />
-                    <Route path="/search" element={<SearchPage />} />
-                    <Route path="/cart" element={<CartPage />} />
-                    <Route path="/checkout" element={<CheckoutPage />} />
-                    <Route path="/track" element={<OrderTrackingPage />} />
-                    <Route path="/track/:orderId" element={<OrderTrackingPage />} />
-                    <Route path="/wishlist" element={<WishlistPage />} />
-                    <Route path="/page/:slug" element={<CustomPage />} />
-                    <Route path="/pages/:slug" element={<CustomPage />} />
-                    <Route path="*" element={<NotFoundPage />} />
-                  </Route>
-                </Routes>
-              </Suspense>
-              <Toaster
-                position="top-center"
-                richColors
-                toastOptions={{
-                  style: {
-                    fontFamily: 'var(--font-body)',
-                  },
-                }}
-              />
-            </CartProvider>
+            <CustomerAuthProvider>
+              <CartProvider>
+                <ScrollToTop />
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
+                    <Route element={<Layout />}>
+                      <Route path="/" element={<HomePage />} />
+                      <Route path="/products" element={<ProductsPage />} />
+                      <Route path="/products/:productId" element={<ProductDetailPage />} />
+                      <Route path="/product/:productId" element={<ProductDetailPage />} />
+                      <Route path="/category/:categoryId" element={<CategoryPage />} />
+                      <Route path="/categories/:categoryId" element={<CategoryPage />} />
+                      <Route path="/search" element={<SearchPage />} />
+                      <Route path="/cart" element={<CartPage />} />
+                      <Route path="/checkout" element={<CheckoutPage />} />
+                      <Route path="/track" element={<OrderTrackingPage />} />
+                      <Route path="/track/:orderId" element={<OrderTrackingPage />} />
+                      <Route path="/wishlist" element={<WishlistPage />} />
+                      <Route path="/page/:slug" element={<CustomPage />} />
+                      <Route path="/pages/:slug" element={<CustomPage />} />
+                      {/* Customer Auth */}
+                      <Route path="/login" element={<LoginPage />} />
+                      <Route path="/register" element={<RegisterPage />} />
+                      <Route path="/profile" element={<ProfilePage />} />
+                      <Route path="*" element={<NotFoundPage />} />
+                    </Route>
+                  </Routes>
+                </Suspense>
+                <Toaster
+                  position="top-center"
+                  richColors
+                  toastOptions={{
+                    style: {
+                      fontFamily: 'var(--font-body)',
+                    },
+                  }}
+                />
+              </CartProvider>
+            </CustomerAuthProvider>
           </LanguageProvider>
         </ThemeProvider>
       </ErrorBoundary>
