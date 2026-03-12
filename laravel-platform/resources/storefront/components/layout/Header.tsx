@@ -9,7 +9,8 @@ import { getImageUrl, getCategoryName } from '../../lib/utils';
 import { useCustomerAuth } from '../../contexts/CustomerAuthContext';
 import {
   Search, ShoppingCart, Menu, X, Globe, ChevronDown,
-  Heart, User, Flame, Phone, LogIn, LogOut
+  Heart, User, Flame, Phone, LogIn, LogOut,
+  Package, Star, MapPin, Tag, History, Shield, Bell, ChevronRight, ChevronLeft
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -29,9 +30,13 @@ export const Header: React.FC<HeaderProps> = ({ style = 'default' }) => {
   const [categories, setCategories] = useState<any[]>([]);
   const [showCategories, setShowCategories] = useState(false);
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [recentProducts, setRecentProducts] = useState<any[]>([]);
   const [isScrolled, setIsScrolled] = useState(false);
   const catRef = useRef<HTMLDivElement>(null);
   const langRef = useRef<HTMLDivElement>(null);
+  const userRef = useRef<HTMLDivElement>(null);
+  const ChevronDir = isRTL ? ChevronLeft : ChevronRight;
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -53,6 +58,7 @@ export const Header: React.FC<HeaderProps> = ({ style = 'default' }) => {
     const handleClickOutside = (e: MouseEvent) => {
       if (catRef.current && !catRef.current.contains(e.target as Node)) setShowCategories(false);
       if (langRef.current && !langRef.current.contains(e.target as Node)) setShowLangMenu(false);
+      if (userRef.current && !userRef.current.contains(e.target as Node)) setShowUserMenu(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -264,21 +270,48 @@ export const Header: React.FC<HeaderProps> = ({ style = 'default' }) => {
 
       {/* Customer Auth */}
       {isAuthenticated ? (
-        <div className="relative group">
-          <button className="h-9 flex items-center gap-1.5 px-2 rounded-lg transition-colors hover:opacity-80" style={{ color: colors.headerText }}>
-            <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: colors.primary }}>
+        <div ref={userRef} className="relative">
+          <button
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            className="h-9 w-9 flex items-center justify-center rounded-lg transition-colors"
+            style={{
+              color: showUserMenu ? '#fff' : colors.headerText,
+              backgroundColor: showUserMenu ? colors.primary : 'transparent',
+            }}
+          >
+            <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: showUserMenu ? 'rgba(255,255,255,0.25)' : colors.primary }}>
               {customer?.name?.charAt(0) || '?'}
             </div>
           </button>
-          <div className="absolute top-full mt-1 z-50 min-w-[160px] py-1 rounded-xl shadow-xl border hidden group-hover:block"
-            style={{ backgroundColor: colors.card, borderColor: colors.border, [isRTL ? 'right' : 'left']: 0 }}>
-            <Link to="/profile" className="flex items-center gap-2 px-4 py-2 text-sm hover:opacity-80" style={{ color: colors.cardForeground }}>
-              <User className="h-4 w-4" /> حسابي
-            </Link>
-            <button onClick={() => logout(apiBase)} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-              <LogOut className="h-4 w-4" /> تسجيل الخروج
-            </button>
-          </div>
+          {/* Desktop dropdown (md and above) */}
+          {showUserMenu && (
+            <div
+              className="hidden md:block absolute top-full mt-1 z-50 min-w-[200px] py-1 rounded-xl shadow-xl border"
+              style={{ backgroundColor: colors.card, borderColor: colors.border, [isRTL ? 'right' : 'left']: 0 }}
+            >
+              <div className="px-4 py-2.5 border-b" style={{ borderColor: colors.border }}>
+                <p className="font-semibold text-sm truncate" style={{ color: colors.foreground }}>{customer?.name}</p>
+                <p className="text-xs truncate" style={{ color: colors.mutedForeground }}>{customer?.phone || customer?.email}</p>
+              </div>
+              {[
+                { to: '/profile', icon: Package, label: 'طلباتك' },
+                { to: '/wishlist', icon: Heart, label: 'قائمة الأمنيات' },
+                { to: '/profile', icon: User, label: 'الملف الشخصي' },
+              ].map((item) => (
+                <Link key={item.label} to={item.to} onClick={() => setShowUserMenu(false)}
+                  className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:opacity-80"
+                  style={{ color: colors.cardForeground }}>
+                  <item.icon className="h-4 w-4" /> {item.label}
+                </Link>
+              ))}
+              <div className="border-t mt-1" style={{ borderColor: colors.border }}>
+                <button onClick={() => { logout(apiBase); setShowUserMenu(false); }}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                  <LogOut className="h-4 w-4" /> تسجيل الخروج
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <Link to="/login" className="h-9 w-9 flex items-center justify-center rounded-lg transition-colors hover:opacity-80" style={{ color: colors.headerText }}>
@@ -396,6 +429,83 @@ export const Header: React.FC<HeaderProps> = ({ style = 'default' }) => {
   return (
     <>
       {renderHeader()}
+
+      {/* Mobile User Account Panel (md and below) */}
+      {showUserMenu && isAuthenticated && (
+        <div
+          className="fixed inset-0 z-[60] md:hidden"
+          onClick={() => setShowUserMenu(false)}
+        >
+          <div className="absolute inset-0 bg-black/50" />
+          <div
+            className={`absolute top-0 ${isRTL ? 'right-0' : 'left-0'} h-full w-72 max-w-[85vw] overflow-y-auto shadow-2xl flex flex-col`}
+            style={{ backgroundColor: colors.background }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Panel Header - store name */}
+            <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: colors.border, backgroundColor: colors.card }}>
+              <button onClick={() => setShowUserMenu(false)}>
+                <ChevronDir className="h-5 w-5" style={{ color: colors.foreground }} />
+              </button>
+              <span className="font-bold text-base truncate mx-2" style={{ color: colors.primary }}>{storeName}</span>
+            </div>
+
+            {/* User Info */}
+            <div className="flex items-center gap-3 px-4 py-4 border-b" style={{ borderColor: colors.border }}>
+              <div className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-lg shrink-0" style={{ backgroundColor: colors.primary }}>
+                {customer?.name?.charAt(0) || '?'}
+              </div>
+              <div className="min-w-0">
+                <p className="font-bold text-sm truncate" style={{ color: colors.foreground }}>{customer?.name}</p>
+                <p className="text-xs truncate" style={{ color: colors.mutedForeground }}>{customer?.phone || customer?.email}</p>
+              </div>
+            </div>
+
+            {/* Section title */}
+            <div className="px-4 pt-3 pb-1">
+              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: colors.mutedForeground }}>الملف الشخصي</p>
+            </div>
+
+            {/* Navigation Items */}
+            <nav className="flex-1 px-2 pb-4">
+              {[
+                { to: '/profile', icon: Package, label: 'طلباتك' },
+                { to: '/profile', icon: Star, label: 'مراجعاتك' },
+                { to: '/wishlist', icon: Heart, label: 'قائمة الأمنيات' },
+                { to: '/profile', icon: Tag, label: 'القسائم والعروض' },
+                { to: '/', icon: History, label: 'سجل التصفح' },
+                { to: '/profile', icon: MapPin, label: 'العناوين' },
+                { to: '/profile', icon: Shield, label: 'أمان الحساب' },
+                { to: '/profile', icon: Bell, label: 'الإشعارات' },
+              ].map((item) => (
+                <Link
+                  key={item.label}
+                  to={item.to}
+                  onClick={() => setShowUserMenu(false)}
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm transition-colors"
+                  style={{ color: colors.foreground }}
+                  onTouchStart={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = colors.muted; }}
+                  onTouchEnd={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'; }}
+                >
+                  <item.icon className="h-5 w-5 shrink-0" style={{ color: colors.primary }} />
+                  <span className="flex-1">{item.label}</span>
+                  <ChevronDir className="h-4 w-4 shrink-0 opacity-40" style={{ color: colors.mutedForeground }} />
+                </Link>
+              ))}
+            </nav>
+
+            {/* Logout */}
+            <div className="p-4 border-t" style={{ borderColor: colors.border }}>
+              <button
+                onClick={() => { logout(apiBase); setShowUserMenu(false); }}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
+              >
+                <LogOut className="h-4 w-4" /> الخروج
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
