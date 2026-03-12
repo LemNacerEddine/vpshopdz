@@ -18,10 +18,20 @@ export function slugify(str: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-export function getImageUrl(path: string | null, fallback = '/images/placeholder.png'): string {
+export function getImageUrl(path: any, fallback = '/images/placeholder.png'): string {
   if (!path) return fallback;
-  if (path.startsWith('http')) return path;
-  return `/storage/${path}`;
+
+  let finalPath = path;
+  if (typeof path === 'object') {
+    finalPath = path.url || path.path || path.src || null;
+  }
+
+  if (!finalPath || typeof finalPath !== 'string') return fallback;
+  if (finalPath.startsWith('http')) return finalPath;
+  if (finalPath.startsWith('/storage/')) return finalPath;
+  if (finalPath.startsWith('storage/')) return `/${finalPath}`;
+
+  return `/storage/${finalPath}`;
 }
 
 export function getProductName(product: any, language: string): string {

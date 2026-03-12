@@ -94,8 +94,8 @@ const ThemeContext = createContext<ThemeContextType>({
   currentTheme: 'dawn',
   preset: null,
   isDark: false,
-  setTheme: () => {},
-  setCustomColors: () => {},
+  setTheme: () => { },
+  setCustomColors: () => { },
 });
 
 export const useTheme = (): ThemeContextType => {
@@ -206,8 +206,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     Object.entries(colors).forEach(([key, value]) => {
       const cssKey = key.replace(/([A-Z])/g, '-$1').toLowerCase();
       root.style.setProperty(`--color-${cssKey}`, value);
+
       // HSL version for Tailwind (only for actual colors, not radius)
-      if (value.startsWith('#')) {
+      if (typeof value === 'string' && value.startsWith('#')) {
         const hslKey = cssKey.replace('color-', '');
         root.style.setProperty(`--${hslKey}`, hexToHSL(value));
       }

@@ -5,6 +5,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { CartProvider } from './contexts/CartContext';
 import { Layout } from './components/layout/Layout';
+import ErrorBoundary from './components/ErrorBoundary';
 import { Toaster } from 'sonner';
 
 // Pages - Lazy loaded for performance
@@ -42,43 +43,45 @@ const ScrollToTop: React.FC = () => {
 const App: React.FC = () => {
   return (
     <StoreProvider>
-      <ThemeProvider>
-        <LanguageProvider>
-          <CartProvider>
-            <ScrollToTop />
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route element={<Layout />}>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/products" element={<ProductsPage />} />
-                  <Route path="/products/:productId" element={<ProductDetailPage />} />
-                  <Route path="/product/:productId" element={<ProductDetailPage />} />
-                  <Route path="/category/:categoryId" element={<CategoryPage />} />
-                  <Route path="/categories/:categoryId" element={<CategoryPage />} />
-                  <Route path="/search" element={<SearchPage />} />
-                  <Route path="/cart" element={<CartPage />} />
-                  <Route path="/checkout" element={<CheckoutPage />} />
-                  <Route path="/track" element={<OrderTrackingPage />} />
-                  <Route path="/track/:orderId" element={<OrderTrackingPage />} />
-                  <Route path="/wishlist" element={<WishlistPage />} />
-                  <Route path="/page/:slug" element={<CustomPage />} />
-                  <Route path="/pages/:slug" element={<CustomPage />} />
-                  <Route path="*" element={<NotFoundPage />} />
-                </Route>
-              </Routes>
-            </Suspense>
-            <Toaster
-              position="top-center"
-              richColors
-              toastOptions={{
-                style: {
-                  fontFamily: 'var(--font-body)',
-                },
-              }}
-            />
-          </CartProvider>
-        </LanguageProvider>
-      </ThemeProvider>
+      <ErrorBoundary>
+        <ThemeProvider>
+          <LanguageProvider>
+            <CartProvider>
+              <ScrollToTop />
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route element={<Layout />}>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/products" element={<ProductsPage />} />
+                    <Route path="/products/:productId" element={<ProductDetailPage />} />
+                    <Route path="/product/:productId" element={<ProductDetailPage />} />
+                    <Route path="/category/:categoryId" element={<CategoryPage />} />
+                    <Route path="/categories/:categoryId" element={<CategoryPage />} />
+                    <Route path="/search" element={<SearchPage />} />
+                    <Route path="/cart" element={<CartPage />} />
+                    <Route path="/checkout" element={<CheckoutPage />} />
+                    <Route path="/track" element={<OrderTrackingPage />} />
+                    <Route path="/track/:orderId" element={<OrderTrackingPage />} />
+                    <Route path="/wishlist" element={<WishlistPage />} />
+                    <Route path="/page/:slug" element={<CustomPage />} />
+                    <Route path="/pages/:slug" element={<CustomPage />} />
+                    <Route path="*" element={<NotFoundPage />} />
+                  </Route>
+                </Routes>
+              </Suspense>
+              <Toaster
+                position="top-center"
+                richColors
+                toastOptions={{
+                  style: {
+                    fontFamily: 'var(--font-body)',
+                  },
+                }}
+              />
+            </CartProvider>
+          </LanguageProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
     </StoreProvider>
   );
 };
