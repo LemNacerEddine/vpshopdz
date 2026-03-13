@@ -31,7 +31,7 @@ interface ThemeLayout {
   headerStyle: 'default' | 'centered' | 'minimal' | 'mega';
   footerStyle: 'default' | 'minimal' | 'rich';
   productCardStyle: 'default' | 'minimal' | 'overlay' | 'horizontal';
-  heroStyle: 'slider' | 'banner' | 'split' | 'video';
+  heroStyle: 'slider' | 'banner' | 'split' | 'video' | 'product-split';
   gridColumns: number;
   containerWidth?: string;
   showBreadcrumb?: boolean;
@@ -79,7 +79,7 @@ const defaultLayout: ThemeLayout = {
   headerStyle: 'default',
   footerStyle: 'default',
   productCardStyle: 'default',
-  heroStyle: 'slider',
+  heroStyle: 'product-split',
   gridColumns: 4,
   containerWidth: '1280px',
   showBreadcrumb: true,

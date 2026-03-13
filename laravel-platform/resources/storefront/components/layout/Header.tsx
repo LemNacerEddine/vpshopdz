@@ -152,9 +152,13 @@ export const Header: React.FC<HeaderProps> = ({ style = 'default' }) => {
 
       {/* Categories Dropdown */}
       {categories.length > 0 && (
-        <div ref={catRef} className="relative">
+        <div
+          ref={catRef}
+          className="relative"
+          onMouseEnter={() => setShowCategories(true)}
+          onMouseLeave={() => setShowCategories(false)}
+        >
           <button
-            onClick={() => setShowCategories(!showCategories)}
             className="flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors hover:opacity-80"
             style={{ color: colors.headerText }}
           >
@@ -222,9 +226,13 @@ export const Header: React.FC<HeaderProps> = ({ style = 'default' }) => {
   const actionButtons = (
     <div className="flex items-center gap-1 shrink-0">
       {/* Language Selector */}
-      <div ref={langRef} className="relative">
+      <div
+        ref={langRef}
+        className="relative"
+        onMouseEnter={() => setShowLangMenu(true)}
+        onMouseLeave={() => setShowLangMenu(false)}
+      >
         <button
-          onClick={() => setShowLangMenu(!showLangMenu)}
           className="h-9 w-9 flex items-center justify-center rounded-lg transition-colors hover:opacity-80"
           style={{ color: colors.headerText }}
         >
@@ -232,7 +240,7 @@ export const Header: React.FC<HeaderProps> = ({ style = 'default' }) => {
         </button>
         {showLangMenu && (
           <div
-            className="absolute top-full mt-2 z-50 min-w-[140px] py-1 rounded-lg shadow-xl border"
+            className="absolute top-full mt-0 z-50 min-w-[140px] py-1 rounded-lg shadow-xl border"
             style={{
               backgroundColor: colors.card,
               borderColor: colors.border,
@@ -268,30 +276,6 @@ export const Header: React.FC<HeaderProps> = ({ style = 'default' }) => {
         <Heart className="h-5 w-5" />
       </Link>
 
-      {/* Customer Auth */}
-      {isAuthenticated ? (
-        <div ref={userRef} className="relative">
-          <button
-            onClick={() => setShowUserMenu(!showUserMenu)}
-            className="h-9 w-9 flex items-center justify-center rounded-lg transition-colors"
-            style={{
-              color: showUserMenu ? '#fff' : colors.headerText,
-              backgroundColor: showUserMenu ? colors.primary : 'transparent',
-            }}
-          >
-            <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: showUserMenu ? 'rgba(255,255,255,0.25)' : colors.primary }}>
-              {customer?.name?.charAt(0) || '?'}
-            </div>
-          </button>
-          {/* Desktop dropdown (md and above) — rich UserMenu */}
-          <UserMenu isOpen={showUserMenu} onClose={() => setShowUserMenu(false)} />
-        </div>
-      ) : (
-        <Link to="/login" className="h-9 w-9 flex items-center justify-center rounded-lg transition-colors hover:opacity-80" style={{ color: colors.headerText }}>
-          <User className="h-5 w-5" />
-        </Link>
-      )}
-
       {/* Cart */}
       <Link
         to="/cart"
@@ -308,6 +292,41 @@ export const Header: React.FC<HeaderProps> = ({ style = 'default' }) => {
           </span>
         )}
       </Link>
+
+      {/* Customer Auth — User icon LAST (hover to open) */}
+      {isAuthenticated ? (
+        <div
+          ref={userRef}
+          className="relative"
+          onMouseEnter={() => setShowUserMenu(true)}
+          onMouseLeave={() => setShowUserMenu(false)}
+        >
+          <button
+            className="h-9 w-9 flex items-center justify-center rounded-lg transition-colors"
+            style={{
+              color: showUserMenu ? '#fff' : colors.headerText,
+              backgroundColor: showUserMenu ? colors.primary : 'transparent',
+            }}
+          >
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
+              style={{ backgroundColor: showUserMenu ? 'rgba(255,255,255,0.25)' : colors.primary }}
+            >
+              {customer?.name?.charAt(0) || '?'}
+            </div>
+          </button>
+          {/* Desktop dropdown (md and above) — rich UserMenu */}
+          <UserMenu isOpen={showUserMenu} onClose={() => setShowUserMenu(false)} />
+        </div>
+      ) : (
+        <Link
+          to="/login"
+          className="h-9 w-9 flex items-center justify-center rounded-lg transition-colors hover:opacity-80"
+          style={{ color: colors.headerText }}
+        >
+          <User className="h-5 w-5" />
+        </Link>
+      )}
 
       {/* Mobile Menu Toggle */}
       <button

@@ -72,7 +72,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ isOpen, onClose }) => {
 
   return (
     <div
-      className="hidden md:flex absolute top-full mt-1 z-50 rounded-xl shadow-2xl border overflow-hidden"
+      className="hidden md:flex absolute top-full mt-0 z-50 rounded-xl shadow-2xl border overflow-hidden"
       style={{
         backgroundColor: colors.card,
         borderColor: colors.border,
