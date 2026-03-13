@@ -7,6 +7,7 @@ import { useCart } from '../../contexts/CartContext';
 import { api } from '../../lib/api';
 import { getImageUrl, getCategoryName } from '../../lib/utils';
 import { useCustomerAuth } from '../../contexts/CustomerAuthContext';
+import { UserMenu } from './UserMenu';
 import {
   Search, ShoppingCart, Menu, X, Globe, ChevronDown,
   Heart, User, Flame, Phone, LogIn, LogOut,
@@ -31,7 +32,6 @@ export const Header: React.FC<HeaderProps> = ({ style = 'default' }) => {
   const [showCategories, setShowCategories] = useState(false);
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [recentProducts, setRecentProducts] = useState<any[]>([]);
   const [isScrolled, setIsScrolled] = useState(false);
   const catRef = useRef<HTMLDivElement>(null);
   const langRef = useRef<HTMLDivElement>(null);
@@ -283,35 +283,8 @@ export const Header: React.FC<HeaderProps> = ({ style = 'default' }) => {
               {customer?.name?.charAt(0) || '?'}
             </div>
           </button>
-          {/* Desktop dropdown (md and above) */}
-          {showUserMenu && (
-            <div
-              className="hidden md:block absolute top-full mt-1 z-50 min-w-[200px] py-1 rounded-xl shadow-xl border"
-              style={{ backgroundColor: colors.card, borderColor: colors.border, [isRTL ? 'right' : 'left']: 0 }}
-            >
-              <div className="px-4 py-2.5 border-b" style={{ borderColor: colors.border }}>
-                <p className="font-semibold text-sm truncate" style={{ color: colors.foreground }}>{customer?.name}</p>
-                <p className="text-xs truncate" style={{ color: colors.mutedForeground }}>{customer?.phone || customer?.email}</p>
-              </div>
-              {[
-                { to: '/profile', icon: Package, label: 'طلباتك' },
-                { to: '/wishlist', icon: Heart, label: 'قائمة الأمنيات' },
-                { to: '/profile', icon: User, label: 'الملف الشخصي' },
-              ].map((item) => (
-                <Link key={item.label} to={item.to} onClick={() => setShowUserMenu(false)}
-                  className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:opacity-80"
-                  style={{ color: colors.cardForeground }}>
-                  <item.icon className="h-4 w-4" /> {item.label}
-                </Link>
-              ))}
-              <div className="border-t mt-1" style={{ borderColor: colors.border }}>
-                <button onClick={() => { logout(apiBase); setShowUserMenu(false); }}
-                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                  <LogOut className="h-4 w-4" /> تسجيل الخروج
-                </button>
-              </div>
-            </div>
-          )}
+          {/* Desktop dropdown (md and above) — rich UserMenu */}
+          <UserMenu isOpen={showUserMenu} onClose={() => setShowUserMenu(false)} />
         </div>
       ) : (
         <Link to="/login" className="h-9 w-9 flex items-center justify-center rounded-lg transition-colors hover:opacity-80" style={{ color: colors.headerText }}>

@@ -24,6 +24,10 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const DealsPage = lazy(() => import('./pages/DealsPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const ProductLandingPage = lazy(() => import('./pages/ProductLandingPage'));
+const AbandonedCartPage = lazy(() => import('./pages/AbandonedCartPage'));
 
 // Loading fallback
 const PageLoader: React.FC = () => (
@@ -55,6 +59,9 @@ const App: React.FC = () => {
                 <ScrollToTop />
                 <Suspense fallback={<PageLoader />}>
                   <Routes>
+                    {/* Standalone pages (no Layout) */}
+                    <Route path="/p/:productId" element={<ProductLandingPage />} />
+
                     <Route element={<Layout />}>
                       <Route path="/" element={<HomePage />} />
                       <Route path="/products" element={<ProductsPage />} />
@@ -68,11 +75,14 @@ const App: React.FC = () => {
                       <Route path="/track" element={<OrderTrackingPage />} />
                       <Route path="/track/:orderId" element={<OrderTrackingPage />} />
                       <Route path="/wishlist" element={<WishlistPage />} />
+                      <Route path="/deals" element={<DealsPage />} />
+                      <Route path="/recover/:token" element={<AbandonedCartPage />} />
                       <Route path="/page/:slug" element={<CustomPage />} />
                       <Route path="/pages/:slug" element={<CustomPage />} />
                       {/* Customer Auth */}
                       <Route path="/login" element={<LoginPage />} />
                       <Route path="/register" element={<RegisterPage />} />
+                      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                       <Route path="/profile" element={<ProfilePage />} />
                       <Route path="*" element={<NotFoundPage />} />
                     </Route>

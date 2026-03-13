@@ -15,7 +15,7 @@ import {
 
 const ProductDetailPage: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
-  const { apiBase } = useStore();
+  const { store, apiBase } = useStore();
   const { colors } = useTheme();
   const { t, language, isRTL, formatPrice } = useLanguage();
   const { addToCart } = useCart();
@@ -37,6 +37,22 @@ const ProductDetailPage: React.FC = () => {
         setProduct(productData);
         setSelectedImage(0);
         setQuantity(1);
+        // Track product view in localStorage
+        try {
+          const key = `vp_viewed_${store.slug}`;
+          const viewed = JSON.parse(localStorage.getItem(key) || '[]');
+          const entry = {
+            id: productData.id,
+            name_ar: productData.name_ar,
+            name_fr: productData.name_fr,
+            name_en: productData.name_en,
+            images: productData.images,
+            price: productData.price,
+            old_price: productData.old_price,
+          };
+          const filtered = viewed.filter((p: any) => p.id !== productData.id);
+          localStorage.setItem(key, JSON.stringify([entry, ...filtered].slice(0, 12)));
+        } catch { /* ignore */ }
         // Fetch related products using dedicated endpoint
         const relRes = await api.get(`${apiBase}/products/${productId}/related`)
           .catch(() => ({ data: { data: [] } }));
