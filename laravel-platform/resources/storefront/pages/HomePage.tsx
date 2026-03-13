@@ -9,11 +9,11 @@ import { HeroSection } from '../components/layout/HeroSection';
 import { ProductCard } from '../components/products/ProductCard';
 import {
   ArrowRight, ArrowLeft, Shield, Truck, Headphones, BadgePercent,
-  ChevronRight, ChevronLeft
+  ChevronRight, ChevronLeft, Flame,
 } from 'lucide-react';
 
 const HomePage: React.FC = () => {
-  const { apiBase, getSetting } = useStore();
+  const { apiBase, storeName, getSetting } = useStore();
   const { colors, layout } = useTheme();
   const { t, language, isRTL } = useLanguage();
 
@@ -48,10 +48,20 @@ const HomePage: React.FC = () => {
 
   const gridCols = layout.gridColumns || 4;
   const gridClass = `grid grid-cols-2 md:grid-cols-3 lg:grid-cols-${gridCols} gap-4`;
+  const ArrowIcon = isRTL ? ArrowRight : ArrowLeft;
+  const ChevronIcon = isRTL ? ChevronLeft : ChevronRight;
 
-  const SectionHeader: React.FC<{ title: string; link?: string; linkText?: string }> = ({ title, link, linkText }) => (
-    <div className="flex items-center justify-between mb-6">
-      <h2 className="text-xl md:text-2xl font-bold" style={{ color: colors.foreground }}>{title}</h2>
+  const SectionHeader: React.FC<{
+    title: string;
+    link?: string;
+    linkText?: string;
+    icon?: React.ElementType;
+  }> = ({ title, link, linkText, icon: Icon }) => (
+    <div className={`flex items-center justify-between mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
+      <h2 className="flex items-center gap-2 text-xl md:text-2xl font-bold" style={{ color: colors.foreground }}>
+        {Icon && <Icon className="h-6 w-6" style={{ color: colors.primary }} />}
+        {title}
+      </h2>
       {link && (
         <Link
           to={link}
@@ -59,18 +69,20 @@ const HomePage: React.FC = () => {
           style={{ color: colors.primary }}
         >
           {linkText || t('hero.viewAll')}
-          {isRTL ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          <ChevronIcon className="h-4 w-4" />
         </Link>
       )}
     </div>
   );
 
   const whyUsItems = [
-    { icon: Shield, title: t('whyUs.quality'), desc: t('whyUs.qualityDesc') },
     { icon: Truck, title: t('whyUs.delivery'), desc: t('whyUs.deliveryDesc') },
-    { icon: Headphones, title: t('whyUs.support'), desc: t('whyUs.supportDesc') },
+    { icon: Shield, title: t('whyUs.quality'), desc: t('whyUs.qualityDesc') },
     { icon: BadgePercent, title: t('whyUs.prices'), desc: t('whyUs.pricesDesc') },
+    { icon: Headphones, title: t('whyUs.support'), desc: t('whyUs.supportDesc') },
   ];
+
+  const showWhyUs = layout.showWhyUs !== false;
 
   if (loading) {
     return (
@@ -82,14 +94,18 @@ const HomePage: React.FC = () => {
 
   return (
     <div>
-      {/* Hero Section */}
+      {/* 1. Hero Section */}
       <HeroSection />
 
-      {/* Categories Section */}
+      {/* 2. Categories */}
       {categories.length > 0 && (
         <section className="py-8 md:py-12" style={{ backgroundColor: colors.background }}>
           <div className="container mx-auto px-4">
-            <SectionHeader title={t('nav.categories')} link="/products" />
+            <SectionHeader
+              title={t('nav.categories')}
+              link="/products"
+              linkText={t('hero.viewAll')}
+            />
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
               {categories.slice(0, 6).map((cat: any) => (
                 <Link
@@ -118,13 +134,17 @@ const HomePage: React.FC = () => {
         </section>
       )}
 
-      {/* Featured Products */}
-      {featuredProducts.length > 0 && (
-        <section className="py-8 md:py-12" style={{ backgroundColor: colors.background }}>
+      {/* 3. New Arrivals — وصل حديثاً */}
+      {newProducts.length > 0 && (
+        <section className="py-8 md:py-12" style={{ backgroundColor: colors.muted }}>
           <div className="container mx-auto px-4">
-            <SectionHeader title={t('products.featured')} link="/products?featured=1" />
+            <SectionHeader
+              title={t('products.newArrivals')}
+              link="/products?sort=newest"
+              linkText={t('hero.viewAll')}
+            />
             <div className={gridClass}>
-              {featuredProducts.map((product: any) => (
+              {newProducts.map((product: any) => (
                 <ProductCard key={product.id || product.product_id} product={product} />
               ))}
             </div>
@@ -132,11 +152,16 @@ const HomePage: React.FC = () => {
         </section>
       )}
 
-      {/* Deals Section */}
+      {/* 4. Deals — عروض مميزة */}
       {dealProducts.length > 0 && (
-        <section className="py-8 md:py-12" style={{ backgroundColor: colors.muted }}>
+        <section className="py-8 md:py-12" style={{ backgroundColor: colors.background }}>
           <div className="container mx-auto px-4">
-            <SectionHeader title={t('products.specialOffers')} link="/products?deals=1" />
+            <SectionHeader
+              title={t('products.specialOffers')}
+              link="/deals"
+              linkText={t('hero.viewAll')}
+              icon={Flame}
+            />
             <div className={gridClass}>
               {dealProducts.map((product: any) => (
                 <ProductCard key={product.id || product.product_id} product={product} />
@@ -146,41 +171,61 @@ const HomePage: React.FC = () => {
         </section>
       )}
 
-      {/* Why Us Section */}
-      <section className="py-12 md:py-16" style={{ backgroundColor: colors.background }}>
-        <div className="container mx-auto px-4">
-          <h2 className="text-xl md:text-2xl font-bold text-center mb-8" style={{ color: colors.foreground }}>
-            {t('whyUs.title')}
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {whyUsItems.map((item, index) => (
-              <div
-                key={index}
-                className="flex flex-col items-center text-center p-4 rounded-xl transition-shadow hover:shadow-md"
-                style={{ backgroundColor: colors.card, border: `1px solid ${colors.border}`, borderRadius: colors.cardRadius }}
-              >
-                <div
-                  className="h-14 w-14 rounded-full flex items-center justify-center mb-3"
-                  style={{ backgroundColor: `${colors.primary}15` }}
-                >
-                  <item.icon className="h-7 w-7" style={{ color: colors.primary }} />
-                </div>
-                <h3 className="font-semibold text-sm mb-1" style={{ color: colors.foreground }}>{item.title}</h3>
-                <p className="text-xs leading-relaxed" style={{ color: colors.mutedForeground }}>{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* New Arrivals */}
-      {newProducts.length > 0 && (
+      {/* 5. Featured Products — منتجاتنا + زر عرض الكل */}
+      {featuredProducts.length > 0 && (
         <section className="py-8 md:py-12" style={{ backgroundColor: colors.muted }}>
           <div className="container mx-auto px-4">
-            <SectionHeader title={t('products.newArrivals')} link="/products?sort=newest" />
+            <SectionHeader
+              title={language === 'ar' ? 'منتجاتنا' : language === 'fr' ? 'Nos Produits' : 'Our Products'}
+              link="/products"
+            />
             <div className={gridClass}>
-              {newProducts.map((product: any) => (
+              {featuredProducts.map((product: any) => (
                 <ProductCard key={product.id || product.product_id} product={product} />
+              ))}
+            </div>
+            {/* Big centered View All button */}
+            <div className="flex justify-center mt-8">
+              <Link
+                to="/products"
+                className="inline-flex items-center gap-2 px-8 py-3 rounded-full font-semibold text-white transition-transform hover:scale-105 shadow-md"
+                style={{ backgroundColor: colors.primary }}
+              >
+                <ArrowIcon className="h-5 w-5" />
+                {t('hero.viewAll')}
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 6. Why Us — لماذا تختار... (آخر قسم، قابل للإخفاء) */}
+      {showWhyUs && (
+        <section className="py-12 md:py-16" style={{ backgroundColor: colors.primary }}>
+          <div className="container mx-auto px-4">
+            <h2 className="text-xl md:text-2xl font-bold text-center mb-10 text-white">
+              {language === 'ar'
+                ? `لماذا تختار ${storeName}؟`
+                : language === 'fr'
+                  ? `Pourquoi choisir ${storeName} ?`
+                  : `Why Choose ${storeName}?`}
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+              {whyUsItems.map((item, index) => (
+                <div
+                  key={index}
+                  className="flex flex-col items-center text-center p-5 rounded-2xl"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}
+                >
+                  <div
+                    className="h-14 w-14 rounded-2xl flex items-center justify-center mb-3"
+                    style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
+                  >
+                    <item.icon className="h-7 w-7 text-white" />
+                  </div>
+                  <h3 className="font-bold text-sm mb-1 text-white">{item.title}</h3>
+                  <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>{item.desc}</p>
+                </div>
               ))}
             </div>
           </div>
