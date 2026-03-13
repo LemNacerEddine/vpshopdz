@@ -95,7 +95,7 @@
                             <td class="px-5 py-4">
                                 <p class="font-bold text-gray-800">{{ $order->shipping_name }}</p>
                                 <a href="tel:{{ $order->shipping_phone }}" class="text-sm text-primary-600 hover:underline">{{ $order->shipping_phone }}</a>
-                                <p class="text-xs text-gray-400 mt-0.5">{{ $order->wilaya->name_ar ?? '' }}{{ $order->commune ? ' - ' . $order->commune->name_ar : '' }}</p>
+                                <p class="text-xs text-gray-400 mt-0.5">{{ is_string($order->wilaya) ? $order->wilaya : ($order->wilaya->name_ar ?? '') }}{{ $order->commune ? ' - ' . (is_string($order->commune) ? $order->commune : ($order->commune->name_ar ?? '')) : '' }}</p>
                             </td>
                             <td class="px-5 py-4">
                                 <span class="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium">{{ $order->items->count() }} منتج</span>
@@ -202,7 +202,7 @@
                     <div class="bg-gray-50 rounded-xl p-3 mb-3">
                         <p class="font-bold text-gray-800">{{ $order->shipping_name }}</p>
                         <p class="text-sm text-gray-500">{{ $order->shipping_phone }}</p>
-                        <p class="text-xs text-gray-400">{{ $order->wilaya->name_ar ?? '' }}{{ $order->commune ? ' - ' . $order->commune->name_ar : '' }}</p>
+                        <p class="text-xs text-gray-400">{{ is_string($order->wilaya) ? $order->wilaya : ($order->wilaya->name_ar ?? '') }}{{ $order->commune ? ' - ' . (is_string($order->commune) ? $order->commune : ($order->commune->name_ar ?? '')) : '' }}</p>
                     </div>
                     <div class="flex items-center justify-between">
                         <div>
