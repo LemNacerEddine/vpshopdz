@@ -119,6 +119,8 @@ Route::prefix('v1')->group(function () {
         Route::prefix('customer')->group(function () {
             Route::post('/register', [CustomerAuthController::class, 'register']);
             Route::post('/login', [CustomerAuthController::class, 'login']);
+            Route::post('/forgot-password', [CustomerAuthController::class, 'forgotPassword']);
+            Route::post('/reset-password', [CustomerAuthController::class, 'resetPassword']);
             Route::middleware('auth:customer')->group(function () {
                 Route::post('/logout', [CustomerAuthController::class, 'logout']);
                 Route::get('/profile', [CustomerAuthController::class, 'profile']);

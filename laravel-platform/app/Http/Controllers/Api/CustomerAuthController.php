@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Store;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 
 class CustomerAuthController extends Controller
@@ -163,6 +164,65 @@ class CustomerAuthController extends Controller
         }
 
         $customer->update(['password' => Hash::make($request->new_password)]);
+
+        return response()->json(['message' => 'تم تغيير كلمة المرور بنجاح']);
+    }
+
+    /**
+     * Send password reset code
+     */
+    public function forgotPassword(Request $request, Store $store)
+    {
+        $request->validate(['identifier' => 'required|string']);
+
+        $identifier = $request->identifier;
+        $customer = Customer::where('store_id', $store->id)
+            ->where(function ($q) use ($identifier) {
+                $q->where('phone', $identifier)->orWhere('email', $identifier);
+            })->first();
+
+        if (!$customer) {
+            return response()->json(['message' => 'لم يتم العثور على الحساب'], 404);
+        }
+
+        $code = rand(100000, 999999);
+        Cache::put("pwd_reset_{$store->id}_{$customer->id}", $code, now()->addMinutes(15));
+
+        // In production, send via SMS or email
+        return response()->json([
+            'message' => 'تم إرسال رمز التحقق',
+            'code'    => $code, // Remove in production
+        ]);
+    }
+
+    /**
+     * Reset password with code
+     */
+    public function resetPassword(Request $request, Store $store)
+    {
+        $request->validate([
+            'identifier' => 'required|string',
+            'code'       => 'required|string',
+            'password'   => 'required|string|min:6',
+        ]);
+
+        $identifier = $request->identifier;
+        $customer = Customer::where('store_id', $store->id)
+            ->where(function ($q) use ($identifier) {
+                $q->where('phone', $identifier)->orWhere('email', $identifier);
+            })->first();
+
+        if (!$customer) {
+            return response()->json(['message' => 'حساب غير موجود'], 404);
+        }
+
+        $cached = Cache::get("pwd_reset_{$store->id}_{$customer->id}");
+        if (!$cached || (string) $cached !== (string) $request->code) {
+            return response()->json(['message' => 'رمز غير صحيح أو منتهي الصلاحية'], 422);
+        }
+
+        $customer->update(['password' => Hash::make($request->password)]);
+        Cache::forget("pwd_reset_{$store->id}_{$customer->id}");
 
         return response()->json(['message' => 'تم تغيير كلمة المرور بنجاح']);
     }
