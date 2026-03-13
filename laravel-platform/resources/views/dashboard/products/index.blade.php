@@ -9,11 +9,11 @@
         <div>
             <p class="text-gray-500">إجمالي <span class="font-bold text-gray-800">{{ $products->total() }}</span> منتج</p>
         </div>
-        <button @click="openAddModal()"
+        <a href="{{ route('dashboard.products.create') }}"
             class="bg-gradient-to-l from-primary-600 to-primary-500 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-primary-500/30 transition-all flex items-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
             إضافة منتج
-        </button>
+        </a>
     </div>
 
     <!-- Filters -->
@@ -72,8 +72,8 @@
                     @endif
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
                         <div class="flex gap-2">
-                            <button @click="editProduct({{ $product->id }})" class="bg-white text-gray-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-500 hover:text-white transition-colors">تعديل</button>
-                            <button @click="confirmDelete({{ $product->id }}, '{{ addslashes($product->name_ar ?? $product->name) }}')" class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-600 transition-colors">حذف</button>
+                            <a href="{{ route('dashboard.products.edit', $product->id) }}" class="bg-white text-gray-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-500 hover:text-white transition-colors">تعديل</a>
+                            <button @click="confirmDelete('{{ $product->id }}', '{{ addslashes($product->name_ar ?? $product->name) }}')" class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-600 transition-colors">حذف</button>
                         </div>
                     </div>
                 </div>
@@ -102,7 +102,7 @@
                 </div>
                 <h3 class="text-xl font-bold text-gray-700 mb-2">لا توجد منتجات</h3>
                 <p class="text-gray-500 mb-6">ابدأ بإضافة منتجاتك الآن</p>
-                <button @click="openAddModal()" class="bg-gradient-to-l from-primary-600 to-primary-500 text-white px-8 py-3 rounded-xl font-bold">إضافة منتج جديد</button>
+                <a href="{{ route('dashboard.products.create') }}" class="inline-block bg-gradient-to-l from-primary-600 to-primary-500 text-white px-8 py-3 rounded-xl font-bold">إضافة منتج جديد</a>
             </div>
         @endforelse
     </div>

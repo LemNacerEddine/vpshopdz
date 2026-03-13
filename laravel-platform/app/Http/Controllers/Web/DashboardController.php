@@ -85,6 +85,34 @@ class DashboardController extends Controller
     }
 
     /**
+     * Product Create Page
+     */
+    public function createProduct(Request $request)
+    {
+        $store = $this->getStore();
+        $categories = \App\Models\Category::where('store_id', $store->id)
+            ->orderBy('name')
+            ->get(['id', 'name', 'name_ar']);
+        return view('dashboard.products.create', compact('store', 'categories'));
+    }
+
+    /**
+     * Product Edit Page
+     */
+    public function editProduct(Request $request, string $id)
+    {
+        $store = $this->getStore();
+        $product = Product::where('store_id', $store->id)
+            ->where('id', $id)
+            ->with(['category', 'images', 'variants', 'options.values'])
+            ->firstOrFail();
+        $categories = \App\Models\Category::where('store_id', $store->id)
+            ->orderBy('name')
+            ->get(['id', 'name', 'name_ar']);
+        return view('dashboard.products.edit', compact('store', 'categories', 'product'));
+    }
+
+    /**
      * Categories Management
      */
     public function categories()

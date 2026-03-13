@@ -61,6 +61,8 @@ Route::middleware('auth')->prefix('dashboard')->name('dashboard')->group(functio
 
     // Products & Categories
     Route::get('/products', [DashboardController::class, 'products'])->name('.products');
+    Route::get('/products/create', [DashboardController::class, 'createProduct'])->name('.products.create');
+    Route::get('/products/{id}/edit', [DashboardController::class, 'editProduct'])->name('.products.edit');
     Route::get('/categories', [DashboardController::class, 'categories'])->name('.categories');
 
     // Orders & Customers

@@ -152,12 +152,13 @@ Route::prefix('v1')->group(function () {
 
         // Products
         Route::get('/products', [ProductController::class, 'dashboardIndex']);
+        Route::post('/products/upload-media', [ProductController::class, 'uploadMedia']);
+        Route::post('/products/bulk-action', [ProductController::class, 'bulkAction']);
         Route::post('/products', [ProductController::class, 'store']);
         Route::get('/products/{id}', [ProductController::class, 'dashboardShow']);
         Route::put('/products/{id}', [ProductController::class, 'update']);
         Route::delete('/products/{id}', [ProductController::class, 'destroy']);
         Route::post('/products/{id}/duplicate', [ProductController::class, 'duplicate']);
-        Route::post('/products/bulk-action', [ProductController::class, 'bulkAction']);
         Route::get('/products-export', [ProductController::class, 'export']);
 
         // Categories

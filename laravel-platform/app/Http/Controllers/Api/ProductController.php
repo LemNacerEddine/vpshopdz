@@ -5,9 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\ProductOption;
+use App\Models\ProductOptionValue;
+use App\Models\ProductVariant;
 use App\Models\Store;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -178,7 +182,7 @@ class ProductController extends Controller
             ->where(function ($q) use ($id) {
                 $q->where('id', $id)->orWhere('slug', $id);
             })
-            ->with(['category', 'images', 'variants'])
+            ->with(['category', 'images', 'variants', 'options.values'])
             ->first();
 
         if (!$product) {
@@ -358,7 +362,7 @@ class ProductController extends Controller
         }
         $product = Product::where('store_id', $store->id)
             ->where('id', $id)
-            ->with(['category', 'images', 'variants'])
+            ->with(['category', 'images', 'variants', 'options.values'])
             ->first();
         if (!$product) {
             return response()->json(['success' => false, 'message' => 'المنتج غير موجود'], 404);
@@ -560,8 +564,10 @@ class ProductController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'name_ar' => 'nullable|string|max:255',
+            'name_fr' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
+            'description_fr' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'compare_at_price' => 'nullable|numeric|min:0',
             'cost_price' => 'nullable|numeric|min:0',
@@ -569,11 +575,15 @@ class ProductController extends Controller
             'sku' => 'nullable|string|max:100',
             'stock_quantity' => 'integer|min:0',
             'track_inventory' => 'boolean',
+            'has_variants' => 'boolean',
             'status' => 'in:active,draft,archived',
             'is_featured' => 'boolean',
             'discount_percent' => 'integer|min:0|max:100',
             'images' => 'array',
-            'images.*' => 'url',
+            'options' => 'array',
+            'options.*.name' => 'required_with:options|string|max:100',
+            'options.*.values' => 'required_with:options|array|min:1',
+            'variants' => 'array',
         ]);
 
         if ($validator->fails()) {
@@ -584,48 +594,56 @@ class ProductController extends Controller
         }
 
         // Generate slug
-        $slug = Str::slug($request->name);
+        $slug = Str::slug($request->name ?: 'product');
+        $slug = $slug ?: 'product-' . Str::random(6);
         $originalSlug = $slug;
         $counter = 1;
         while (Product::where('store_id', $store->id)->where('slug', $slug)->exists()) {
             $slug = $originalSlug . '-' . $counter++;
         }
 
+        $hasVariants = $request->boolean('has_variants', false);
+
         $product = Product::create([
             'store_id' => $store->id,
             'category_id' => $request->category_id,
             'name' => $request->name,
             'name_ar' => $request->name_ar ?? $request->name,
+            'name_fr' => $request->name_fr,
             'slug' => $slug,
             'description' => $request->description,
             'description_ar' => $request->description_ar,
+            'description_fr' => $request->description_fr,
             'price' => $request->price,
             'compare_at_price' => $request->compare_at_price,
             'cost_price' => $request->cost_price,
             'sku' => $request->sku,
-            'stock_quantity' => $request->stock_quantity ?? 0,
-            'track_inventory' => $request->track_inventory ?? true,
+            'stock_quantity' => $hasVariants ? 0 : ($request->stock_quantity ?? 0),
+            'track_inventory' => $request->boolean('track_inventory', true),
+            'has_variants' => $hasVariants,
             'status' => $request->status ?? 'active',
-            'is_featured' => $request->is_featured ?? false,
+            'is_featured' => $request->boolean('is_featured', false),
             'discount_percent' => $request->discount_percent ?? 0,
+            'weight' => $request->weight,
+            'low_stock_threshold' => $request->low_stock_threshold ?? 5,
+            'shipping_type' => $request->shipping_type ?? 'standard',
         ]);
 
-        // Add images
-        if ($request->has('images')) {
-            foreach ($request->images as $index => $imageUrl) {
-                ProductImage::create([
-                    'product_id' => $product->id,
-                    'url' => $imageUrl,
-                    'sort_order' => $index,
-                    'is_primary' => $index === 0,
-                ]);
-            }
+        // Save images (mix of URLs and uploaded files)
+        $this->syncImages($product, $request->get('images', []));
+
+        // Save options + variants
+        if ($hasVariants && $request->has('options')) {
+            $this->syncOptions($product, $request->get('options', []));
+        }
+        if ($hasVariants && $request->has('variants')) {
+            $this->syncVariants($product, $request->get('variants', []));
         }
 
         // Update store products count
         $store->increment('products_count');
 
-        $product->load(['category', 'images']);
+        $product->load(['category', 'images', 'variants', 'options.values']);
 
         return response()->json([
             'success' => true,
@@ -650,8 +668,10 @@ class ProductController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255',
             'name_ar' => 'nullable|string|max:255',
+            'name_fr' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
+            'description_fr' => 'nullable|string',
             'price' => 'sometimes|numeric|min:0',
             'compare_at_price' => 'nullable|numeric|min:0',
             'cost_price' => 'nullable|numeric|min:0',
@@ -659,11 +679,13 @@ class ProductController extends Controller
             'sku' => 'nullable|string|max:100',
             'stock_quantity' => 'integer|min:0',
             'track_inventory' => 'boolean',
+            'has_variants' => 'boolean',
             'status' => 'in:active,draft,archived',
             'is_featured' => 'boolean',
             'discount_percent' => 'integer|min:0|max:100',
             'images' => 'array',
-            'images.*' => 'url',
+            'options' => 'array',
+            'variants' => 'array',
         ]);
 
         if ($validator->fails()) {
@@ -673,22 +695,32 @@ class ProductController extends Controller
             ], 422);
         }
 
-        $product->update($request->except(['images']));
+        $hasVariants = $request->has('has_variants')
+            ? $request->boolean('has_variants')
+            : $product->has_variants;
+
+        $updateData = $request->except(['images', 'options', 'variants']);
+        $updateData['has_variants'] = $hasVariants;
+        if ($hasVariants) {
+            $updateData['stock_quantity'] = 0;
+        }
+
+        $product->update($updateData);
 
         // Update images if provided
         if ($request->has('images')) {
-            $product->images()->delete();
-            foreach ($request->images as $index => $imageUrl) {
-                ProductImage::create([
-                    'product_id' => $product->id,
-                    'url' => $imageUrl,
-                    'sort_order' => $index,
-                    'is_primary' => $index === 0,
-                ]);
-            }
+            $this->syncImages($product, $request->get('images', []));
         }
 
-        $product->load(['category', 'images']);
+        // Update options + variants
+        if ($request->has('options')) {
+            $this->syncOptions($product, $request->get('options', []));
+        }
+        if ($request->has('variants')) {
+            $this->syncVariants($product, $request->get('variants', []));
+        }
+
+        $product->load(['category', 'images', 'variants', 'options.values']);
 
         return response()->json([
             'success' => true,
@@ -716,6 +748,29 @@ class ProductController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'تم حذف المنتج بنجاح',
+        ]);
+    }
+
+    /**
+     * Upload media file (image or video) for a product
+     */
+    public function uploadMedia(Request $request): JsonResponse
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:jpg,jpeg,png,webp,gif,mp4,mov|max:20480',
+        ]);
+
+        $file = $request->file('file');
+        $ext = $file->getClientOriginalExtension();
+        $filename = Str::uuid() . '.' . $ext;
+
+        $path = $file->storeAs('products', $filename, 'public');
+        $url = Storage::url($path);
+
+        return response()->json([
+            'success' => true,
+            'url' => $url,
+            'type' => str_starts_with($file->getMimeType(), 'video/') ? 'video' : 'image',
         ]);
     }
 
@@ -766,12 +821,87 @@ class ProductController extends Controller
         }
 
         $store->increment('products_count');
-        $newProduct->load(['category', 'images']);
+        $newProduct->load(['category', 'images', 'variants', 'options.values']);
 
         return response()->json([
             'success' => true,
             'message' => 'تم نسخ المنتج بنجاح',
             'data' => $newProduct,
         ], 201);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PRIVATE HELPERS
+    // ═══════════════════════════════════════════════════════════════
+
+    private function syncImages(Product $product, array $images): void
+    {
+        if (empty($images)) return;
+
+        $product->images()->delete();
+        foreach ($images as $index => $img) {
+            // $img can be a URL string or an array with 'url' key
+            $url = is_array($img) ? ($img['url'] ?? null) : $img;
+            if (!$url) continue;
+
+            ProductImage::create([
+                'product_id' => $product->id,
+                'url' => $url,
+                'sort_order' => $index,
+                'is_primary' => $index === 0,
+            ]);
+        }
+    }
+
+    private function syncOptions(Product $product, array $options): void
+    {
+        // Delete existing options (cascades to values)
+        $product->options()->delete();
+
+        foreach ($options as $position => $optionData) {
+            $option = ProductOption::create([
+                'product_id' => $product->id,
+                'name' => $optionData['name'],
+                'position' => $position,
+            ]);
+
+            foreach ($optionData['values'] ?? [] as $valPos => $val) {
+                ProductOptionValue::create([
+                    'option_id' => $option->id,
+                    'value' => is_array($val) ? $val['value'] : $val,
+                    'position' => $valPos,
+                ]);
+            }
+        }
+    }
+
+    private function syncVariants(Product $product, array $variants): void
+    {
+        // Keep track of submitted variant IDs (for existing ones)
+        $submittedIds = collect($variants)->pluck('id')->filter()->values();
+
+        // Delete variants not in the submitted list
+        $product->variants()->whereNotIn('id', $submittedIds)->delete();
+
+        foreach ($variants as $variantData) {
+            $id = $variantData['id'] ?? null;
+
+            $payload = [
+                'product_id' => $product->id,
+                'name' => $variantData['name'] ?? implode(' / ', (array)($variantData['options'] ?? [])),
+                'sku' => $variantData['sku'] ?? null,
+                'price' => $variantData['price'] ?? null,
+                'stock_quantity' => (int)($variantData['stock_quantity'] ?? 0),
+                'options' => $variantData['options'] ?? [],
+                'image' => $variantData['image'] ?? null,
+                'is_active' => $variantData['is_active'] ?? true,
+            ];
+
+            if ($id) {
+                ProductVariant::where('id', $id)->where('product_id', $product->id)->update($payload);
+            } else {
+                ProductVariant::create($payload);
+            }
+        }
     }
 }

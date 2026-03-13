@@ -44,6 +44,7 @@ class Product extends Model
         'is_fragile',
         'unit',
         'status',
+        'has_variants',
         'is_featured',
         'meta_title',
         'meta_description',
@@ -65,6 +66,7 @@ class Product extends Model
         'track_inventory' => 'boolean',
         'allow_backorder' => 'boolean',
         'is_fragile' => 'boolean',
+        'has_variants' => 'boolean',
         'is_featured' => 'boolean',
         'weight' => 'decimal:2',
         'rating' => 'decimal:1',
@@ -94,7 +96,12 @@ class Product extends Model
 
     public function variants(): HasMany
     {
-        return $this->hasMany(ProductVariant::class);
+        return $this->hasMany(ProductVariant::class)->where('is_active', true);
+    }
+
+    public function options(): HasMany
+    {
+        return $this->hasMany(ProductOption::class)->orderBy('position');
     }
 
     public function reviews(): HasMany

@@ -26,6 +26,7 @@ const ProductDetailPage: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState<string>('');
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState('description');
 
   useEffect(() => {
@@ -37,6 +38,8 @@ const ProductDetailPage: React.FC = () => {
         setProduct(productData);
         setSelectedImage(0);
         setQuantity(1);
+        setSelectedOptions({});
+        setSelectedVariant('');
         // Track product view in localStorage
         try {
           const key = `vp_viewed_${store.slug}`;
@@ -84,6 +87,51 @@ const ProductDetailPage: React.FC = () => {
     };
   }, [product]);
 
+  // Compute active variant from selectedOptions
+  const variants = product?.variants || [];
+  const options = product?.options || [];
+  const hasVariants = product?.has_variants && options.length > 0;
+
+  const activeVariant = useMemo(() => {
+    if (!hasVariants || !variants.length) return null;
+    const keys = Object.keys(selectedOptions);
+    if (keys.length !== options.length) return null;
+    return variants.find((v: any) => {
+      const vo = v.options || {};
+      return keys.every(k => vo[k] === selectedOptions[k]);
+    }) || null;
+  }, [hasVariants, variants, options, selectedOptions]);
+
+  // Check if a value is available given current selections
+  const isValueAvailable = (optionName: string, value: string): boolean => {
+    const testOptions = { ...selectedOptions, [optionName]: value };
+    return variants.some((v: any) => {
+      const vo = v.options || {};
+      return Object.keys(testOptions).every(k => !testOptions[k] || vo[k] === testOptions[k])
+        && v.is_active && v.stock_quantity > 0;
+    });
+  };
+
+  const selectOption = (optionName: string, value: string) => {
+    setSelectedOptions(prev => ({ ...prev, [optionName]: value }));
+    // Find matching variant and set it
+    const newOptions = { ...selectedOptions, [optionName]: value };
+    const matched = variants.find((v: any) => {
+      const vo = v.options || {};
+      return Object.keys(newOptions).every(k => vo[k] === newOptions[k]);
+    });
+    if (matched) setSelectedVariant(matched.id);
+  };
+
+  // Stock and price from active variant (or product)
+  const displayStock = hasVariants
+    ? (activeVariant?.stock_quantity ?? null)
+    : (product?.stock_quantity ?? product?.stock ?? 0);
+
+  const displayPrice = hasVariants && activeVariant?.price
+    ? activeVariant.price
+    : discountData.displayPrice;
+
   const handleAddToCart = async () => {
     if (!product) return;
     const success = await addToCart(product.id || product.product_id, quantity, selectedVariant || undefined);
@@ -120,7 +168,6 @@ const ProductDetailPage: React.FC = () => {
   const name = getProductName(product, language);
   const description = getProductDescription(product, language);
   const images = product.images || (product.image ? [product.image] : []);
-  const variants = product.variants || [];
   const reviews = product.reviews || [];
 
   return (
@@ -199,8 +246,8 @@ const ProductDetailPage: React.FC = () => {
             {/* Price */}
             <div className="mb-6">
               <div className="flex items-center gap-3 flex-wrap">
-                <span className={`text-3xl font-bold ${discountData.hasDiscount ? 'text-red-500' : ''}`} style={{ color: discountData.hasDiscount ? undefined : colors.primary }}>
-                  {formatPrice(discountData.displayPrice!)}
+                <span className={`text-3xl font-bold ${discountData.hasDiscount && !activeVariant?.price ? 'text-red-500' : ''}`} style={{ color: discountData.hasDiscount && !activeVariant?.price ? undefined : colors.primary }}>
+                  {formatPrice(displayPrice!)}
                 </span>
                 {discountData.strikePrice && (
                   <span className="text-lg line-through" style={{ color: colors.mutedForeground }}>
@@ -222,18 +269,69 @@ const ProductDetailPage: React.FC = () => {
 
             {/* Stock Status */}
             <div className="mb-4">
-              {product.stock > 0 ? (
-                <span className="flex items-center gap-1 text-sm text-green-600">
-                  <Check className="h-4 w-4" />
-                  {t('products.inStock')} ({product.stock})
+              {hasVariants && !activeVariant ? (
+                <span className="text-sm" style={{ color: colors.mutedForeground }}>
+                  {isRTL ? 'اختر خيارات المنتج' : 'Select product options'}
                 </span>
+              ) : displayStock === null ? null : displayStock > 0 ? (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="flex items-center gap-1 text-sm text-green-600">
+                    <Check className="h-4 w-4" />
+                    {t('products.inStock')}
+                  </span>
+                  {displayStock <= (product.low_stock_threshold || 5) && (
+                    <span className="text-xs font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full">
+                      {isRTL ? `متبقي ${displayStock} فقط!` : `Only ${displayStock} left!`}
+                    </span>
+                  )}
+                </div>
               ) : (
                 <span className="text-sm text-red-500">{t('products.outOfStock')}</span>
               )}
             </div>
 
-            {/* Variants */}
-            {variants.length > 0 && (
+            {/* Options/Variants — Shopify-style per-option selectors */}
+            {hasVariants && options.map((opt: any) => (
+              <div key={opt.id || opt.name} className="mb-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <label className="text-sm font-semibold" style={{ color: colors.foreground }}>
+                    {opt.name}
+                  </label>
+                  {selectedOptions[opt.name] && (
+                    <span className="text-sm" style={{ color: colors.mutedForeground }}>
+                      : {selectedOptions[opt.name]}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {(opt.values || []).map((valObj: any) => {
+                    const val = typeof valObj === 'string' ? valObj : valObj.value;
+                    const isSelected = selectedOptions[opt.name] === val;
+                    const available = isValueAvailable(opt.name, val);
+                    return (
+                      <button
+                        key={val}
+                        onClick={() => available && selectOption(opt.name, val)}
+                        disabled={!available}
+                        className="px-4 py-2 rounded-lg text-sm border transition-all relative"
+                        style={{
+                          borderColor: isSelected ? colors.primary : colors.border,
+                          backgroundColor: isSelected ? `${colors.primary}15` : available ? 'transparent' : colors.muted,
+                          color: isSelected ? colors.primary : available ? colors.foreground : colors.mutedForeground,
+                          opacity: available ? 1 : 0.5,
+                          textDecoration: !available ? 'line-through' : 'none',
+                        }}
+                      >
+                        {val}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+
+            {/* Fallback: simple variant list for products without structured options */}
+            {!hasVariants && variants.length > 0 && (
               <div className="mb-6">
                 <label className="text-sm font-medium mb-2 block" style={{ color: colors.foreground }}>
                   {t('products.variant')}
@@ -273,7 +371,7 @@ const ProductDetailPage: React.FC = () => {
                   </button>
                   <span className="w-12 text-center font-medium" style={{ color: colors.foreground }}>{quantity}</span>
                   <button
-                    onClick={() => setQuantity(Math.min(product.stock || 99, quantity + 1))}
+                    onClick={() => setQuantity(Math.min(displayStock || 99, quantity + 1))}
                     className="h-10 w-10 flex items-center justify-center transition-colors"
                     style={{ color: colors.foreground }}
                   >
@@ -287,12 +385,18 @@ const ProductDetailPage: React.FC = () => {
             <div className="flex gap-3 mb-6">
               <button
                 onClick={handleAddToCart}
-                disabled={product.stock === 0}
-                className="flex-1 h-12 flex items-center justify-center gap-2 text-white font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
+                disabled={
+                  (hasVariants && !activeVariant) ||
+                  (hasVariants && activeVariant?.stock_quantity === 0) ||
+                  (!hasVariants && displayStock === 0)
+                }
+                className="flex-1 h-12 flex items-center justify-center gap-2 text-white font-semibold transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ backgroundColor: colors.primary, borderRadius: colors.buttonRadius }}
               >
                 <ShoppingCart className="h-5 w-5" />
-                {t('products.addToCart')}
+                {hasVariants && !activeVariant
+                  ? (isRTL ? 'اختر خيارات المنتج' : 'Select options')
+                  : t('products.addToCart')}
               </button>
               <button
                 className="h-12 w-12 flex items-center justify-center border rounded-lg transition-colors"
