@@ -28,6 +28,7 @@ const DealsPage = lazy(() => import('./pages/DealsPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 const ProductLandingPage = lazy(() => import('./pages/ProductLandingPage'));
 const AbandonedCartPage = lazy(() => import('./pages/AbandonedCartPage'));
+const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
 
 // Loading fallback
 const PageLoader: React.FC = () => (
@@ -82,6 +83,7 @@ const App: React.FC = () => {
                       {/* Customer Auth */}
                       <Route path="/login" element={<LoginPage />} />
                       <Route path="/register" element={<RegisterPage />} />
+                      <Route path="/auth/callback" element={<AuthCallbackPage />} />
                       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                       <Route path="/profile" element={<ProfilePage />} />
                       <Route path="*" element={<NotFoundPage />} />

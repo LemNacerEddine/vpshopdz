@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Api\CustomerAuthController;
+use App\Http\Controllers\Api\CustomerGoogleAuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +44,9 @@ Route::prefix('v1')->group(function () {
         Route::post('/login', [AuthController::class, 'login']);
         Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
         Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+
+        // Google OAuth callback — global route (Google redirects here after login)
+        Route::get('/google/callback', [CustomerGoogleAuthController::class, 'callback']);
     });
 
     Route::post('/staff/accept-invitation', [StaffController::class, 'acceptInvitation']);
@@ -121,6 +125,10 @@ Route::prefix('v1')->group(function () {
             Route::post('/login', [CustomerAuthController::class, 'login']);
             Route::post('/forgot-password', [CustomerAuthController::class, 'forgotPassword']);
             Route::post('/reset-password', [CustomerAuthController::class, 'resetPassword']);
+
+            // Google OAuth
+            Route::get('/auth/google', [CustomerGoogleAuthController::class, 'redirect']);
+            Route::post('/auth/google/session', [CustomerGoogleAuthController::class, 'session']);
             Route::middleware('auth:customer')->group(function () {
                 Route::post('/logout', [CustomerAuthController::class, 'logout']);
                 Route::get('/profile', [CustomerAuthController::class, 'profile']);

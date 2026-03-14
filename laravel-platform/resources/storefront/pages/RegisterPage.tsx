@@ -8,6 +8,15 @@ import { api } from '../lib/api';
 import { toast } from 'sonner';
 import { Loader2, UserPlus, Eye, EyeOff, Phone, Mail } from 'lucide-react';
 
+const GOOGLE_ICON = (
+  <svg className="h-5 w-5" viewBox="0 0 24 24">
+    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+  </svg>
+);
+
 const RegisterPage: React.FC = () => {
   const { apiBase } = useStore();
   const { register, isAuthenticated } = useCustomerAuth();
@@ -17,9 +26,15 @@ const RegisterPage: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<'phone' | 'email'>('phone');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [wilayas, setWilayas] = useState<string[]>([]);
-  const [communes, setCommunes] = useState<string[]>([]);
+
+  // Wilaya objects: { id, name_ar, name_fr }
+  const [wilayas, setWilayas] = useState<any[]>([]);
+  // Communes objects: { id, name_ar }
+  const [communes, setCommunes] = useState<any[]>([]);
+  // Selected wilaya id (for fetching communes)
+  const [selectedWilayaId, setSelectedWilayaId] = useState<number | null>(null);
 
   const [form, setForm] = useState({
     name: '', phone: '', email: '', password: '', confirmPassword: '',
@@ -29,32 +44,64 @@ const RegisterPage: React.FC = () => {
   useEffect(() => { if (isAuthenticated) navigate('/profile', { replace: true }); }, [isAuthenticated]);
 
   useEffect(() => {
-    api.get(`${apiBase}/shipping/wilayas`).then(r => setWilayas(r.data?.data || r.data || [])).catch(() => {});
+    api.get(`${apiBase}/shipping/wilayas`)
+      .then(r => setWilayas(r.data?.data || r.data || []))
+      .catch(() => {});
   }, [apiBase]);
 
-  const handleWilayaChange = (val: string) => {
-    setForm(f => ({ ...f, wilaya: val, commune: '' }));
-    if (val) {
-      api.get(`${apiBase}/shipping/communes/${val}`).then(r => setCommunes(r.data?.data || r.data || [])).catch(() => setCommunes([]));
+  const handleWilayaChange = (wilayaId: string) => {
+    const id = parseInt(wilayaId);
+    const found = wilayas.find((w: any) => w.id === id);
+    const wilayaName = found ? (found.name_ar || found.name_fr || '') : '';
+    setSelectedWilayaId(id || null);
+    setForm(f => ({ ...f, wilaya: wilayaName, commune: '' }));
+    setCommunes([]);
+    if (id) {
+      api.get(`${apiBase}/shipping/communes/${id}`)
+        .then(r => setCommunes(r.data?.data || r.data || []))
+        .catch(() => setCommunes([]));
     }
   };
 
   const update = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
+  const handleGoogleLogin = async () => {
+    try {
+      setGoogleLoading(true);
+      const res = await api.get(`${apiBase}/auth/google`);
+      const authUrl = res.data?.authUrl || res.data?.url;
+      if (!authUrl) throw new Error('No auth URL');
+      window.location.href = authUrl;
+    } catch {
+      toast.error('فشل تسجيل الدخول عبر Google');
+      setGoogleLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name) { toast.error('الاسم مطلوب'); return; }
+    if (!form.name.trim()) { toast.error('الاسم مطلوب'); return; }
     if (activeTab === 'phone' && !form.phone) { toast.error('رقم الهاتف مطلوب'); return; }
     if (activeTab === 'email' && !form.email) { toast.error('البريد الإلكتروني مطلوب'); return; }
     if (form.password.length < 6) { toast.error('كلمة المرور 6 أحرف على الأقل'); return; }
     if (form.password !== form.confirmPassword) { toast.error('كلمتا المرور غير متطابقتين'); return; }
 
     const payload: Record<string, any> = {
-      name: form.name, password: form.password,
-      wilaya: form.wilaya || undefined, commune: form.commune || undefined, address: form.address || undefined,
+      name: form.name,
+      password: form.password,
+      wilaya: form.wilaya || undefined,
+      commune: form.commune || undefined,
+      address: form.address || undefined,
     };
-    if (activeTab === 'phone') payload.phone = form.phone;
-    else { payload.email = form.email; payload.phone = form.phone || form.email; }
+
+    if (activeTab === 'phone') {
+      payload.phone = form.phone;
+      if (form.email) payload.email = form.email;
+    } else {
+      payload.email = form.email;
+      // phone is optional for email registration
+      if (form.phone) payload.phone = form.phone;
+    }
 
     setLoading(true);
     try {
@@ -62,13 +109,16 @@ const RegisterPage: React.FC = () => {
       toast.success('تم إنشاء الحساب بنجاح');
       navigate('/profile', { replace: true });
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'خطأ في إنشاء الحساب');
+      const msg = err?.response?.data?.message
+        || err?.response?.data?.errors
+        || 'خطأ في إنشاء الحساب';
+      toast.error(typeof msg === 'object' ? Object.values(msg).flat().join(', ') : msg);
     } finally {
       setLoading(false);
     }
   };
 
-  const inputClass = `w-full h-11 px-4 rounded-xl border text-sm focus:outline-none focus:ring-2`;
+  const inputClass = `w-full h-11 px-4 rounded-xl border text-sm focus:outline-none focus:ring-2 transition-colors`;
   const inputStyle = { backgroundColor: colors.muted, borderColor: colors.border, color: colors.foreground };
 
   return (
@@ -81,6 +131,24 @@ const RegisterPage: React.FC = () => {
             </div>
             <h1 className="text-2xl font-bold" style={{ color: colors.cardForeground }}>إنشاء حساب جديد</h1>
             <p className="text-sm mt-1" style={{ color: colors.mutedForeground }}>سجّل لتتبع طلباتك وإدارة عناوينك</p>
+          </div>
+
+          {/* Google Sign-Up */}
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={googleLoading}
+            className="w-full h-11 rounded-xl border flex items-center justify-center gap-3 font-medium text-sm mb-4 hover:opacity-80 transition-opacity disabled:opacity-50"
+            style={{ borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background }}
+          >
+            {googleLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : GOOGLE_ICON}
+            التسجيل عبر Google
+          </button>
+
+          <div className="relative flex items-center gap-3 mb-4">
+            <div className="flex-1 h-px" style={{ backgroundColor: colors.border }} />
+            <span className="text-xs" style={{ color: colors.mutedForeground }}>أو</span>
+            <div className="flex-1 h-px" style={{ backgroundColor: colors.border }} />
           </div>
 
           {/* Tabs */}
@@ -133,8 +201,16 @@ const RegisterPage: React.FC = () => {
             {/* Password */}
             <div className="relative">
               <label className="block text-sm font-medium mb-1" style={{ color: colors.cardForeground }}>كلمة المرور *</label>
-              <input type={showPassword ? 'text' : 'password'} value={form.password} onChange={e => update('password', e.target.value)} required placeholder="6 أحرف على الأقل" dir="ltr" className={`${inputClass} ${isRTL ? 'pl-10' : 'pr-10'}`} style={inputStyle} />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className={`absolute bottom-3 ${isRTL ? 'left-3' : 'right-3'}`} style={{ color: colors.mutedForeground }}>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={form.password}
+                onChange={e => update('password', e.target.value)}
+                required placeholder="6 أحرف على الأقل" dir="ltr"
+                className={`${inputClass} ${isRTL ? 'pl-10' : 'pr-10'}`}
+                style={inputStyle}
+              />
+              <button type="button" onClick={() => setShowPassword(!showPassword)}
+                className={`absolute bottom-3 ${isRTL ? 'left-3' : 'right-3'}`} style={{ color: colors.mutedForeground }}>
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
@@ -147,11 +223,16 @@ const RegisterPage: React.FC = () => {
             {wilayas.length > 0 && (
               <div>
                 <label className="block text-sm font-medium mb-1" style={{ color: colors.cardForeground }}>الولاية</label>
-                <select value={form.wilaya} onChange={e => handleWilayaChange(e.target.value)} className={inputClass} style={inputStyle}>
+                <select
+                  value={selectedWilayaId ?? ''}
+                  onChange={e => handleWilayaChange(e.target.value)}
+                  className={inputClass}
+                  style={inputStyle}
+                >
                   <option value="">اختر الولاية</option>
                   {wilayas.map((w: any) => (
-                    <option key={typeof w === 'object' ? w.id : w} value={typeof w === 'object' ? w.name : w}>
-                      {typeof w === 'object' ? `${w.code} - ${w.name}` : w}
+                    <option key={w.id} value={w.id}>
+                      {w.id} - {w.name_ar}
                     </option>
                   ))}
                 </select>
@@ -165,8 +246,8 @@ const RegisterPage: React.FC = () => {
                 <select value={form.commune} onChange={e => update('commune', e.target.value)} className={inputClass} style={inputStyle}>
                   <option value="">اختر البلدية</option>
                   {communes.map((c: any) => (
-                    <option key={typeof c === 'object' ? c.id : c} value={typeof c === 'object' ? c.name : c}>
-                      {typeof c === 'object' ? c.name : c}
+                    <option key={c.id} value={c.name_ar || c.name}>
+                      {c.name_ar || c.name}
                     </option>
                   ))}
                 </select>

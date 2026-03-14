@@ -20,6 +20,7 @@ interface CustomerData {
   wilaya: string | null;
   commune: string | null;
   address: string | null;
+  avatar: string | null;
   orders_count: number;
   total_spent: string;
   addresses?: CustomerAddress[];
@@ -32,6 +33,7 @@ interface CustomerAuthContextType {
   token: string | null;
   login: (apiBase: string, identifier: string, password: string) => Promise<void>;
   register: (apiBase: string, data: Record<string, any>) => Promise<void>;
+  loginWithGoogleSession: (apiBase: string, sessionId: string) => Promise<void>;
   logout: (apiBase: string) => Promise<void>;
   loadProfile: (apiBase: string) => Promise<void>;
 }
@@ -84,6 +86,15 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setCustomer(c);
   };
 
+  /** Exchange a short-lived Google session_id for a Sanctum token */
+  const loginWithGoogleSession = async (apiBase: string, sessionId: string) => {
+    const res = await api.post(`${apiBase}/customer/auth/google/session`, { session_id: sessionId });
+    const { token: newToken, customer: c } = res.data;
+    localStorage.setItem(TOKEN_KEY, newToken);
+    setToken(newToken);
+    setCustomer(c);
+  };
+
   const logout = async (apiBase: string) => {
     const t = localStorage.getItem(TOKEN_KEY);
     if (t) {
@@ -95,7 +106,7 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   return (
-    <CustomerAuthContext.Provider value={{ customer, isAuthenticated: !!customer, isLoading, token, login, register, logout, loadProfile }}>
+    <CustomerAuthContext.Provider value={{ customer, isAuthenticated: !!customer, isLoading, token, login, register, loginWithGoogleSession, logout, loadProfile }}>
       {children}
     </CustomerAuthContext.Provider>
   );

@@ -18,7 +18,7 @@ class CustomerAuthController extends Controller
     {
         $request->validate([
             'name'     => 'required|string|max:255',
-            'phone'    => 'required|string|max:20',
+            'phone'    => 'nullable|string|max:20',
             'email'    => 'nullable|email|max:255',
             'password' => 'required|string|min:6',
             'wilaya'   => 'nullable|string',
@@ -26,8 +26,13 @@ class CustomerAuthController extends Controller
             'address'  => 'nullable|string',
         ]);
 
+        // Require at least phone or email
+        if (!$request->phone && !$request->email) {
+            return response()->json(['message' => 'يجب تقديم رقم الهاتف أو البريد الإلكتروني'], 422);
+        }
+
         // Check phone uniqueness per store
-        if (Customer::where('store_id', $store->id)->where('phone', $request->phone)->exists()) {
+        if ($request->phone && Customer::where('store_id', $store->id)->where('phone', $request->phone)->exists()) {
             return response()->json(['message' => 'رقم الهاتف مستخدم مسبقاً في هذا المتجر'], 422);
         }
 
